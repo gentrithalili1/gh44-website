@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@import "./styles/gh44.css";
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono.ttf") format("truetype");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-Italic.ttf") format("truetype");
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Map the gh44 palette to Tailwind utilities: bg-canvas, text-muted, border-border, text-brand... */
+@theme inline {
+  --color-canvas: var(--gh44-canvas);
+  --color-card: var(--gh44-card);
+  --color-raised: var(--gh44-raised);
+  --color-border: var(--gh44-border);
+  --color-text: var(--gh44-text);
+  --color-muted: var(--gh44-muted);
+  --color-brand: var(--gh44-brand);
+  --color-setup: var(--gh44-setup);
+  --color-accent: var(--gh44-accent);
+  --color-editorial: var(--gh44-editorial);
+  --color-comment: var(--gh44-comment);
+  --color-hover: var(--gh44-slate-hover);
+  --color-danger: var(--gh44-red);
+
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: var(--font-mono);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  @apply bg-canvas font-mono text-text antialiased;
+}
