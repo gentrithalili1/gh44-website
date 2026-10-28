@@ -1,6 +1,6 @@
 # gh44-website
 
-Source for [gh44.dev](https://gh44.dev). TanStack Start on Cloudflare Workers, styled with the [gh44 theme](https://github.com/gentrithalili1/gh44-theme).
+Source for [gh44.dev](https://gh44.dev). TanStack Start, self-hosted with Coolify, styled with the [gh44 theme](https://github.com/gentrithalili1/gh44-theme).
 
 ## Develop
 
@@ -15,15 +15,15 @@ pnpm dev
 pnpm typecheck && pnpm lint && pnpm format:check && pnpm build
 ```
 
-`pnpm build` prerenders every linked page and writes `sitemap.xml`.
+`pnpm build` prerenders every linked page. Add new public pages to `src/routes/sitemap[.]xml.ts`.
 
 ## Deploy
 
-```sh
-pnpm run deploy
-```
+Coolify builds the `Dockerfile` and redeploys on every push to `main`. Run the production build locally with:
 
-Pushes to `main` deploy through Cloudflare Workers Builds.
+```sh
+pnpm build && pnpm start
+```
 
 ## Theme
 
