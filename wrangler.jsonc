@@ -5,4 +5,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "observability": { "enabled": true },
+  "routes": [{ "pattern": "gh44.dev", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
 }
