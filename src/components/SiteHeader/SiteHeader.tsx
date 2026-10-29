@@ -2,6 +2,7 @@ import { useLocation } from "@tanstack/react-router";
 
 import { SiteLogo } from "./components/SiteLogo";
 import { SiteMenu } from "./components/SiteMenu";
+import { ThemeToggle } from "./components/ThemeToggle";
 import { getSectionId } from "./utils/sections";
 
 export function SiteHeader() {
@@ -11,7 +12,10 @@ export function SiteHeader() {
   return (
     <header className="flex items-center justify-between py-6">
       <SiteLogo sectionId={sectionId} />
-      <SiteMenu />
+      <div className="flex items-center gap-1">
+        <ThemeToggle />
+        <SiteMenu />
+      </div>
     </header>
   );
 }

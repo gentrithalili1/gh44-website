@@ -36,6 +36,14 @@ describe("SiteHeader", () => {
     );
   });
 
+  it("puts the theme toggle before the menu button", async () => {
+    await renderAt("/");
+
+    const themeToggle = screen.getByRole("button", { name: "Switch to dark mode" });
+    const menuButton = screen.getByRole("button", { name: "Open menu" });
+    expect(themeToggle.compareDocumentPosition(menuButton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
   it("cycles the logo's 44 through the section colors on the home page", async () => {
     await renderAt("/");
 
