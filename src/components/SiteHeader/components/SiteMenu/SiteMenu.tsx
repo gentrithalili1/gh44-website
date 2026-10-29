@@ -32,7 +32,7 @@ export function SiteMenu() {
           }
         />
         <SheetTitle className="sr-only">{messages.title}</SheetTitle>
-        <nav aria-label={messages.navLabel} className="px-6 pt-16">
+        <nav aria-label={messages.navLabel} className="px-6 pt-20">
           <ul className="grid gap-1">
             {MENU_ITEMS.map((item) => (
               <li key={item.to}>
