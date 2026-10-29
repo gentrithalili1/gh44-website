@@ -1,10 +1,12 @@
+import { PageWrapper } from "#/components/PageWrapper";
+
 import { ContactLink } from "./HomePage.elements";
 import { messages } from "./messages";
 import { CONTACT_LINKS } from "./utils/contactLinks";
 
 export function HomePage() {
   return (
-    <section className="flex flex-1 flex-col items-center justify-center gap-6 py-16 text-center text-balance">
+    <PageWrapper variant="centered">
       <h1 className="text-display font-bold">{messages.title}</h1>
       <p className="max-w-prose text-lead text-muted-foreground">{messages.lead}</p>
       <ul
@@ -19,6 +21,6 @@ export function HomePage() {
           </li>
         ))}
       </ul>
-    </section>
+    </PageWrapper>
   );
 }
