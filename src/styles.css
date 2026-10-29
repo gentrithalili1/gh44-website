@@ -60,12 +60,15 @@
 }
 
 @theme {
-  --text-intro: clamp(2.5rem, 1.75rem + 3.75vw, 4.25rem);
-  --text-intro--line-height: 1.15;
+  --text-intro: clamp(2.75rem, 1rem + 7vw, 6rem);
+  --text-intro--line-height: 1.05;
   --text-intro--letter-spacing: -0.035em;
   --text-title: clamp(2.75rem, 2.2rem + 2.5vw, 4rem);
   --text-title--line-height: 1.1;
   --text-title--letter-spacing: -0.03em;
+  --text-statement: clamp(1.5rem, 1.1rem + 1.75vw, 2.25rem);
+  --text-statement--line-height: 1.4;
+  --text-statement--letter-spacing: -0.01em;
   --text-headline: 1.75rem;
   --text-headline--line-height: 1.25;
   --text-headline--letter-spacing: -0.015em;

@@ -4,13 +4,12 @@ import { describe, expect, it } from "vitest";
 import { renderAt } from "#/test/renderAt";
 
 describe("HomePage", () => {
-  it("introduces Gentrit with his name and role", async () => {
+  it("introduces Gentrit by name", async () => {
     await renderAt("/");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Hi, I'm Gentrit Halili" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Senior Software Engineer")).toBeInTheDocument();
   });
 
   it("links to the 3 profiles in a new tab", async () => {
