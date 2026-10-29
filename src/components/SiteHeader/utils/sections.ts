@@ -1,14 +1,15 @@
 // One theme color per section, in theme order. The logo's "44" and the menu icons use it.
-// Every page nested under a section takes its color. The next section gets rose (text-chart-5).
+// Every page nested under a section takes its color. The next section gets blue (text-info).
+// On home the "44" cycles through the menu colors (`logo-cycle` in styles.css), lavender as fallback.
 export const SECTIONS = {
-  home: { textClassName: "text-primary", iconClassName: "" },
+  home: { textClassName: "text-primary motion-safe:animate-logo-cycle", iconClassName: "" },
   work: {
     textClassName: "text-success",
     iconClassName: "group-hover:text-success group-data-[status=active]:text-success",
   },
   "gh44-brain": {
-    textClassName: "text-info",
-    iconClassName: "group-hover:text-info group-data-[status=active]:text-info",
+    textClassName: "text-primary",
+    iconClassName: "group-hover:text-primary group-data-[status=active]:text-primary",
   },
   "gh44-theme": {
     textClassName: "text-warning",

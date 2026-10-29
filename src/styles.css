@@ -56,6 +56,43 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@theme {
+  /* Fluid sizes grow from a 390px to a 1280px wide viewport. */
+  --text-display: clamp(3.5rem, 2.4rem + 5vw, 6rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.035em;
+  --text-title: clamp(2.75rem, 2.2rem + 2.5vw, 4rem);
+  --text-title--line-height: 1.1;
+  --text-title--letter-spacing: -0.03em;
+  --text-headline: 1.75rem;
+  --text-headline--line-height: 1.25;
+  --text-headline--letter-spacing: -0.015em;
+  --text-lead: 1.25rem;
+  --text-lead--line-height: 1.6;
+
+  --animate-logo-cycle: logo-cycle 6.75s ease-in-out infinite;
+
+  /* The home logo's "44": the menu colors in menu order, each held about 1.5s.
+     Add a color here when a menu item is added. */
+  @keyframes logo-cycle {
+    0%,
+    22% {
+      color: var(--success);
+    }
+    33%,
+    55% {
+      color: var(--primary);
+    }
+    67%,
+    89% {
+      color: var(--warning);
+    }
+    100% {
+      color: var(--success);
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -64,6 +101,11 @@
   /* Bigger base size: every rem-based size scales with it. */
   html {
     font-size: 112.5%;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
   }
 
   body {
