@@ -55,6 +55,7 @@ describe("SiteHeader", () => {
     { path: "/work", colorClassName: "text-success" },
     { path: "/gh44-brain", colorClassName: "text-primary" },
     { path: "/gh44-theme", colorClassName: "text-warning" },
+    { path: "/does-not-exist", colorClassName: "text-primary" },
   ])("colors the logo's 44 with the section color on $path", async ({ path, colorClassName }) => {
     await renderAt(path);
 

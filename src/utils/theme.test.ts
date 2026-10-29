@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { applyInitialTheme, THEME_SCRIPT, THEME_STORAGE_KEY } from "./theme";
+import { applyInitialTheme, THEME_COLORS, THEME_SCRIPT, THEME_STORAGE_KEY } from "./theme";
+
+const PARAMS = { storageKey: THEME_STORAGE_KEY, colors: THEME_COLORS };
 
 function stubSystemTheme(systemTheme: "light" | "dark") {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -21,7 +23,7 @@ describe("applyInitialTheme", () => {
   it("follows a dark system setting when nothing is saved", () => {
     stubSystemTheme("dark");
 
-    applyInitialTheme(THEME_STORAGE_KEY);
+    applyInitialTheme(PARAMS);
 
     expect(document.documentElement).toHaveClass("dark");
   });
@@ -30,7 +32,7 @@ describe("applyInitialTheme", () => {
     stubSystemTheme("light");
     document.documentElement.classList.add("dark");
 
-    applyInitialTheme(THEME_STORAGE_KEY);
+    applyInitialTheme(PARAMS);
 
     expect(document.documentElement).not.toHaveClass("dark");
   });
@@ -39,7 +41,7 @@ describe("applyInitialTheme", () => {
     stubSystemTheme("dark");
     localStorage.setItem(THEME_STORAGE_KEY, "light");
 
-    applyInitialTheme(THEME_STORAGE_KEY);
+    applyInitialTheme(PARAMS);
 
     expect(document.documentElement).not.toHaveClass("dark");
   });
@@ -48,9 +50,34 @@ describe("applyInitialTheme", () => {
     stubSystemTheme("light");
     localStorage.setItem(THEME_STORAGE_KEY, "dark");
 
-    applyInitialTheme(THEME_STORAGE_KEY);
+    applyInitialTheme(PARAMS);
 
     expect(document.documentElement).toHaveClass("dark");
+  });
+});
+
+describe("applyInitialTheme theme-color", () => {
+  beforeEach(() => {
+    document.documentElement.className = "";
+    document.head.innerHTML = "";
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("adds one browser theme color meta set to the active theme", () => {
+    stubSystemTheme("light");
+    localStorage.setItem(THEME_STORAGE_KEY, "dark");
+
+    applyInitialTheme(PARAMS);
+
+    applyInitialTheme(PARAMS);
+
+    const metas = document.querySelectorAll('meta[name="theme-color"]');
+    expect(metas).toHaveLength(1);
+    expect(metas[0]).toHaveAttribute("content", THEME_COLORS.dark);
   });
 });
 
