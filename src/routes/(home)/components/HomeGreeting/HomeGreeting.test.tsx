@@ -39,7 +39,7 @@ describe("HomeGreeting", () => {
     render(<HomeGreeting />);
 
     finishLoop();
-    expect(screen.getByText("Tung, jam Gentrit Halili", VISIBLE)).toBeInTheDocument();
+    expect(screen.getByText("Çkemi, jam Gentrit Halili", VISIBLE)).toBeInTheDocument();
 
     finishLoop();
     expect(screen.getByText("Hi, I'm Gentrit Halili", VISIBLE)).toBeInTheDocument();
