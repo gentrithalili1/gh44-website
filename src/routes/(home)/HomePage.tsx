@@ -5,6 +5,7 @@ import { HomeGreeting } from "./components/HomeGreeting";
 import { HomeStatement } from "./components/HomeStatement";
 import { ContactLink } from "./HomePage.elements";
 import { messages } from "./messages";
+import { CONTACT_EMAIL } from "./utils/contactEmail";
 import { CONTACT_LINKS } from "./utils/contactLinks";
 
 export function HomePage() {
@@ -15,21 +16,24 @@ export function HomePage() {
           <span className="sr-only">{messages.title}</span>
           <HomeGreeting />
         </h1>
-        <HomeStatement />
+        <HomeStatement email={<ContactEmail />} />
       </hgroup>
-      <div className="grid justify-items-start gap-5">
-        <ContactEmail />
-        <ul aria-label={messages.contactLabel} className="flex flex-wrap gap-x-6 gap-y-3">
-          {CONTACT_LINKS.map((link) => (
-            <li key={link.href}>
-              <ContactLink href={link.href}>
-                {messages.contactLinkLabels[link.id]}
-                <span className="sr-only"> {messages.opensInNewTab}</span>
-              </ContactLink>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul
+        aria-label={messages.contactLabel}
+        className="flex flex-wrap gap-x-3.5 gap-y-3 sm:gap-x-6"
+      >
+        <li>
+          <ContactLink href={`mailto:${CONTACT_EMAIL}`}>{messages.emailLinkLabel}</ContactLink>
+        </li>
+        {CONTACT_LINKS.map((link) => (
+          <li key={link.href}>
+            <ContactLink href={link.href} target="_blank" rel="noreferrer">
+              {messages.contactLinkLabels[link.id]}
+              <span className="sr-only"> {messages.opensInNewTab}</span>
+            </ContactLink>
+          </li>
+        ))}
+      </ul>
     </PageWrapper>
   );
 }
