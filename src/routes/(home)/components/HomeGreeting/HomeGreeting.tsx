@@ -32,7 +32,7 @@ export function HomeGreeting() {
   return (
     <span
       aria-hidden="true"
-      className="grid items-center justify-items-center *:col-start-1 *:row-start-1"
+      className="grid items-center justify-items-start *:col-start-1 *:row-start-1"
     >
       {messages.greetings.map((sizingGreeting) => (
         <span key={sizingGreeting.lang} lang={sizingGreeting.lang} dir="auto" className="invisible">
