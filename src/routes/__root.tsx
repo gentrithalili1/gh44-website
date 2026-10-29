@@ -6,6 +6,7 @@ import { SiteHeader } from "#/components/SiteHeader";
 import { Button } from "#/components/ui/button";
 
 import appCss from "../styles.css?url";
+import { messages } from "./messages";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -51,9 +52,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function NotFound() {
   return (
     <section className="grid justify-items-start gap-4">
-      <h1 className="text-3xl font-bold">404</h1>
-      <p className="text-muted-foreground">This page does not exist.</p>
-      <Button render={<Link to="/" />}>Back home</Button>
+      <h1 className="text-3xl font-bold">{messages.notFoundHeading}</h1>
+      <p className="text-muted-foreground">{messages.notFoundDescription}</p>
+      <Button render={<Link to="/" />}>{messages.notFoundBackHome}</Button>
     </section>
   );
 }
