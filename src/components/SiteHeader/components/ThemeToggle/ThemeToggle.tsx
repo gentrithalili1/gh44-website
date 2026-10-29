@@ -7,14 +7,13 @@ import { messages } from "./messages";
 export function ThemeToggle() {
   const themeState = useTheme();
 
-  const label =
-    themeState.theme === "dark" ? messages.switchToLightLabel : messages.switchToDarkLabel;
+  const isDark = themeState.theme === "dark";
 
-  // Both icons render and the `dark` class picks one, so the icon is right before hydration.
   return (
-    <IconButton label={label} onClick={themeState.toggleTheme}>
-      <MoonIcon aria-hidden className="dark:hidden" />
-      <SunIcon aria-hidden className="hidden dark:block" />
-    </IconButton>
+    <IconButton
+      icon={isDark ? SunIcon : MoonIcon}
+      label={isDark ? messages.switchToLightLabel : messages.switchToDarkLabel}
+      onClick={themeState.toggleTheme}
+    />
   );
 }
