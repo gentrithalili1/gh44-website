@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SITE_URL } from "#/utils/seo";
 
 // Add every public page here so search engines find it.
-const SITEMAP_PATHS = ["/", "/about"] as const;
+const SITEMAP_PATHS = ["/", "/work", "/gh44-brain", "/gh44-theme"] as const;
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
