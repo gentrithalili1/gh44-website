@@ -2,7 +2,6 @@ import type { ComponentProps } from "react";
 
 type ContactLinkProps = ComponentProps<"a">;
 
-// An external profile link: mono, lowercase and underlined.
 export function ContactLink({ children, ...props }: ContactLinkProps) {
   return (
     <a

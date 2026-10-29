@@ -9,7 +9,7 @@ import { CONTACT_LINKS } from "./utils/contactLinks";
 
 export function HomePage() {
   return (
-    <PageWrapper variant="intro">
+    <PageWrapper>
       <hgroup className="grid gap-6 md:gap-8">
         <h1 className="font-mono text-intro font-bold">
           <span className="sr-only">{messages.title}</span>
@@ -22,7 +22,10 @@ export function HomePage() {
         <ul aria-label={messages.contactLabel} className="flex flex-wrap gap-x-6 gap-y-3">
           {CONTACT_LINKS.map((link) => (
             <li key={link.href}>
-              <ContactLink href={link.href}>{messages.contactLinkLabels[link.id]}</ContactLink>
+              <ContactLink href={link.href}>
+                {messages.contactLinkLabels[link.id]}
+                <span className="sr-only"> {messages.opensInNewTab}</span>
+              </ContactLink>
             </li>
           ))}
         </ul>
