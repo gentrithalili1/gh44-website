@@ -73,8 +73,8 @@
   --text-logo--line-height: 1.1;
 
   /* Same timing as greeting-in, so the logo's color changes with each greeting. */
-  --animate-logo-tick: logo-tick 3.5s -1s infinite;
-  --animate-greeting-in: greeting-in 3.5s -1s infinite both;
+  --animate-logo-tick: logo-tick 5s -1s infinite;
+  --animate-greeting-in: greeting-in 5s -1s infinite both;
   --animate-greeting-out: greeting-out 800ms cubic-bezier(0.33, 1, 0.68, 1) both;
 
   @keyframes logo-tick {
@@ -90,7 +90,8 @@
       transform: translateY(0.15em) scale(0.96);
       animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
     }
-    28.57%,
+    /* 1s entrance of the 5s cycle. */
+    20%,
     100% {
       opacity: 1;
       filter: blur(0);

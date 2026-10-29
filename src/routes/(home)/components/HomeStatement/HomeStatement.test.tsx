@@ -9,4 +9,17 @@ describe("HomeStatement", () => {
 
     expect(screen.getByText("Senior Software Engineer")).toBeInTheDocument();
   });
+
+  it("says where to write", async () => {
+    await renderAt("/");
+
+    // The phrase and the address sit in different elements; match the paragraph that ends with both.
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === "P" &&
+          element.textContent?.endsWith("Write to me at gentrithalili11@gmail.com") === true,
+      ),
+    ).toBeInTheDocument();
+  });
 });
