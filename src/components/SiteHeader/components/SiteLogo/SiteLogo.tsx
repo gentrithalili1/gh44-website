@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { cn } from "#/lib/utils";
 
 import { SECTIONS, type SectionId } from "../../utils/sections";
+import { SiteLogoRandomAccent } from "./components/SiteLogoRandomAccent";
 import { messages } from "./messages";
 
 interface SiteLogoProps {
@@ -17,9 +18,13 @@ export function SiteLogo({ sectionId }: SiteLogoProps) {
       className="font-mono text-logo font-bold tracking-tight"
     >
       {messages.wordmarkStart}
-      <span className={cn("transition-colors", SECTIONS[sectionId].textClassName)}>
-        {messages.wordmarkEnd}
-      </span>
+      {sectionId === "home" ? (
+        <SiteLogoRandomAccent>{messages.wordmarkEnd}</SiteLogoRandomAccent>
+      ) : (
+        <span className={cn("transition-colors", SECTIONS[sectionId].textClassName)}>
+          {messages.wordmarkEnd}
+        </span>
+      )}
     </Link>
   );
 }

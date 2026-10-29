@@ -1,7 +1,7 @@
 export const messages = {
   greetings: [
     { lang: "en", text: "Hi, I'm Gentrit Halili" },
-    { lang: "sq", text: "Tung, unë jam Gentrit Halili" },
+    { lang: "sq", text: "Tung, jam Gentrit Halili" },
     { lang: "es", text: "Hola, soy Gentrit Halili" },
     { lang: "hi", text: "नमस्ते, मेरा नाम Gentrit Halili है।" },
     { lang: "de", text: "Hallo, ich bin Gentrit Halili" },
