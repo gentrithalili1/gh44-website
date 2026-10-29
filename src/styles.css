@@ -108,6 +108,99 @@
   }
 }
 
+/*
+ * Page transitions (router view transitions). The header stays still; the page content
+ * fades up, or slides in from the right after a menu pick. Browsers without view
+ * transitions switch pages instantly.
+ */
+::view-transition-group(page) {
+  animation: none;
+}
+
+::view-transition-old(page) {
+  animation: 100ms cubic-bezier(0.32, 0, 0.67, 0) both page-out;
+}
+
+/* Starts once the old page is gone, so the two never read on top of each other. */
+::view-transition-new(page) {
+  animation: 280ms cubic-bezier(0.33, 1, 0.68, 1) 100ms both page-in-up;
+}
+
+html:active-view-transition-type(menu)::view-transition-new(page) {
+  animation-name: page-in-from-right;
+}
+
+::view-transition-group(site-header),
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* The menu sheet gets its own layers so it fades out on top of the page, not behind it. */
+[data-slot="sheet-overlay"] {
+  view-transition-name: site-menu-backdrop;
+}
+
+[data-slot="sheet-content"] {
+  view-transition-name: site-menu;
+}
+
+::view-transition-group(site-menu),
+::view-transition-group(site-menu-backdrop) {
+  animation: none;
+}
+
+::view-transition-old(site-menu),
+::view-transition-old(site-menu-backdrop) {
+  animation: 100ms cubic-bezier(0.32, 0, 0.67, 0) both page-out;
+}
+
+/* The live sheet's backdrop blur would otherwise cover the whole transition. */
+html:active-view-transition [data-slot="sheet-overlay"] {
+  backdrop-filter: none;
+}
+
+/* The sheet is still playing its own exit in the new state: keep that copy hidden. */
+::view-transition-new(site-menu),
+::view-transition-new(site-menu-backdrop) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes page-in-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
