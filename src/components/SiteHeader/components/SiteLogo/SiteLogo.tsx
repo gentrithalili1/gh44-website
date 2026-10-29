@@ -14,7 +14,7 @@ export function SiteLogo({ sectionId }: SiteLogoProps) {
     <Link
       to="/"
       aria-label={messages.homeLabel}
-      className="font-mono text-4xl font-bold tracking-tight"
+      className="font-mono text-logo font-bold tracking-tight"
     >
       {messages.wordmarkStart}
       <span className={cn("transition-colors", SECTIONS[sectionId].textClassName)}>

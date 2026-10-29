@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { Button } from "#/components/ui/button";
+import { cn } from "#/lib/utils";
 
 interface IconButtonProps extends Omit<
   ComponentProps<typeof Button>,
@@ -12,10 +13,22 @@ interface IconButtonProps extends Omit<
 }
 
 // shadcn's Button with one fixed size, so every icon button matches.
-export function IconButton({ icon: Icon, label, variant = "ghost", ...props }: IconButtonProps) {
+export function IconButton({
+  icon: Icon,
+  label,
+  variant = "ghost",
+  className,
+  ...props
+}: IconButtonProps) {
   return (
-    <Button variant={variant} size="icon-lg" aria-label={label} {...props}>
-      <Icon aria-hidden className="size-6" />
+    <Button
+      variant={variant}
+      size="icon-lg"
+      aria-label={label}
+      className={cn("size-12", className)}
+      {...props}
+    >
+      <Icon aria-hidden className="size-7" />
     </Button>
   );
 }
