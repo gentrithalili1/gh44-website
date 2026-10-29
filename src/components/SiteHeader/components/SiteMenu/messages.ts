@@ -1,5 +1,6 @@
 export const messages = {
   openMenuLabel: "Open menu",
+  closeMenuLabel: "Close menu",
   title: "Menu",
   navLabel: "Main",
   workLabel: "Work Experience",
