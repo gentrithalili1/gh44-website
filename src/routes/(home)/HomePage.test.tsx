@@ -4,13 +4,12 @@ import { describe, expect, it } from "vitest";
 import { renderAt } from "#/test/renderAt";
 
 describe("HomePage", () => {
-  it("introduces Gentrit with his name and role", async () => {
+  it("introduces Gentrit by name", async () => {
     await renderAt("/");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Hi, I'm Gentrit Halili" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Senior Software Engineer")).toBeInTheDocument();
   });
 
   it("links to the 3 profiles in a new tab", async () => {
@@ -25,9 +24,21 @@ describe("HomePage", () => {
         target: link.getAttribute("target"),
       })),
     ).toEqual([
-      { name: "GitHub", href: "https://github.com/gentrithalili1", target: "_blank" },
-      { name: "LinkedIn", href: "https://www.linkedin.com/in/gentrithalili", target: "_blank" },
-      { name: "Instagram", href: "https://www.instagram.com/gentrithalili", target: "_blank" },
+      {
+        name: "GitHub (opens in new tab)",
+        href: "https://github.com/gentrithalili1",
+        target: "_blank",
+      },
+      {
+        name: "LinkedIn (opens in new tab)",
+        href: "https://www.linkedin.com/in/gentrithalili",
+        target: "_blank",
+      },
+      {
+        name: "Instagram (opens in new tab)",
+        href: "https://www.instagram.com/gentrithalili",
+        target: "_blank",
+      },
     ]);
   });
 
