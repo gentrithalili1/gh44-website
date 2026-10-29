@@ -17,15 +17,17 @@ export function SiteMenu() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger render={<IconButton label={messages.openMenuLabel} />}>
-        <MenuIcon aria-hidden />
-      </SheetTrigger>
+      <SheetTrigger render={<IconButton icon={MenuIcon} label={messages.openMenuLabel} />} />
       <SheetContent showCloseButton={false}>
         <SheetClose
-          render={<IconButton label={messages.closeMenuLabel} className="absolute top-6 right-6" />}
-        >
-          <XIcon aria-hidden />
-        </SheetClose>
+          render={
+            <IconButton
+              icon={XIcon}
+              label={messages.closeMenuLabel}
+              className="absolute top-6 right-6"
+            />
+          }
+        />
         <SheetTitle className="sr-only">{messages.title}</SheetTitle>
         <nav aria-label={messages.navLabel} className="px-6 pt-16">
           <ul className="grid gap-1">

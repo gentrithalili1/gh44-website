@@ -7,22 +7,14 @@ import { IconButton } from "./IconButton";
 
 describe("IconButton", () => {
   it("is a button named by its label", () => {
-    render(
-      <IconButton label="Open menu">
-        <MenuIcon aria-hidden />
-      </IconButton>,
-    );
+    render(<IconButton icon={MenuIcon} label="Open menu" />);
 
     expect(screen.getByRole("button", { name: "Open menu" })).toBeInTheDocument();
   });
 
   it("calls onClick when clicked", async () => {
     const handleClick = vi.fn();
-    render(
-      <IconButton label="Open menu" onClick={handleClick}>
-        <MenuIcon aria-hidden />
-      </IconButton>,
-    );
+    render(<IconButton icon={MenuIcon} label="Open menu" onClick={handleClick} />);
 
     await userEvent.click(screen.getByRole("button", { name: "Open menu" }));
 

@@ -2,7 +2,6 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Link, ScriptOnce, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import { PageHeader } from "#/components/PageHeader";
 import { SiteHeader } from "#/components/SiteHeader";
 import { Button } from "#/components/ui/button";
 import { THEME_COLORS, THEME_SCRIPT } from "#/utils/theme";
@@ -61,8 +60,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function NotFound() {
   return (
-    <PageHeader variant="page" title={messages.notFoundHeading} lead={messages.notFoundDescription}>
+    <section className="grid justify-items-start gap-5 pt-8 md:pt-16">
+      <h1 className="text-title font-bold">{messages.notFoundHeading}</h1>
+      <p className="max-w-prose text-lead text-muted-foreground">{messages.notFoundDescription}</p>
       <Button render={<Link to="/" />}>{messages.notFoundBackHome}</Button>
-    </PageHeader>
+    </section>
   );
 }
