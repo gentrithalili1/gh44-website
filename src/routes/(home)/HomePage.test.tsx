@@ -24,9 +24,21 @@ describe("HomePage", () => {
         target: link.getAttribute("target"),
       })),
     ).toEqual([
-      { name: "GitHub", href: "https://github.com/gentrithalili1", target: "_blank" },
-      { name: "LinkedIn", href: "https://www.linkedin.com/in/gentrithalili", target: "_blank" },
-      { name: "Instagram", href: "https://www.instagram.com/gentrithalili", target: "_blank" },
+      {
+        name: "GitHub (opens in new tab)",
+        href: "https://github.com/gentrithalili1",
+        target: "_blank",
+      },
+      {
+        name: "LinkedIn (opens in new tab)",
+        href: "https://www.linkedin.com/in/gentrithalili",
+        target: "_blank",
+      },
+      {
+        name: "Instagram (opens in new tab)",
+        href: "https://www.instagram.com/gentrithalili",
+        target: "_blank",
+      },
     ]);
   });
 

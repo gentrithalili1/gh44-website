@@ -29,10 +29,11 @@ export function HomeGreeting() {
     }));
   }
 
+  // `text-left` keeps RTL greetings on the page's left edge: `dir="auto"` alone right-aligns them.
   return (
     <span
       aria-hidden="true"
-      className="grid items-center justify-items-start *:col-start-1 *:row-start-1"
+      className="grid items-center justify-items-start text-left text-balance *:col-start-1 *:row-start-1"
     >
       {messages.greetings.map((sizingGreeting) => (
         <span key={sizingGreeting.lang} lang={sizingGreeting.lang} dir="auto" className="invisible">
