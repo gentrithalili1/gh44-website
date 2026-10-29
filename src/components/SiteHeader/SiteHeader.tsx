@@ -1,9 +1,10 @@
 import { useLocation } from "@tanstack/react-router";
 
+import { getSectionId } from "#/utils/sections";
+
 import { SiteLogo } from "./components/SiteLogo";
 import { SiteMenu } from "./components/SiteMenu";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { getSectionId } from "./utils/sections";
 
 export function SiteHeader() {
   const pathname = useLocation({ select: (location) => location.pathname });
