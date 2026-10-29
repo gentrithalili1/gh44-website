@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { MenuIcon } from "lucide-react";
+import { MenuIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "#/components/ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "#/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "#/components/ui/sheet";
 import { cn } from "#/lib/utils";
 
 import { SECTIONS } from "../../utils/sections";
+import { IconButton } from "../IconButton";
 import { messages } from "./messages";
 import { MENU_ITEMS } from "./utils/menuItems";
 
@@ -17,12 +17,15 @@ export function SiteMenu() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger
-        render={<Button variant="ghost" size="icon-lg" aria-label={messages.openMenuLabel} />}
-      >
-        <MenuIcon className="size-6" />
+      <SheetTrigger render={<IconButton label={messages.openMenuLabel} />}>
+        <MenuIcon aria-hidden />
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent showCloseButton={false}>
+        <SheetClose
+          render={<IconButton label={messages.closeMenuLabel} className="absolute top-6 right-6" />}
+        >
+          <XIcon aria-hidden />
+        </SheetClose>
         <SheetTitle className="sr-only">{messages.title}</SheetTitle>
         <nav aria-label={messages.navLabel} className="px-6 pt-16">
           <ul className="grid gap-1">
