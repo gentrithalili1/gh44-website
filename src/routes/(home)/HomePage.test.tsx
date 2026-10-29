@@ -13,7 +13,7 @@ describe("HomePage", () => {
     expect(screen.getByText("Senior Software Engineer")).toBeInTheDocument();
   });
 
-  it("links to the 5 contact channels, external ones in a new tab", async () => {
+  it("links to the 3 profiles in a new tab", async () => {
     await renderAt("/");
 
     const contacts = screen.getByRole("list", { name: "Contact" });
@@ -25,11 +25,9 @@ describe("HomePage", () => {
         target: link.getAttribute("target"),
       })),
     ).toEqual([
+      { name: "GitHub", href: "https://github.com/gentrithalili1", target: "_blank" },
       { name: "LinkedIn", href: "https://www.linkedin.com/in/gentrithalili", target: "_blank" },
       { name: "Instagram", href: "https://www.instagram.com/gentrithalili", target: "_blank" },
-      { name: "X", href: "https://x.com/gentrithalili", target: "_blank" },
-      { name: "Email", href: "mailto:hello@gh44.dev", target: null },
-      { name: "GitHub", href: "https://github.com/gentrithalili1", target: "_blank" },
     ]);
   });
 

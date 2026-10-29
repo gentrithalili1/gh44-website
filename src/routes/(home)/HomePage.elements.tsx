@@ -1,16 +1,19 @@
+import { ArrowUpRightIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
-interface ContactLinkProps extends ComponentProps<"a"> {
-  isExternal: boolean;
-}
+type ContactLinkProps = ComponentProps<"a">;
 
-export function ContactLink({ isExternal, ...props }: ContactLinkProps) {
+// An external profile link: mono and lowercase, with an arrow for the new tab.
+export function ContactLink({ children, ...props }: ContactLinkProps) {
   return (
     <a
-      target={isExternal ? "_blank" : undefined}
-      rel={isExternal ? "noreferrer" : undefined}
-      className="rounded-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-0.5 rounded-sm font-mono text-sm text-muted-foreground lowercase underline-offset-4 hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
       {...props}
-    />
+    >
+      {children}
+      <ArrowUpRightIcon aria-hidden className="size-3.5" />
+    </a>
   );
 }
