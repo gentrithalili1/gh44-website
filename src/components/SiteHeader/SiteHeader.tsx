@@ -11,7 +11,7 @@ export function SiteHeader() {
   const sectionId = getSectionId(pathname);
 
   return (
-    <header className="flex items-center justify-between py-6">
+    <header className="flex items-center justify-between py-6 [view-transition-name:site-header]">
       <SiteLogo sectionId={sectionId} />
       {/* The icon buttons have inner padding; pull them out so the icons sit flush with the page edge. */}
       <div className="-mr-1.5 flex items-center gap-1">
