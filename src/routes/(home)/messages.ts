@@ -1,8 +1,15 @@
 export const messages = {
-  seoTitle: "gh44.dev",
-  seoDescription: "Personal site of Gentrit Halili, frontend engineer. Work in progress.",
-  status: "Work in progress",
-  heading: "gh44.dev",
-  intro:
-    "Something is being built here. Work experience, gh44-brain and gh44-theme are on the way.",
+  seoTitle: "Gentrit Halili, Senior Software Engineer | gh44.dev",
+  seoDescription:
+    "Gentrit Halili is a senior software engineer. Find his work, gh44-brain, gh44-theme and ways to reach him.",
+  title: "Hi, I'm Gentrit Halili",
+  lead: "Senior Software Engineer",
+  contactLabel: "Contact",
+  contactLinkLabels: {
+    linkedIn: "LinkedIn",
+    instagram: "Instagram",
+    x: "X",
+    email: "Email",
+    gitHub: "GitHub",
+  },
 } as const;

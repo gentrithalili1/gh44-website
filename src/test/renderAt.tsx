@@ -1,13 +1,10 @@
-import { createMemoryHistory, createRouter, RouterProvider } from "@tanstack/react-router";
+import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { act, render } from "@testing-library/react";
 
-import { routeTree } from "#/routeTree.gen";
+import { getRouter } from "#/router";
 
 export async function renderAt(path: string) {
-  const router = createRouter({
-    routeTree,
-    history: createMemoryHistory({ initialEntries: [path] }),
-  });
+  const router = getRouter({ history: createMemoryHistory({ initialEntries: [path] }) });
 
   await act(() => router.load());
 
