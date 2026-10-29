@@ -1,3 +1,4 @@
+import type { FileRouteTypes } from "#/routeTree.gen";
 import { BrainIcon, BriefcaseIcon, type LucideIcon, PaletteIcon } from "lucide-react";
 
 import type { SectionId } from "../../../utils/sections";
@@ -6,7 +7,7 @@ import { messages } from "../messages";
 type MenuItem = {
   sectionId: SectionId;
   label: string;
-  to: "/work" | "/gh44-brain" | "/gh44-theme";
+  to: FileRouteTypes["to"];
   Icon: LucideIcon;
 };
 
