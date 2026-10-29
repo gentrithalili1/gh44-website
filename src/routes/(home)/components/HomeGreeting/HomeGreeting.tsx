@@ -1,16 +1,32 @@
 import { useState } from "react";
 
+import { pickRandomIndex } from "#/utils/pickRandomIndex";
+
 import { messages } from "./messages";
 
-export function HomeGreeting() {
-  const [step, setStep] = useState(0);
+type GreetingTurn = {
+  index: number;
+  previousIndex: number | null;
+};
 
-  const greeting = messages.greetings[step % messages.greetings.length];
+// English first, so the server and the client render the same greeting.
+const FIRST_TURN: GreetingTurn = { index: 0, previousIndex: null };
+
+export function HomeGreeting() {
+  const [turn, setTurn] = useState(FIRST_TURN);
+
+  const greeting = messages.greetings[turn.index];
   const previousGreeting =
-    step > 0 ? messages.greetings[(step - 1) % messages.greetings.length] : null;
+    turn.previousIndex === null ? null : messages.greetings[turn.previousIndex];
 
   function handleAnimationIteration() {
-    setStep((currentStep) => currentStep + 1);
+    setTurn((currentTurn) => ({
+      index: pickRandomIndex({
+        count: messages.greetings.length,
+        excludeIndex: currentTurn.index,
+      }),
+      previousIndex: currentTurn.index,
+    }));
   }
 
   return (

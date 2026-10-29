@@ -1,0 +1,1 @@
+export { SiteLogoRandomAccent } from "./SiteLogoRandomAccent";

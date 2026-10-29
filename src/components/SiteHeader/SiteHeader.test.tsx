@@ -44,11 +44,11 @@ describe("SiteHeader", () => {
     expect(themeToggle.compareDocumentPosition(menuButton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("cycles the logo's 44 through the section colors on the home page", async () => {
+  it("changes the logo's 44 color with each greeting on the home page", async () => {
     await renderAt("/");
 
     const logo = screen.getByRole("link", { name: "gh44 home" });
-    expect(within(logo).getByText("44")).toHaveClass("motion-safe:animate-logo-cycle");
+    expect(within(logo).getByText("44")).toHaveClass("motion-safe:animate-logo-tick");
   });
 
   it.each([
@@ -62,6 +62,6 @@ describe("SiteHeader", () => {
     const logo = screen.getByRole("link", { name: "gh44 home" });
     const accent = within(logo).getByText("44");
     expect(accent).toHaveClass(colorClassName);
-    expect(accent).not.toHaveClass("motion-safe:animate-logo-cycle");
+    expect(accent).not.toHaveClass("motion-safe:animate-logo-tick");
   });
 });
