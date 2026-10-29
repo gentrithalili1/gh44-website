@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { HomeGreeting } from "./HomeGreeting";
 import { messages } from "./messages";
@@ -15,34 +15,46 @@ function finishLoop() {
 }
 
 describe("HomeGreeting", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("starts in English", () => {
     render(<HomeGreeting />);
 
     expect(screen.getByText("Hi, I'm Gentrit Halili", VISIBLE)).toBeInTheDocument();
   });
 
-  it("shows the next language after each loop", () => {
+  it("shows a random other language after each loop", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
     render(<HomeGreeting />);
 
     finishLoop();
 
-    expect(screen.getByText("Tung, unë jam Gentrit Halili", VISIBLE)).toBeInTheDocument();
+    expect(screen.getByText("你好，我是 Gentrit Halili。", VISIBLE)).toBeInTheDocument();
+  });
+
+  it("never shows the same language twice in a row", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    render(<HomeGreeting />);
+
+    finishLoop();
+    expect(screen.getByText("Tung, jam Gentrit Halili", VISIBLE)).toBeInTheDocument();
+
+    finishLoop();
+    expect(screen.getByText("Hi, I'm Gentrit Halili", VISIBLE)).toBeInTheDocument();
   });
 
   it("keeps each language's own word order", () => {
+    const japaneseIndex = messages.greetings.findIndex((greeting) => greeting.lang === "ja");
+    // From English, index - 1 maps to `japaneseIndex` (English is skipped).
+    vi.spyOn(Math, "random").mockReturnValue(
+      (japaneseIndex - 0.5) / (messages.greetings.length - 1),
+    );
     render(<HomeGreeting />);
 
-    const japaneseIndex = messages.greetings.findIndex((greeting) => greeting.lang === "ja");
-    for (let step = 0; step < japaneseIndex; step++) finishLoop();
+    finishLoop();
 
     expect(screen.getByText("こんにちは、Gentrit Haliliです。", VISIBLE)).toBeInTheDocument();
-  });
-
-  it("returns to English after the last language", () => {
-    render(<HomeGreeting />);
-
-    for (let step = 0; step < messages.greetings.length; step++) finishLoop();
-
-    expect(screen.getByText("Hi, I'm Gentrit Halili", VISIBLE)).toBeInTheDocument();
   });
 });

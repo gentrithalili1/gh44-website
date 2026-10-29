@@ -10,7 +10,7 @@ export function HomePage() {
   return (
     <PageWrapper variant="centered">
       <hgroup className="flex w-full flex-col items-center gap-2">
-        <h1 className="w-full text-intro font-bold">
+        <h1 className="w-full font-mono text-intro font-bold">
           <span className="sr-only">{messages.title}</span>
           <HomeGreeting />
         </h1>

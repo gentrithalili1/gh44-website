@@ -1,9 +1,5 @@
-// One theme color per section, in theme order. The logo's "44" and the menu icons use it.
-// Every page nested under a section takes its color. The next section gets blue (text-info).
-// On home the "44" cycles through the menu colors (`logo-cycle` in styles.css), lavender as fallback.
 export const SECTIONS = {
-  home: { textClassName: "text-primary motion-safe:animate-logo-cycle", iconClassName: "" },
-  // Pages outside every section, like the 404: static lavender.
+  home: { textClassName: "text-primary", iconClassName: "" },
   other: { textClassName: "text-primary", iconClassName: "" },
   work: {
     textClassName: "text-success",
