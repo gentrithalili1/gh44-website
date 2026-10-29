@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 
 import { cn } from "#/lib/utils";
+import { SECTIONS, type SectionId } from "#/utils/sections";
 
-import { SECTIONS, type SectionId } from "../../utils/sections";
 import { SiteLogoRandomAccent } from "./components/SiteLogoRandomAccent";
 import { messages } from "./messages";
 
