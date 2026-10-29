@@ -1,3 +1,4 @@
 {
-  "target": "react"
+  "target": "react",
+  "routeFileIgnorePattern": "^[A-Z]|^(messages|types)\\.ts$|\\.test\\.tsx?$|^(components|hooks|utils)$"
 }

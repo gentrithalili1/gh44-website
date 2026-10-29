@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "#/components/ui/s
 import { cn } from "#/lib/utils";
 
 import { SECTIONS } from "../../utils/sections";
+import { messages } from "./messages";
 import { MENU_ITEMS } from "./utils/menuItems";
 
 export function SiteMenu() {
@@ -16,12 +17,14 @@ export function SiteMenu() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger render={<Button variant="ghost" size="icon-lg" aria-label="Open menu" />}>
+      <SheetTrigger
+        render={<Button variant="ghost" size="icon-lg" aria-label={messages.openMenuLabel} />}
+      >
         <MenuIcon className="size-6" />
       </SheetTrigger>
       <SheetContent>
-        <SheetTitle className="sr-only">Menu</SheetTitle>
-        <nav aria-label="Main" className="px-6 pt-16">
+        <SheetTitle className="sr-only">{messages.title}</SheetTitle>
+        <nav aria-label={messages.navLabel} className="px-6 pt-16">
           <ul className="grid gap-1">
             {MENU_ITEMS.map((item) => (
               <li key={item.to}>

@@ -12,7 +12,7 @@ pnpm dev
 ## Check
 
 ```sh
-pnpm typecheck && pnpm lint && pnpm format:check && pnpm build
+pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build
 ```
 
 `pnpm build` prerenders every linked page. Add new public pages to `src/routes/sitemap[.]xml.ts`.
