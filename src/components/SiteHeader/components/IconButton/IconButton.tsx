@@ -1,24 +1,21 @@
+import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { Button } from "#/components/ui/button";
-import { cn } from "#/lib/utils";
 
 interface IconButtonProps extends Omit<
   ComponentProps<typeof Button>,
-  "variant" | "size" | "aria-label"
+  "size" | "children" | "aria-label"
 > {
+  icon: LucideIcon;
   label: string;
 }
 
-// One size for every icon button: pass the icon as children, the button sizes it.
-export function IconButton({ label, className, ...props }: IconButtonProps) {
+// shadcn's Button with one fixed size, so every icon button matches.
+export function IconButton({ icon: Icon, label, variant = "ghost", ...props }: IconButtonProps) {
   return (
-    <Button
-      variant="ghost"
-      size="icon-lg"
-      aria-label={label}
-      className={cn("[&_svg:not([class*='size-'])]:size-6", className)}
-      {...props}
-    />
+    <Button variant={variant} size="icon-lg" aria-label={label} {...props}>
+      <Icon aria-hidden className="size-6" />
+    </Button>
   );
 }
