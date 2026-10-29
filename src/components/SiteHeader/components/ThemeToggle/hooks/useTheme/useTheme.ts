@@ -1,15 +1,53 @@
 import { useSyncExternalStore } from "react";
 
-import { THEME_STORAGE_KEY, type Theme } from "#/utils/theme";
+import { DARK_SCHEME_QUERY, THEME_COLORS, THEME_STORAGE_KEY, type Theme } from "#/utils/theme";
 
 // The `dark` class on <html> is the single source of truth: the inline theme script sets it
-// before the first paint, and toggleTheme changes it and tells every subscriber.
+// before the first paint, and every change below updates it and tells the subscribers.
 const listeners = new Set<() => void>();
 
+function readSavedTheme(): Theme | null {
+  try {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return savedTheme === "dark" || savedTheme === "light" ? savedTheme : null;
+  } catch {
+    // Storage is blocked: nothing is saved.
+    return null;
+  }
+}
+
+function getSystemTheme(): Theme {
+  return window.matchMedia(DARK_SCHEME_QUERY).matches ? "dark" : "light";
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.classList.toggle("dark", theme === "dark");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
+  for (const listener of listeners) listener();
+}
+
+// Follows the system setting while nothing is saved, and choices made in other tabs.
+function handleSystemThemeChange() {
+  if (readSavedTheme() === null) applyTheme(getSystemTheme());
+}
+
+function handleStorage(event: StorageEvent) {
+  if (event.key === THEME_STORAGE_KEY) applyTheme(readSavedTheme() ?? getSystemTheme());
+}
+
 function subscribe(listener: () => void) {
+  if (listeners.size === 0) {
+    window.matchMedia(DARK_SCHEME_QUERY).addEventListener("change", handleSystemThemeChange);
+    window.addEventListener("storage", handleStorage);
+  }
   listeners.add(listener);
+
   return () => {
     listeners.delete(listener);
+    if (listeners.size === 0) {
+      window.matchMedia(DARK_SCHEME_QUERY).removeEventListener("change", handleSystemThemeChange);
+      window.removeEventListener("storage", handleStorage);
+    }
   };
 }
 
@@ -27,8 +65,7 @@ export function useTheme() {
 
   const toggleTheme = () => {
     const nextTheme: Theme = theme === "dark" ? "light" : "dark";
-    document.documentElement.classList.toggle("dark", nextTheme === "dark");
-    for (const listener of listeners) listener();
+    applyTheme(nextTheme);
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     } catch {

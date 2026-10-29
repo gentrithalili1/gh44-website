@@ -3,6 +3,8 @@
 // On home the "44" cycles through the menu colors (`logo-cycle` in styles.css), lavender as fallback.
 export const SECTIONS = {
   home: { textClassName: "text-primary motion-safe:animate-logo-cycle", iconClassName: "" },
+  // Pages outside every section, like the 404: static lavender.
+  other: { textClassName: "text-primary", iconClassName: "" },
   work: {
     textClassName: "text-success",
     iconClassName: "group-hover:text-success group-data-[status=active]:text-success",
@@ -22,7 +24,9 @@ export type SectionId = keyof typeof SECTIONS;
 const PAGE_SECTION_IDS = ["work", "gh44-brain", "gh44-theme"] as const satisfies SectionId[];
 
 export function getSectionId(pathname: string): SectionId {
+  if (pathname === "/") return "home";
+
   const firstSegment = pathname.split("/")[1];
 
-  return PAGE_SECTION_IDS.find((sectionId) => sectionId === firstSegment) ?? "home";
+  return PAGE_SECTION_IDS.find((sectionId) => sectionId === firstSegment) ?? "other";
 }
