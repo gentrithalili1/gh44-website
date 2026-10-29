@@ -35,4 +35,24 @@ describe("SiteHeader", () => {
       "aria-current",
     );
   });
+
+  it("cycles the logo's 44 through the section colors on the home page", async () => {
+    await renderAt("/");
+
+    const logo = screen.getByRole("link", { name: "gh44 home" });
+    expect(within(logo).getByText("44")).toHaveClass("motion-safe:animate-logo-cycle");
+  });
+
+  it.each([
+    { path: "/work", colorClassName: "text-success" },
+    { path: "/gh44-brain", colorClassName: "text-primary" },
+    { path: "/gh44-theme", colorClassName: "text-warning" },
+  ])("colors the logo's 44 with the section color on $path", async ({ path, colorClassName }) => {
+    await renderAt(path);
+
+    const logo = screen.getByRole("link", { name: "gh44 home" });
+    const accent = within(logo).getByText("44");
+    expect(accent).toHaveClass(colorClassName);
+    expect(accent).not.toHaveClass("motion-safe:animate-logo-cycle");
+  });
 });

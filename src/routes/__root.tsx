@@ -2,6 +2,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Link, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
+import { PageHeader } from "#/components/PageHeader";
 import { SiteHeader } from "#/components/SiteHeader";
 import { Button } from "#/components/ui/button";
 
@@ -28,9 +29,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <div className="mx-auto flex min-h-dvh flex-col px-6">
+        <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-6 md:px-10">
           <SiteHeader />
-          <main className="flex-1 py-8">{children}</main>
+          <main className="flex flex-1 flex-col pb-16">{children}</main>
         </div>
         {import.meta.env.DEV ? (
           <TanStackDevtools
@@ -51,10 +52,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function NotFound() {
   return (
-    <section className="grid justify-items-start gap-4">
-      <h1 className="text-3xl font-bold">{messages.notFoundHeading}</h1>
-      <p className="text-muted-foreground">{messages.notFoundDescription}</p>
+    <PageHeader variant="page" title={messages.notFoundHeading} lead={messages.notFoundDescription}>
       <Button render={<Link to="/" />}>{messages.notFoundBackHome}</Button>
-    </section>
+    </PageHeader>
   );
 }
