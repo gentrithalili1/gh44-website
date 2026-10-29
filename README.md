@@ -27,4 +27,10 @@ pnpm build && pnpm start
 
 ## Theme
 
-`src/styles/gh44.css` and `public/fonts/` are copied from `gh44-theme`. Re-copy them after changing the theme. `src/styles.css` maps the palette to Tailwind utilities (`bg-canvas`, `text-muted`, `text-brand`).
+[shadcn/ui](https://ui.shadcn.com) with the gh44 theme: IBM Plex Sans for text, Lilex for code. Update the theme with:
+
+```sh
+pnpm dlx shadcn@latest add @gh44/gh44
+```
+
+The site is dark only: `<html>` has the `dark` class.
