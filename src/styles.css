@@ -57,11 +57,7 @@
 }
 
 @theme {
-  /* Fluid sizes grow from a 390px to a 1280px wide viewport. */
-  /* The home intro spans the page column. The longest greeting is about 15em (see HomeGreeting):
-     it stays on one line from md up, two lines on phones down to 320px, and the max keeps it inside
-     the column. */
-  --text-intro: clamp(min(9vw, 2rem), 6.5vw - 0.35rem, 4.25rem);
+  --text-intro: clamp(2.5rem, 1.75rem + 3.75vw, 4.25rem);
   --text-intro--line-height: 1.15;
   --text-intro--letter-spacing: -0.035em;
   --text-title: clamp(2.75rem, 2.2rem + 2.5vw, 4rem);
@@ -79,8 +75,6 @@
   --animate-greeting-in: greeting-in 3.5s -1s infinite both;
   --animate-greeting-out: greeting-out 800ms cubic-bezier(0.33, 1, 0.68, 1) both;
 
-  /* The home logo's "44": the menu colors in menu order, one per greeting.
-     Add a color here when a menu item is added, then update the duration above and these stops. */
   @keyframes logo-cycle {
     0% {
       color: var(--warning);
