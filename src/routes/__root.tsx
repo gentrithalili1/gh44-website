@@ -5,7 +5,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { PageWrapper } from "#/components/PageWrapper";
 import { SiteHeader } from "#/components/SiteHeader";
 import { Button } from "#/components/ui/button";
-import { THEME_COLORS, THEME_SCRIPT } from "#/utils/theme";
+import { THEME_SCRIPT } from "#/utils/theme";
 
 import appCss from "../styles.css?url";
 import { messages } from "./messages";
@@ -28,13 +28,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <ScriptOnce>{THEME_SCRIPT}</ScriptOnce>
-        {/* Rendered here, not in `head`: the router keeps only one meta per name. */}
-        <meta
-          name="theme-color"
-          media="(prefers-color-scheme: light)"
-          content={THEME_COLORS.light}
-        />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content={THEME_COLORS.dark} />
         <HeadContent />
       </head>
       <body>
