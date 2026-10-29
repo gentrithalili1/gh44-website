@@ -35,9 +35,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <div className="mx-auto flex min-h-dvh w-full flex-col px-6">
+        <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 md:px-6">
           <SiteHeader />
-          <main className="flex flex-1 flex-col pb-16">{children}</main>
+          <main className="flex flex-1 flex-col pb-6 md:pb-16">{children}</main>
         </div>
         {import.meta.env.DEV ? (
           <TanStackDevtools
