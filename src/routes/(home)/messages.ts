@@ -8,8 +8,6 @@ export const messages = {
   contactLinkLabels: {
     linkedIn: "LinkedIn",
     instagram: "Instagram",
-    x: "X",
-    email: "Email",
     gitHub: "GitHub",
   },
 } as const;

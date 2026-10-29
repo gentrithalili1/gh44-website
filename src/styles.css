@@ -58,9 +58,12 @@
 
 @theme {
   /* Fluid sizes grow from a 390px to a 1280px wide viewport. */
-  --text-display: clamp(3.5rem, 2.4rem + 5vw, 6rem);
-  --text-display--line-height: 1.05;
-  --text-display--letter-spacing: -0.035em;
+  /* The home intro spans the page column. The longest greeting is about 15em (see HomeGreeting):
+     it stays on one line from md up, two lines on phones down to 320px, and the max keeps it inside
+     the column. */
+  --text-intro: clamp(min(9vw, 2rem), 6.5vw - 0.35rem, 4.25rem);
+  --text-intro--line-height: 1.15;
+  --text-intro--letter-spacing: -0.035em;
   --text-title: clamp(2.75rem, 2.2rem + 2.5vw, 4rem);
   --text-title--line-height: 1.1;
   --text-title--letter-spacing: -0.03em;
@@ -69,26 +72,53 @@
   --text-headline--letter-spacing: -0.015em;
   --text-lead: 1.25rem;
   --text-lead--line-height: 1.6;
+  --text-logo: 3.125rem;
+  --text-logo--line-height: 1.1;
 
-  --animate-logo-cycle: logo-cycle 6.75s ease-in-out infinite;
+  --animate-logo-cycle: logo-cycle 10.5s cubic-bezier(0.33, 1, 0.68, 1) -1s infinite;
+  --animate-greeting-in: greeting-in 3.5s -1s infinite both;
+  --animate-greeting-out: greeting-out 800ms cubic-bezier(0.33, 1, 0.68, 1) both;
 
-  /* The home logo's "44": the menu colors in menu order, each held about 1.5s.
-     Add a color here when a menu item is added. */
+  /* The home logo's "44": the menu colors in menu order, one per greeting.
+     Add a color here when a menu item is added, then update the duration above and these stops. */
   @keyframes logo-cycle {
-    0%,
-    22% {
-      color: var(--success);
-    }
-    33%,
-    55% {
-      color: var(--primary);
-    }
-    67%,
-    89% {
+    0% {
       color: var(--warning);
     }
-    100% {
+    9.52%,
+    33.33% {
       color: var(--success);
+    }
+    42.86%,
+    66.67% {
+      color: var(--primary);
+    }
+    76.19%,
+    100% {
+      color: var(--warning);
+    }
+  }
+
+  @keyframes greeting-in {
+    0% {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(0.15em) scale(0.96);
+      animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+    }
+    28.57%,
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: none;
+    }
+  }
+
+  @keyframes greeting-out {
+    to {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(-0.15em) scale(1.04);
     }
   }
 }

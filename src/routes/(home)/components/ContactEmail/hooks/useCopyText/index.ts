@@ -1,0 +1,1 @@
+export { useCopyText } from "./useCopyText";
