@@ -12,7 +12,6 @@ interface IconButtonProps extends Omit<
   label: string;
 }
 
-// shadcn's Button with one fixed size, so every icon button matches.
 export function IconButton({
   icon: Icon,
   label,
