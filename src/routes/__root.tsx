@@ -1,10 +1,9 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { createRootRoute, HeadContent, Link, ScriptOnce, Scripts } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, ScriptOnce, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import { PageWrapper } from "#/components/PageWrapper";
 import { SiteHeader } from "#/components/SiteHeader";
-import { Button } from "#/components/ui/button";
 import { THEME_SCRIPT } from "#/utils/theme";
 
 import appCss from "../styles.css?url";
@@ -59,9 +58,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function NotFound() {
   return (
     <PageWrapper>
-      <h1 className="text-title font-bold">{messages.notFoundHeading}</h1>
-      <p className="max-w-prose text-lead text-muted-foreground">{messages.notFoundDescription}</p>
-      <Button render={<Link to="/" />}>{messages.notFoundBackHome}</Button>
+      <hgroup className="grid gap-6 md:gap-8">
+        <h1 className="font-mono text-intro font-bold">{messages.notFoundHeading}</h1>
+        <p className="max-w-[34ch] text-statement text-pretty text-muted-foreground">
+          {messages.notFoundDescription}
+        </p>
+      </hgroup>
     </PageWrapper>
   );
 }

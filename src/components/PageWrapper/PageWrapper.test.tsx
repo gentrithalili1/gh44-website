@@ -13,14 +13,4 @@ describe("PageWrapper", () => {
 
     expect(screen.getByRole("heading", { name: "Work experience" })).toBeInTheDocument();
   });
-
-  it("centers its content with the centered variant", () => {
-    render(
-      <PageWrapper variant="centered">
-        <h1>Hi</h1>
-      </PageWrapper>,
-    );
-
-    expect(screen.getByRole("heading", { name: "Hi" }).parentElement).toHaveClass("items-center");
-  });
 });

@@ -3,8 +3,8 @@ export const messages = {
   seoDescription:
     "Gentrit Halili is a senior software engineer. Find his work, gh44-brain, gh44-theme and ways to reach him.",
   title: "Hi, I'm Gentrit Halili",
-  lead: "Senior Software Engineer",
   contactLabel: "Contact",
+  opensInNewTab: "(opens in new tab)",
   contactLinkLabels: {
     linkedIn: "LinkedIn",
     instagram: "Instagram",

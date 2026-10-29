@@ -1,7 +1,8 @@
-import type { FileRouteTypes } from "#/routeTree.gen";
 import { BrainIcon, BriefcaseIcon, type LucideIcon, PaletteIcon } from "lucide-react";
 
-import type { SectionId } from "../../../utils/sections";
+import type { FileRouteTypes } from "#/routeTree.gen";
+import type { SectionId } from "#/utils/sections";
+
 import { messages } from "../messages";
 
 type MenuItem = {

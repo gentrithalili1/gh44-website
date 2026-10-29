@@ -4,8 +4,8 @@ import { useState } from "react";
 
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "#/components/ui/sheet";
 import { cn } from "#/lib/utils";
+import { SECTIONS } from "#/utils/sections";
 
-import { SECTIONS } from "../../utils/sections";
 import { IconButton } from "../IconButton";
 import { messages } from "./messages";
 import { MENU_ITEMS } from "./utils/menuItems";
