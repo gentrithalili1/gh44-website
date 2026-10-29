@@ -15,7 +15,6 @@ export function useCopyText() {
       await navigator.clipboard.writeText(text);
       setStatus("copied");
     } catch {
-      // No clipboard access (insecure page or denied permission): the caller shows the failure.
       setStatus("failed");
     }
     resetTimerRef.current = setTimeout(() => setStatus("idle"), RESET_DELAY_MS);

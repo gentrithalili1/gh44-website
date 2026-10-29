@@ -12,7 +12,7 @@ describe("HomePage", () => {
     ).toBeInTheDocument();
   });
 
-  it("links to the 3 profiles in a new tab", async () => {
+  it("links to email and, in a new tab, the 3 profiles", async () => {
     await renderAt("/");
 
     const contacts = screen.getByRole("list", { name: "Contact" });
@@ -24,19 +24,20 @@ describe("HomePage", () => {
         target: link.getAttribute("target"),
       })),
     ).toEqual([
+      { name: "email", href: "mailto:gentrithalili11@gmail.com", target: null },
       {
         name: "GitHub (opens in new tab)",
-        href: "https://github.com/gentrithalili1",
+        href: "https://github.com/gentrithalili1/",
         target: "_blank",
       },
       {
         name: "LinkedIn (opens in new tab)",
-        href: "https://www.linkedin.com/in/gentrithalili",
+        href: "https://www.linkedin.com/in/gentrithalili11/",
         target: "_blank",
       },
       {
         name: "Instagram (opens in new tab)",
-        href: "https://www.instagram.com/gentrithalili",
+        href: "https://www.instagram.com/gentrithalili_/",
         target: "_blank",
       },
     ]);
