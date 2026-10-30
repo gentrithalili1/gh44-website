@@ -76,6 +76,7 @@
   --animate-logo-tick: logo-tick 5s -1s infinite;
   --animate-greeting-in: greeting-in 5s -1s infinite both;
   --animate-greeting-out: greeting-out 800ms cubic-bezier(0.33, 1, 0.68, 1) both;
+  --ease-out-page: cubic-bezier(0.33, 1, 0.68, 1);
 
   @keyframes logo-tick {
     to {
@@ -108,22 +109,20 @@
   }
 }
 
-/*
- * Page transitions (router view transitions). The header stays still; the page content
- * fades up, or slides in from the right after a menu pick. Browsers without view
- * transitions switch pages instantly.
- */
 ::view-transition-group(page) {
   animation: none;
 }
 
 ::view-transition-old(page) {
-  animation: 100ms cubic-bezier(0.32, 0, 0.67, 0) both page-out;
+  animation: 150ms var(--ease-out-page) both page-out;
 }
 
-/* Starts once the old page is gone, so the two never read on top of each other. */
 ::view-transition-new(page) {
-  animation: 280ms cubic-bezier(0.33, 1, 0.68, 1) 100ms both page-in-up;
+  animation: 300ms var(--ease-out-page) 70ms both page-in-up;
+}
+
+html:active-view-transition-type(menu)::view-transition-old(page) {
+  animation-name: page-out-left;
 }
 
 html:active-view-transition-type(menu)::view-transition-new(page) {
@@ -136,7 +135,7 @@ html:active-view-transition-type(menu)::view-transition-new(page) {
   animation: none;
 }
 
-/* The menu sheet gets its own layers so it fades out on top of the page, not behind it. */
+/* The menu sheet gets its own layers so it closes on top of the page, not behind it. */
 [data-slot="sheet-overlay"] {
   view-transition-name: site-menu-backdrop;
 }
@@ -150,17 +149,21 @@ html:active-view-transition-type(menu)::view-transition-new(page) {
   animation: none;
 }
 
-::view-transition-old(site-menu),
-::view-transition-old(site-menu-backdrop) {
-  animation: 100ms cubic-bezier(0.32, 0, 0.67, 0) both page-out;
+/* Same move as the sheet's own close, so the snapshot and the live sheet agree. */
+::view-transition-old(site-menu) {
+  animation: 200ms var(--ease-out-page) both site-menu-out;
 }
 
-/* The live sheet's backdrop blur would otherwise cover the whole transition. */
+::view-transition-old(site-menu-backdrop) {
+  animation: 200ms var(--ease-out-page) both page-out;
+}
+
+html:active-view-transition [data-slot="sheet-content"],
 html:active-view-transition [data-slot="sheet-overlay"] {
+  transition: opacity 420ms linear;
   backdrop-filter: none;
 }
 
-/* The sheet is still playing its own exit in the new state: keep that copy hidden. */
 ::view-transition-new(site-menu),
 ::view-transition-new(site-menu-backdrop) {
   animation: none;
@@ -179,6 +182,19 @@ html:active-view-transition [data-slot="sheet-overlay"] {
   }
 }
 
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes page-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+
 @keyframes page-in-up {
   from {
     opacity: 0;
@@ -189,15 +205,26 @@ html:active-view-transition [data-slot="sheet-overlay"] {
 @keyframes page-in-from-right {
   from {
     opacity: 0;
-    transform: translateX(24px);
+    transform: translateX(32px);
   }
 }
 
+@keyframes site-menu-out {
+  to {
+    opacity: 0;
+    transform: translateX(2.5rem);
+  }
+}
+
+/* Reduced motion keeps the fades and drops the movement. */
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
+  ::view-transition-old(page),
+  ::view-transition-old(site-menu) {
+    animation-name: page-out;
+  }
+
+  ::view-transition-new(page) {
+    animation-name: page-in;
   }
 }
 

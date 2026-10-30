@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { MenuIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -14,14 +14,22 @@ import { MENU_ITEMS } from "./utils/menuItems";
 const MENU_VIEW_TRANSITION = getViewTransition(VIEW_TRANSITION_TYPES.menu);
 
 export function SiteMenu() {
-  const [isOpen, setIsOpen] = useState(false);
+  const pathname = useRouterState({ select: (state) => state.resolvedLocation?.pathname ?? null });
 
-  const handleNavigate = () => setIsOpen(false);
+  const [openedPathname, setOpenedPathname] = useState<string | null>(null);
+
+  const isOpen = openedPathname === pathname;
+
+  const handleOpenChange = (open: boolean) => setOpenedPathname(open ? pathname : null);
+
+  const handleItemClick = (to: string) => {
+    if (to === pathname) setOpenedPathname(null);
+  };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
       <SheetTrigger render={<IconButton icon={MenuIcon} label={messages.openMenuLabel} />} />
-      <SheetContent showCloseButton={false}>
+      <SheetContent side="right" showCloseButton={false}>
         <SheetClose
           render={
             <IconButton
@@ -39,7 +47,7 @@ export function SiteMenu() {
                 <Link
                   to={item.to}
                   viewTransition={MENU_VIEW_TRANSITION}
-                  onClick={handleNavigate}
+                  onClick={() => handleItemClick(item.to)}
                   className="group -mx-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-lg font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[status=active]:bg-muted data-[status=active]:text-foreground"
                 >
                   <item.Icon
