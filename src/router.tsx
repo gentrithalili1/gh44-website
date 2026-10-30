@@ -1,7 +1,6 @@
 import { createRouter as createTanStackRouter, type RouterHistory } from "@tanstack/react-router";
 
 import { routeTree } from "./routeTree.gen";
-import { getViewTransition, VIEW_TRANSITION_TYPES } from "./utils/viewTransition";
 
 type GetRouterParams = {
   history?: RouterHistory;
@@ -11,10 +10,11 @@ export function getRouter({ history }: GetRouterParams = {}) {
   const router = createTanStackRouter({
     routeTree,
     history,
-    scrollRestoration: true,
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
-    defaultViewTransition: getViewTransition(VIEW_TRANSITION_TYPES.page),
+    // The page transition resets the scroll itself, between the old page and the new one.
+    // Only a function can turn the router's scroll-to-top off: `false` still scrolls on push.
+    scrollRestoration: () => false,
   });
 
   return router;
