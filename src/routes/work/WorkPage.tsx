@@ -16,9 +16,6 @@ export function WorkPage() {
         >
           {messages.heading}
         </h1>
-        <p className="max-w-[34ch] text-statement text-pretty text-muted-foreground">
-          {messages.comingSoon}
-        </p>
       </hgroup>
     </PageWrapper>
   );
