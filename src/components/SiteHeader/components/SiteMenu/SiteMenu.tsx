@@ -1,30 +1,21 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { MenuIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "#/components/ui/sheet";
 import { cn } from "#/lib/utils";
 import { SECTIONS } from "#/utils/sections";
-import { getViewTransition, VIEW_TRANSITION_TYPES } from "#/utils/viewTransition";
 
 import { IconButton } from "../IconButton";
 import { messages } from "./messages";
 import { MENU_ITEMS } from "./utils/menuItems";
 
-const MENU_VIEW_TRANSITION = getViewTransition(VIEW_TRANSITION_TYPES.menu);
-
 export function SiteMenu() {
-  const pathname = useRouterState({ select: (state) => state.resolvedLocation?.pathname ?? null });
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [openedPathname, setOpenedPathname] = useState<string | null>(null);
+  const handleOpenChange = (open: boolean) => setIsOpen(open);
 
-  const isOpen = openedPathname === pathname;
-
-  const handleOpenChange = (open: boolean) => setOpenedPathname(open ? pathname : null);
-
-  const handleItemClick = (to: string) => {
-    if (to === pathname) setOpenedPathname(null);
-  };
+  const handleItemClick = () => setIsOpen(false);
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
@@ -46,8 +37,7 @@ export function SiteMenu() {
               <li key={item.to}>
                 <Link
                   to={item.to}
-                  viewTransition={MENU_VIEW_TRANSITION}
-                  onClick={() => handleItemClick(item.to)}
+                  onClick={handleItemClick}
                   className="group -mx-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-lg font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[status=active]:bg-muted data-[status=active]:text-foreground"
                 >
                   <item.Icon
