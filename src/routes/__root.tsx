@@ -2,6 +2,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, ScriptOnce, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
+import { PageTransition } from "#/components/PageTransition";
 import { PageWrapper } from "#/components/PageWrapper";
 import { SiteHeader } from "#/components/SiteHeader";
 import { THEME_SCRIPT } from "#/utils/theme";
@@ -36,9 +37,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 md:px-6">
           <SiteHeader />
-          <main className="flex flex-1 flex-col pb-6 [view-transition-name:page] md:pb-16">
-            {children}
-          </main>
+          <PageTransition>{children}</PageTransition>
         </div>
         {import.meta.env.DEV ? (
           <TanStackDevtools
