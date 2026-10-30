@@ -16,10 +16,73 @@ export function Gh44BrainPage() {
         >
           {messages.heading}
         </h1>
-        <p className="max-w-[34ch] text-statement text-pretty text-muted-foreground">
-          {messages.comingSoon}
-        </p>
       </hgroup>
+      <div>
+        <p className="text-2xl">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus, nam voluptatem sapiente
+          possimus earum corporis! Ab vel officia nulla, consequatur molestias deleniti dolor odio
+          itaque labore temporibus dolore doloribus iusto veniam exercitationem cupiditate, at dicta
+          consequuntur. At, sint omnis. Praesentium excepturi repudiandae unde culpa voluptas quas
+          reprehenderit adipisci beatae optio blanditiis impedit error nam, temporibus ratione
+          consectetur minima! Illum beatae deserunt praesentium provident cumque harum asperiores
+          officia mollitia amet voluptate laboriosam minus, quod ducimus exercitationem impedit
+          maiores eligendi commodi eius atque nobis saepe dolor, qui placeat. Culpa officiis,
+          impedit error libero at ullam deserunt autem. Similique eveniet dignissimos aliquid
+          asperiores?
+        </p>
+
+        <p className="text-2xl">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus, nam voluptatem sapiente
+          possimus earum corporis! Ab vel officia nulla, consequatur molestias deleniti dolor odio
+          itaque labore temporibus dolore doloribus iusto veniam exercitationem cupiditate, at dicta
+          consequuntur. At, sint omnis. Praesentium excepturi repudiandae unde culpa voluptas quas
+          reprehenderit adipisci beatae optio blanditiis impedit error nam, temporibus ratione
+          consectetur minima! Illum beatae deserunt praesentium provident cumque harum asperiores
+          officia mollitia amet voluptate laboriosam minus, quod ducimus exercitationem impedit
+          maiores eligendi commodi eius atque nobis saepe dolor, qui placeat. Culpa officiis,
+          impedit error libero at ullam deserunt autem. Similique eveniet dignissimos aliquid
+          asperiores?
+        </p>
+
+        <p className="text-2xl">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus, nam voluptatem sapiente
+          possimus earum corporis! Ab vel officia nulla, consequatur molestias deleniti dolor odio
+          itaque labore temporibus dolore doloribus iusto veniam exercitationem cupiditate, at dicta
+          consequuntur. At, sint omnis. Praesentium excepturi repudiandae unde culpa voluptas quas
+          reprehenderit adipisci beatae optio blanditiis impedit error nam, temporibus ratione
+          consectetur minima! Illum beatae deserunt praesentium provident cumque harum asperiores
+          officia mollitia amet voluptate laboriosam minus, quod ducimus exercitationem impedit
+          maiores eligendi commodi eius atque nobis saepe dolor, qui placeat. Culpa officiis,
+          impedit error libero at ullam deserunt autem. Similique eveniet dignissimos aliquid
+          asperiores?
+        </p>
+
+        <p className="text-2xl">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus, nam voluptatem sapiente
+          possimus earum corporis! Ab vel officia nulla, consequatur molestias deleniti dolor odio
+          itaque labore temporibus dolore doloribus iusto veniam exercitationem cupiditate, at dicta
+          consequuntur. At, sint omnis. Praesentium excepturi repudiandae unde culpa voluptas quas
+          reprehenderit adipisci beatae optio blanditiis impedit error nam, temporibus ratione
+          consectetur minima! Illum beatae deserunt praesentium provident cumque harum asperiores
+          officia mollitia amet voluptate laboriosam minus, quod ducimus exercitationem impedit
+          maiores eligendi commodi eius atque nobis saepe dolor, qui placeat. Culpa officiis,
+          impedit error libero at ullam deserunt autem. Similique eveniet dignissimos aliquid
+          asperiores?
+        </p>
+
+        <p className="text-2xl">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus, nam voluptatem sapiente
+          possimus earum corporis! Ab vel officia nulla, consequatur molestias deleniti dolor odio
+          itaque labore temporibus dolore doloribus iusto veniam exercitationem cupiditate, at dicta
+          consequuntur. At, sint omnis. Praesentium excepturi repudiandae unde culpa voluptas quas
+          reprehenderit adipisci beatae optio blanditiis impedit error nam, temporibus ratione
+          consectetur minima! Illum beatae deserunt praesentium provident cumque harum asperiores
+          officia mollitia amet voluptate laboriosam minus, quod ducimus exercitationem impedit
+          maiores eligendi commodi eius atque nobis saepe dolor, qui placeat. Culpa officiis,
+          impedit error libero at ullam deserunt autem. Similique eveniet dignissimos aliquid
+          asperiores?
+        </p>
+      </div>
     </PageWrapper>
   );
 }
