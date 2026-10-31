@@ -27,10 +27,8 @@ pnpm build && pnpm start
 
 ## Theme
 
-[shadcn/ui](https://ui.shadcn.com) with the gh44 theme: IBM Plex Sans for text, Lilex for code. Update the theme with:
+The gh44-theme palette (`palette/tokens.json` in gh44-theme) as Tailwind tokens in `src/styles.css`, with Lilex as the only font. Light and dark follow the system until the visitor clicks the sun; the choice is saved in `localStorage`.
 
-```sh
-pnpm dlx shadcn@latest add @gh44/gh44
-```
+## Planets
 
-The site is dark only: `<html>` has the `dark` class.
+`src/utils/planets.ts` drives the solar system, the planet pages, their SEO and the sitemap. Add a planet: add an entry there and a panel case in `src/routes/$planetId/PlanetPage.tsx`.

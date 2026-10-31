@@ -1,0 +1,1 @@
+export { SolarSystemPlanet } from "./SolarSystemPlanet";
