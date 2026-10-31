@@ -12,9 +12,6 @@ export function getRouter({ history }: GetRouterParams = {}) {
     history,
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
-    // The page transition resets the scroll itself, between the old page and the new one.
-    // Only a function can turn the router's scroll-to-top off: `false` still scrolls on push.
-    scrollRestoration: () => false,
   });
 
   return router;

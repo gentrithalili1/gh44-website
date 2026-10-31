@@ -1,1 +1,0 @@
-export { HomeStatement } from "./HomeStatement";

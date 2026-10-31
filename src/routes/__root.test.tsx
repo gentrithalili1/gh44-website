@@ -8,6 +8,6 @@ describe("NotFound", () => {
     await renderAt("/does-not-exist");
 
     expect(screen.getByRole("heading", { level: 1, name: "404" })).toBeInTheDocument();
-    expect(screen.getByText("This page does not exist.")).toBeInTheDocument();
+    expect(screen.getByText("this page does not exist.")).toBeInTheDocument();
   });
 });
