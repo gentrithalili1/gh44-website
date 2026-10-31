@@ -1,14 +1,21 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { createRootRoute, HeadContent, ScriptOnce, Scripts } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  HeadContent,
+  Outlet,
+  ScriptOnce,
+  Scripts,
+  useParams,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import { PageTransition } from "#/components/PageTransition";
-import { PageWrapper } from "#/components/PageWrapper";
-import { SiteHeader } from "#/components/SiteHeader";
+import { SolarSystem } from "#/components/SolarSystem";
+import { findPlanet } from "#/utils/planets";
 import { THEME_SCRIPT } from "#/utils/theme";
 
 import appCss from "../styles.css?url";
 import { messages } from "./messages";
+import { getPlanetStyle } from "./utils/planetStyle";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -23,6 +30,7 @@ export const Route = createRootRoute({
     ],
   }),
   shellComponent: RootDocument,
+  component: RootLayout,
   notFoundComponent: NotFound,
 });
 
@@ -35,10 +43,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 md:px-6">
-          <SiteHeader />
-          <PageTransition>{children}</PageTransition>
-        </div>
+        {children}
         {import.meta.env.DEV ? (
           <TanStackDevtools
             config={{ position: "bottom-right" }}
@@ -56,15 +61,30 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   );
 }
 
+function RootLayout() {
+  const params = useParams({ strict: false });
+
+  const planet = findPlanet(params.planetId);
+
+  return (
+    <div
+      data-planet={planet?.id}
+      style={getPlanetStyle(planet)}
+      className="fixed inset-0 bg-background transition-colors duration-900 ease-space"
+    >
+      <SolarSystem openPlanetId={planet?.id} />
+      <Outlet />
+    </div>
+  );
+}
+
 function NotFound() {
   return (
-    <PageWrapper>
-      <hgroup className="grid gap-6 md:gap-8">
-        <h1 className="font-mono text-intro font-bold">{messages.notFoundHeading}</h1>
-        <p className="max-w-[34ch] text-statement text-pretty text-muted-foreground">
-          {messages.notFoundDescription}
-        </p>
-      </hgroup>
-    </PageWrapper>
+    <main className="fixed inset-x-0 bottom-0 z-20 h-[62%] overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(35rem,100%)] md:border-t-0 md:border-l md:px-12 md:pt-24 md:pb-12">
+      <h1 className="mb-1.5 text-planet-sm font-bold tracking-planet md:text-planet">
+        {messages.notFoundHeading}
+      </h1>
+      <p className="text-lede text-muted">{messages.notFoundDescription}</p>
+    </main>
   );
 }

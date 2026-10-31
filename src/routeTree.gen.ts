@@ -9,20 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as Gh44BrainRouteRouteImport } from './routes/gh44-brain/route'
-import { Route as Gh44ThemeRouteRouteImport } from './routes/gh44-theme/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlanetIdRouteRouteImport } from './routes/$planetId/route'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as WorkRouteRouteImport } from './routes/work/route'
-import { Route as homeIndexRouteImport } from './routes/(home)/index'
 
-const Gh44BrainRouteRoute = Gh44BrainRouteRouteImport.update({
-  id: '/gh44-brain',
-  path: '/gh44-brain',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Gh44ThemeRouteRoute = Gh44ThemeRouteRouteImport.update({
-  id: '/gh44-theme',
-  path: '/gh44-theme',
+const PlanetIdRouteRoute = PlanetIdRouteRouteImport.update({
+  id: '/$planetId',
+  path: '/$planetId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -30,75 +28,51 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkRouteRoute = WorkRouteRouteImport.update({
-  id: '/work',
-  path: '/work',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const homeIndexRoute = homeIndexRouteImport.update({
-  id: '/(home)/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
-  '/gh44-brain': typeof Gh44BrainRouteRoute
-  '/gh44-theme': typeof Gh44ThemeRouteRoute
-  '/work': typeof WorkRouteRoute
+  '/': typeof IndexRoute
+  '/$planetId': typeof PlanetIdRouteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/': typeof homeIndexRoute
 }
 export interface FileRoutesByTo {
-  '/gh44-brain': typeof Gh44BrainRouteRoute
-  '/gh44-theme': typeof Gh44ThemeRouteRoute
-  '/work': typeof WorkRouteRoute
+  '/': typeof IndexRoute
+  '/$planetId': typeof PlanetIdRouteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/': typeof homeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/gh44-brain': typeof Gh44BrainRouteRoute
-  '/gh44-theme': typeof Gh44ThemeRouteRoute
-  '/work': typeof WorkRouteRoute
+  '/': typeof IndexRoute
+  '/$planetId': typeof PlanetIdRouteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/(home)/': typeof homeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/gh44-brain' | '/gh44-theme' | '/work' | '/sitemap.xml' | '/'
+  fullPaths: '/' | '/$planetId' | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/gh44-brain' | '/gh44-theme' | '/work' | '/sitemap.xml' | '/'
-  id:
-    | '__root__'
-    | '/gh44-brain'
-    | '/gh44-theme'
-    | '/work'
-    | '/sitemap.xml'
-    | '/(home)/'
+  to: '/' | '/$planetId' | '/sitemap.xml'
+  id: '__root__' | '/' | '/$planetId' | '/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  Gh44BrainRouteRoute: typeof Gh44BrainRouteRoute
-  Gh44ThemeRouteRoute: typeof Gh44ThemeRouteRoute
-  WorkRouteRoute: typeof WorkRouteRoute
+  IndexRoute: typeof IndexRoute
+  PlanetIdRouteRoute: typeof PlanetIdRouteRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  homeIndexRoute: typeof homeIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/gh44-brain': {
-      id: '/gh44-brain'
-      path: '/gh44-brain'
-      fullPath: '/gh44-brain'
-      preLoaderRoute: typeof Gh44BrainRouteRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/gh44-theme': {
-      id: '/gh44-theme'
-      path: '/gh44-theme'
-      fullPath: '/gh44-theme'
-      preLoaderRoute: typeof Gh44ThemeRouteRouteImport
+    '/$planetId': {
+      id: '/$planetId'
+      path: '/$planetId'
+      fullPath: '/$planetId'
+      preLoaderRoute: typeof PlanetIdRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -108,29 +82,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/work': {
-      id: '/work'
-      path: '/work'
-      fullPath: '/work'
-      preLoaderRoute: typeof WorkRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(home)/': {
-      id: '/(home)/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof homeIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  Gh44BrainRouteRoute: Gh44BrainRouteRoute,
-  Gh44ThemeRouteRoute: Gh44ThemeRouteRoute,
-  WorkRouteRoute: WorkRouteRoute,
+  IndexRoute: IndexRoute,
+  PlanetIdRouteRoute: PlanetIdRouteRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  homeIndexRoute: homeIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
