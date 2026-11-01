@@ -1,15 +1,16 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
-import { Vector2 } from "three";
+import { PerspectiveCamera, Vector2 } from "three";
 
 import { SYSTEM_SIZE } from "#/components/SolarSystem/utils/space";
 
-import { damp } from "../../utils/sceneMath";
+import { damp, getPixelsPerUnit } from "../../utils/sceneMath";
 import { ShootingStars } from "./components/ShootingStars";
 import { createStarField } from "./utils/starField";
 import { STAR_FRAGMENT_SHADER, STAR_VERTEX_SHADER } from "./utils/starShaders";
 import { getStarTint, stepStarTint } from "./utils/starTint";
 
+const SUN: [number, number, number] = [0, 0, 0];
 // How far the nearest stars drift per pixel the camera moves; farther layers drift less.
 const PARALLAX = 0.02;
 // Zoomed in past this many times, stars draw a little larger.
@@ -53,6 +54,9 @@ export function Stars({ openPlanetId, isCruising }: StarsProps) {
   const targetTint = getStarTint(openPlanetId);
 
   useFrame(({ camera, size, viewport, clock }, delta) => {
+    if (!(camera instanceof PerspectiveCamera)) return;
+    // Pixels per unit at the sun: how close the camera is.
+    const zoom = getPixelsPerUnit({ camera, viewport: size, position: SUN });
     const fitZoom = Math.min(size.width, size.height) / SYSTEM_SIZE;
     stepStarTint({ tint: material.uniforms.uColor.value, target: targetTint, delta });
     material.uniforms.uViewport.value.set(size.width, size.height);
@@ -63,19 +67,19 @@ export function Stars({ openPlanetId, isCruising }: StarsProps) {
       delta,
       lambda: CRUISE_LAMBDA,
     });
-    const cruiseDrift = cruise.level * CRUISE_PARALLAX * camera.zoom;
+    const cruiseDrift = cruise.level * CRUISE_PARALLAX * zoom;
     cruise.x += (camera.position.x - cruise.cameraX) * cruiseDrift;
-    cruise.y -= (camera.position.y - cruise.cameraY) * cruiseDrift;
+    cruise.y += (camera.position.z - cruise.cameraY) * cruiseDrift;
     cruise.cameraX = camera.position.x;
-    cruise.cameraY = camera.position.y;
-    // The camera's position in screen pixels; `y` grows downward on screen.
+    cruise.cameraY = camera.position.z;
+    // The camera's position over the orbit plane, in screen pixels; `z` grows downward on screen.
     material.uniforms.uOffset.value.set(
-      camera.position.x * camera.zoom * PARALLAX + cruise.x,
-      -camera.position.y * camera.zoom * PARALLAX + cruise.y,
+      camera.position.x * zoom * PARALLAX + cruise.x,
+      camera.position.z * zoom * PARALLAX + cruise.y,
     );
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uPixelRatio.value = viewport.dpr;
-    material.uniforms.uSizeBoost.value = camera.zoom > fitZoom * ZOOMED_IN ? ZOOMED_IN_SIZE : 1;
+    material.uniforms.uSizeBoost.value = zoom > fitZoom * ZOOMED_IN ? ZOOMED_IN_SIZE : 1;
   });
 
   return (

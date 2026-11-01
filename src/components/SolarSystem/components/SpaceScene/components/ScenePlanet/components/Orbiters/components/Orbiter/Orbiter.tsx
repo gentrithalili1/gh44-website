@@ -4,7 +4,10 @@ import { type RefObject, useRef, useState } from "react";
 import type { Mesh } from "three";
 
 import type { SceneState } from "#/components/SolarSystem/components/SpaceScene/types";
-import { toScenePosition } from "#/components/SolarSystem/components/SpaceScene/utils/sceneMath";
+import {
+  isDragRelease,
+  toScenePosition,
+} from "#/components/SolarSystem/components/SpaceScene/utils/sceneMath";
 import type { Orbiter as OrbiterData } from "#/components/SolarSystem/utils/orbiters";
 import { getTiltedPoint } from "#/components/SolarSystem/utils/space";
 import { getSurfaceHex } from "#/components/SolarSystem/utils/surfaceColor";
@@ -75,6 +78,7 @@ export function Orbiter({
 
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
+    if (isDragRelease(event.delta)) return;
     if (link) {
       window.open(link.href, "_blank", "noopener,noreferrer");
       return;

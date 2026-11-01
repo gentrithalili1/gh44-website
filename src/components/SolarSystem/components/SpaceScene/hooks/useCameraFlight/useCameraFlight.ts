@@ -1,19 +1,26 @@
 import { useGSAP } from "@gsap/react";
-import { useFrame } from "@react-three/fiber";
+import type { OrbitControls } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
-import { type RefObject, useRef } from "react";
+import { type ComponentRef, type RefObject, useRef } from "react";
+import { PerspectiveCamera, Vector3 } from "three";
 
 import { useExplorer } from "#/hooks/useExplorer";
 
 import type { SceneState } from "../../types";
-import { CAMERA_HEIGHT } from "../../utils/sceneMath";
 import {
+  type CameraAngle,
   type CameraFocus,
   type CameraPose,
+  getCameraDistance,
   getCameraFocus,
+  getCameraPlacement,
   getCameraPose,
+  getDistanceLimits,
   getPlanetPosition,
   getShipCameraPose,
+  HOME_ANGLE,
+  mixAngles,
   mixPoses,
 } from "./utils/cameraFraming";
 
@@ -33,6 +40,9 @@ type Flight = {
   // What the flight is about (flown to, or left behind); it moves straight on screen.
   anchor: CameraFocus;
   from: CameraPose;
+  // The camera turns from its angle at take-off to this one.
+  fromAngle: CameraAngle;
+  toAngle: CameraAngle;
   // 0 at take-off, 1 on arrival; GSAP drives it.
   progress: number;
 };
@@ -67,16 +77,34 @@ function getFocusPosition({ focus, sceneState }: { focus: CameraFocus; sceneStat
   }
 }
 
+// Where the camera is looking from, relative to its point.
+const fromPoint = new Vector3();
+
+function getAngle(offset: Vector3): CameraAngle {
+  return {
+    polar: Math.acos(offset.y / offset.length()),
+    azimuth: Math.atan2(offset.x, offset.z),
+  };
+}
+
 type UseCameraFlightParams = {
   openPlanetId: string | undefined;
   sceneStateRef: RefObject<SceneState>;
+  controlsRef: RefObject<ComponentRef<typeof OrbitControls> | null>;
 };
 
-// Looks straight down. Opening a planet flies in and frames it beside the panel (or above the
-// sheet); the open cockpit flies in close to the ship; closing flies home. The first frame is
-// already in place, so a deep link starts framed.
-export function useCameraFlight({ openPlanetId, sceneStateRef }: UseCameraFlightParams) {
+// Looks down on the system at an angle. Opening a planet flies in and frames it beside the panel
+// (or above the sheet), then follows it; the open cockpit flies in close to the ship and follows
+// it; closing flies home and turns back to the home angle. Between flights the visitor orbits
+// and zooms around what the camera follows. The first frame is already in place, so a deep link
+// starts framed.
+export function useCameraFlight({
+  openPlanetId,
+  sceneStateRef,
+  controlsRef,
+}: UseCameraFlightParams) {
   const explorer = useExplorer();
+  const size = useThree((state) => state.size);
   const focus = getCameraFocus({
     openPlanetId,
     isCockpitOpen: explorer.cockpit.status === "open",
@@ -84,13 +112,19 @@ export function useCameraFlight({ openPlanetId, sceneStateRef }: UseCameraFlight
       explorer.flight.status === "flying" ? explorer.flight.destination.name : undefined,
   });
   const focusKey = getFocusKey(focus);
+  const isLaunching = explorer.flight.status === "flying";
   const flightRef = useRef<Flight>({
     focus,
     anchor: focus,
-    from: { x: 0, y: 0, zoom: 1 },
+    from: { x: 0, y: 0, zoom: 1, offset: { x: 0, y: 0 } },
+    fromAngle: HOME_ANGLE,
+    toAngle: HOME_ANGLE,
     progress: 1,
   });
+  // The pose and angle drawn last frame, and how far the visitor has zoomed from the framing.
   const poseRef = useRef<CameraPose | null>(null);
+  const angleRef = useRef<CameraAngle>(HOME_ANGLE);
+  const zoomScaleRef = useRef(1);
 
   // Starts a flight when the focus changes, even while the frame loop is paused; GSAP kills a
   // running flight on unmount.
@@ -102,6 +136,10 @@ export function useCameraFlight({ openPlanetId, sceneStateRef }: UseCameraFlight
       flight.anchor = focus.kind === "home" ? flight.focus : focus;
       flight.focus = focus;
       flight.from = poseRef.current ?? flight.from;
+      flight.fromAngle = angleRef.current;
+      // A planet keeps the angle the visitor chose; home and the ship turn back to the home one.
+      flight.toAngle = focus.kind === "planet" ? angleRef.current : HOME_ANGLE;
+      zoomScaleRef.current = 1;
       flight.progress = 0;
       gsap.to(flight, { progress: 1, duration, ease: FLIGHT_EASE, overwrite: true });
     },
@@ -109,9 +147,21 @@ export function useCameraFlight({ openPlanetId, sceneStateRef }: UseCameraFlight
   );
 
   useFrame(({ camera, size }) => {
+    if (!(camera instanceof PerspectiveCamera)) return;
+    const controls = controlsRef.current;
     const flight = flightRef.current;
     const sceneState = sceneStateRef.current;
-    const target =
+    const isFlying = flight.progress < 1;
+    const lastPose = poseRef.current;
+    // Settled, the controls ran first this frame: take on the visitor's orbit and zoom.
+    if (!isFlying && lastPose && controls) {
+      fromPoint.copy(camera.position).sub(controls.target);
+      angleRef.current = getAngle(fromPoint);
+      zoomScaleRef.current *=
+        getCameraDistance({ viewport: size, zoom: lastPose.zoom }) / fromPoint.length();
+    }
+
+    const framing =
       flight.focus.kind === "ship"
         ? getShipCameraPose({ viewport: size, shipPosition: sceneState.shipPose })
         : getCameraPose({
@@ -122,14 +172,36 @@ export function useCameraFlight({ openPlanetId, sceneStateRef }: UseCameraFlight
                 ? sceneState.planetAngles.get(flight.focus.planetId)
                 : undefined,
           });
+    const target = { ...framing, zoom: framing.zoom * zoomScaleRef.current };
     const anchor = getFocusPosition({ focus: flight.anchor, sceneState });
     const pose =
-      flight.progress < 1 && anchor
+      isFlying && anchor
         ? mixPoses({ from: flight.from, to: target, anchor, progress: flight.progress })
         : target;
+    const angle = isFlying
+      ? mixAngles({ from: flight.fromAngle, to: flight.toAngle, progress: flight.progress })
+      : angleRef.current;
     poseRef.current = pose;
-    camera.position.set(pose.x, -pose.y, CAMERA_HEIGHT);
-    camera.zoom = pose.zoom;
+    angleRef.current = angle;
+
+    const placement = getCameraPlacement({ pose, angle, viewport: size });
+    camera.position.set(...placement.position);
+    camera.lookAt(...placement.target);
+    camera.setViewOffset(
+      size.width,
+      size.height,
+      placement.viewOffset.x,
+      placement.viewOffset.y,
+      size.width,
+      size.height,
+    );
     camera.updateProjectionMatrix();
+    if (controls) {
+      controls.target.set(...placement.target);
+      // The visitor steers only at rest: not during a flight, a launch or in the cockpit.
+      controls.enabled = !isFlying && !isLaunching && flight.focus.kind !== "ship";
+    }
   });
+
+  return { distanceLimits: getDistanceLimits(size) };
 }

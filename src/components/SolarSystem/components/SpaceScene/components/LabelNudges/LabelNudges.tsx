@@ -6,7 +6,7 @@ import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
 import { PLANETS } from "#/utils/planets";
 
 import type { SceneState } from "../../types";
-import { damp, PHONE_MAX_WIDTH, toScenePosition } from "../../utils/sceneMath";
+import { damp, PHONE_MAX_WIDTH, toPlanePosition } from "../../utils/sceneMath";
 import { getLabelNudges, type LabelBox } from "./utils/labelNudges";
 
 // The least space between two labels, in pixels.
@@ -17,6 +17,7 @@ const NO_NUDGE = { x: 0, y: 0 } as const;
 const NUDGE_LAMBDA = 8;
 
 const anchor = new Vector3();
+const screenUp = new Vector3();
 
 function setNudge(nudge: { x: number; y: number }) {
   return (element: HTMLElement) => {
@@ -52,6 +53,7 @@ export function LabelNudges({ labelList, openPlanetId, sceneStateRef }: LabelNud
       return;
     }
     hasNudgesRef.current = true;
+    screenUp.set(0, 1, 0).applyQuaternion(camera.quaternion);
     const labels: { element: HTMLElement; box: LabelBox }[] = [];
 
     for (const planet of PLANETS) {
@@ -59,9 +61,10 @@ export function LabelNudges({ labelList, openPlanetId, sceneStateRef }: LabelNud
       if (!element) continue;
       const phase = sceneStateRef.current.planetAngles.get(planet.id) ?? planet.orbit.phase;
       const position = getOrbitPosition({ radius: planet.orbit.radius, phase });
-      // The label hangs from the planet's lowest point.
+      // The label hangs from the planet's lowest point on screen.
       anchor
-        .set(...toScenePosition({ x: position.x, y: position.y + planet.size }))
+        .set(...toPlanePosition(position))
+        .addScaledVector(screenUp, -planet.size)
         .project(camera);
       labels.push({
         element,

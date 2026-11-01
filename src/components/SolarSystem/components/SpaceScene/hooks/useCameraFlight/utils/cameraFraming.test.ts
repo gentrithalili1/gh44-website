@@ -1,40 +1,76 @@
+import { PerspectiveCamera, Vector3 } from "three";
 import { describe, expect, it } from "vitest";
 
 import { findPlanet } from "#/utils/planets";
 
 import {
+  CAMERA_FOV,
+  type CameraAngle,
+  type CameraPose,
+  getCameraDistance,
   getCameraFocus,
+  getCameraPlacement,
+  getDistanceLimits,
   getHomePose,
   getPlanetPose,
   getPlanetReach,
   getShipCameraPose,
+  HOME_ANGLE,
+  mixAngles,
   mixPoses,
 } from "./cameraFraming";
 
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
 
-type Pose = { x: number; y: number; zoom: number };
-
-// Where a system point lands on screen, in pixels from the top left.
+// Where a system point lands on screen, in pixels from the top left, through a real perspective
+// camera placed for the pose.
 function project({
   pose,
   point,
   viewport,
+  angle = HOME_ANGLE,
 }: {
-  pose: Pose;
+  pose: CameraPose;
   point: { x: number; y: number };
   viewport: typeof DESKTOP;
+  angle?: CameraAngle;
 }) {
+  const placement = getCameraPlacement({ pose, angle, viewport });
+  const camera = new PerspectiveCamera(CAMERA_FOV, viewport.width / viewport.height, 1, 10000);
+  camera.position.set(...placement.position);
+  camera.lookAt(...placement.target);
+  camera.setViewOffset(
+    viewport.width,
+    viewport.height,
+    placement.viewOffset.x,
+    placement.viewOffset.y,
+    viewport.width,
+    viewport.height,
+  );
+  camera.updateMatrixWorld();
+  const projected = new Vector3(point.x, 0, point.y).project(camera);
+
   return {
-    x: viewport.width / 2 + (point.x - pose.x) * pose.zoom,
-    y: viewport.height / 2 + (point.y - pose.y) * pose.zoom,
+    x: ((projected.x + 1) / 2) * viewport.width,
+    y: ((1 - projected.y) / 2) * viewport.height,
   };
 }
 
 describe("getHomePose", () => {
   it("centers the sun and fits the whole system to the shorter side", () => {
-    expect(getHomePose(DESKTOP)).toEqual({ x: 0, y: 0, zoom: 900 / 1040 });
+    expect(getHomePose(DESKTOP)).toEqual({ x: 0, y: 0, zoom: 900 / 1040, offset: { x: 0, y: 0 } });
+  });
+
+  it("shows the sun in the middle of the screen from the home angle", () => {
+    const onScreen = project({
+      pose: getHomePose(DESKTOP),
+      point: { x: 0, y: 0 },
+      viewport: DESKTOP,
+    });
+
+    expect(onScreen.x).toBeCloseTo(720);
+    expect(onScreen.y).toBeCloseTo(450);
   });
 });
 
@@ -49,6 +85,19 @@ describe("getPlanetPose", () => {
     expect(onScreen.y).toBeCloseTo(450);
     // Its reach fills 42% of the 648px box.
     expect(40 * pose.zoom).toBeCloseTo(272.16);
+  });
+
+  it("keeps the planet there from any angle the visitor orbits to", () => {
+    const pose = getPlanetPose({ viewport: DESKTOP, planetPosition: planet, reach: 40 });
+
+    const onScreen = project({
+      pose,
+      point: planet,
+      viewport: DESKTOP,
+      angle: { polar: 1.2, azimuth: -2 },
+    });
+    expect(onScreen.x).toBeCloseTo((1440 - 672) / 2);
+    expect(onScreen.y).toBeCloseTo(450);
   });
 
   it("keeps the planet and its reach clear of the panel on a 1280px screen", () => {
@@ -73,6 +122,45 @@ describe("getPlanetPose", () => {
     const pose = getPlanetPose({ viewport: DESKTOP, planetPosition: planet, reach: 1 });
 
     expect(pose.zoom).toBeCloseTo((9 * 900) / 1040);
+  });
+});
+
+describe("getCameraPlacement", () => {
+  it("backs off far enough that one unit at the target spans `zoom` pixels", () => {
+    const pose = { x: 0, y: 0, zoom: 2, offset: { x: 0, y: 0 } };
+
+    const left = project({ pose, point: { x: -10, y: 0 }, viewport: DESKTOP });
+    const right = project({ pose, point: { x: 10, y: 0 }, viewport: DESKTOP });
+    expect(right.x - left.x).toBeCloseTo(40, 0);
+  });
+
+  it("never looks from under the system", () => {
+    const placement = getCameraPlacement({
+      pose: getHomePose(DESKTOP),
+      angle: HOME_ANGLE,
+      viewport: DESKTOP,
+    });
+
+    expect(placement.position[1]).toBeGreaterThan(0);
+  });
+});
+
+describe("getDistanceLimits", () => {
+  it("lets the visitor zoom in and out around every framing, home, planets and ship", () => {
+    for (const viewport of [DESKTOP, PHONE]) {
+      const limits = getDistanceLimits(viewport);
+      const framings = [
+        getHomePose(viewport),
+        getPlanetPose({ viewport, planetPosition: { x: 0, y: 0 }, reach: 1 }),
+        getShipCameraPose({ viewport, shipPosition: { x: 0, y: 0 } }),
+      ];
+
+      for (const pose of framings) {
+        const distance = getCameraDistance({ viewport, zoom: pose.zoom });
+        expect(distance).toBeGreaterThan(limits.min);
+        expect(distance).toBeLessThan(limits.max);
+      }
+    }
   });
 });
 
@@ -151,8 +239,8 @@ describe("getPlanetReach", () => {
 });
 
 describe("mixPoses", () => {
-  const from = { x: 0, y: 0, zoom: 1 };
-  const to = { x: 100, y: 0, zoom: 4 };
+  const from = { x: 0, y: 0, zoom: 1, offset: { x: 0, y: 0 } };
+  const to = { x: 100, y: 0, zoom: 4, offset: { x: -360, y: 0 } };
   const anchor = { x: 100, y: 0 };
 
   it("starts at the first pose and lands on the second", () => {
@@ -161,12 +249,26 @@ describe("mixPoses", () => {
   });
 
   it("zooms on a log scale and moves the anchor straight across the screen", () => {
-    // Halfway: zoom 2 (between 1 and 4 on a log scale); the anchor is 50px right of center,
-    // halfway between 100px and 0px, so the camera sits 25 units left of it.
+    // Halfway: zoom 2 (between 1 and 4 on a log scale); the anchor sits halfway between 100px
+    // right of center and 360px left of it: 130px left.
     const pose = mixPoses({ from, to, anchor, progress: 0.5 });
 
     expect(pose.zoom).toBeCloseTo(2);
-    expect(pose.x).toBeCloseTo(75);
+    expect(pose.offset.x).toBeCloseTo(-180);
+    expect((anchor.x - pose.x) * pose.zoom + pose.offset.x).toBeCloseTo(-130);
     expect(pose.y).toBeCloseTo(0);
+  });
+});
+
+describe("mixAngles", () => {
+  it("turns the short way round", () => {
+    const angle = mixAngles({
+      from: { polar: 0.4, azimuth: 3 },
+      to: { polar: 0.8, azimuth: -3 },
+      progress: 0.5,
+    });
+
+    expect(angle.polar).toBeCloseTo(0.6);
+    expect(Math.cos(angle.azimuth)).toBeCloseTo(-1);
   });
 });

@@ -1,4 +1,4 @@
-import { Html, useCursor } from "@react-three/drei";
+import { Billboard, Html, useCursor } from "@react-three/drei";
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { useNavigate } from "@tanstack/react-router";
 import { useContextBridge } from "its-fine";
@@ -15,7 +15,13 @@ import type { ThemeToolId } from "#/utils/themeTools";
 
 import type { SceneState } from "../../types";
 import { setGroupOpacity } from "../../utils/groupOpacity";
-import { damp, FADED_OPACITY, getOrbitPace, toScenePosition } from "../../utils/sceneMath";
+import {
+  damp,
+  FADED_OPACITY,
+  getOrbitPace,
+  isDragRelease,
+  toPlanePosition,
+} from "../../utils/sceneMath";
 import { Orbiters } from "./components/Orbiters";
 import { PlanetLabel } from "./components/PlanetLabel";
 import { PlanetSurface } from "./components/PlanetSurface";
@@ -28,7 +34,7 @@ import { getBodyStencilMark } from "./utils/bodyStencil";
 const BODY_HOVER = "body";
 const LABEL_HOVER = "label";
 
-const CIRCLE_SEGMENTS = 64;
+const SPHERE_SEGMENTS = 48;
 // Labels stay under the panel and the back link.
 const LABEL_Z_INDEX_RANGE = [1, 0];
 
@@ -81,7 +87,7 @@ export function ScenePlanet({
     const angle = getOrbitAngle({ planet, time: orbitTimeRef.current });
     sceneState.planetAngles.set(planet.id, angle);
     group.position.set(
-      ...toScenePosition(getOrbitPosition({ radius: planet.orbit.radius, phase: angle })),
+      ...toPlanePosition(getOrbitPosition({ radius: planet.orbit.radius, phase: angle })),
     );
     opacityRef.current = damp({
       current: opacityRef.current,
@@ -131,49 +137,58 @@ export function ScenePlanet({
 
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
+    if (isDragRelease(event.delta)) return;
     handleOpen();
   }
 
   return (
     <group ref={groupRef}>
-      {uprightRing ? <UprightRing ring={uprightRing} /> : null}
       <mesh
         onPointerOver={isSitePlanet ? handlePointerOver : undefined}
         onPointerOut={isSitePlanet ? handlePointerOut : undefined}
         onClick={isSitePlanet ? handleClick : undefined}
       >
-        <circleGeometry args={[planet.size, CIRCLE_SEGMENTS]} />
-        <meshBasicMaterial {...getBodyStencilMark(stencilRef)} color={PALETTE[planet.color].soft} />
+        <sphereGeometry args={[planet.size, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
+        <meshLambertMaterial
+          {...getBodyStencilMark(stencilRef)}
+          color={PALETTE[planet.color].soft}
+        />
       </mesh>
-      <PlanetSurface planet={planet} sceneStateRef={sceneStateRef} stencilRef={stencilRef} />
-      <Orbiters
-        orbiters={getOrbiters(planet)}
-        isPlanetOpen={state === "current"}
-        onHoverChange={handleHoverChange}
-        onPlanetClick={handleOpen}
-        sceneStateRef={sceneStateRef}
-      />
-      <Rings
-        bands={ringBands}
-        onHoverChange={handleHoverChange}
-        onBandClick={handleRingBandClick}
-      />
-      {planet.features.hasRocket ? (
-        <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
-      ) : null}
-      {planet.kind === "site" ? (
-        <Html
-          as="li"
-          portal={{ current: labelList }}
-          position={[0, -planet.size, 0]}
-          zIndexRange={LABEL_Z_INDEX_RANGE}
-          pointerEvents="none"
-        >
-          <ContextBridge>
-            <PlanetLabel planet={planet} state={state} onHoverChange={handleLabelHoverChange} />
-          </ContextBridge>
-        </Html>
-      ) : null}
+      {/* What the 2D scene drew around the planet faces the camera, until it moves to 3D. */}
+      <Billboard>
+        {uprightRing ? <UprightRing ring={uprightRing} /> : null}
+        <group position-z={planet.size}>
+          <PlanetSurface planet={planet} sceneStateRef={sceneStateRef} stencilRef={stencilRef} />
+        </group>
+        <Orbiters
+          orbiters={getOrbiters(planet)}
+          isPlanetOpen={state === "current"}
+          onHoverChange={handleHoverChange}
+          onPlanetClick={handleOpen}
+          sceneStateRef={sceneStateRef}
+        />
+        <Rings
+          bands={ringBands}
+          onHoverChange={handleHoverChange}
+          onBandClick={handleRingBandClick}
+        />
+        {planet.features.hasRocket ? (
+          <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
+        ) : null}
+        {planet.kind === "site" ? (
+          <Html
+            as="li"
+            portal={{ current: labelList }}
+            position={[0, -planet.size, 0]}
+            zIndexRange={LABEL_Z_INDEX_RANGE}
+            pointerEvents="none"
+          >
+            <ContextBridge>
+              <PlanetLabel planet={planet} state={state} onHoverChange={handleLabelHoverChange} />
+            </ContextBridge>
+          </Html>
+        ) : null}
+      </Billboard>
     </group>
   );
 }

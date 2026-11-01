@@ -6,6 +6,7 @@ import type { RingBand } from "#/components/SolarSystem/utils/rings";
 import { PALETTE } from "#/utils/palette";
 import type { ThemeToolId } from "#/utils/themeTools";
 
+import { isDragRelease } from "../../../../utils/sceneMath";
 import type { HoverChange } from "../../types";
 import { TILTED_PLANE_ROTATION } from "../../utils/sceneGeometry";
 import { HoverName } from "../HoverName";
@@ -33,6 +34,7 @@ export function Rings({ bands, onHoverChange, onBandClick }: RingsProps) {
 
   function handleClick({ event, bandId }: { event: ThreeEvent<MouseEvent>; bandId: ThemeToolId }) {
     event.stopPropagation();
+    if (isDragRelease(event.delta)) return;
     onBandClick(bandId);
   }
 

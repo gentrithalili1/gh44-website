@@ -1,10 +1,10 @@
 import { useGSAP } from "@gsap/react";
-import { Html, useCursor } from "@react-three/drei";
+import { Billboard, Html, useCursor } from "@react-three/drei";
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { useNavigate } from "@tanstack/react-router";
 import gsap from "gsap";
 import { type RefObject, useRef, useState } from "react";
-import { type Group, type Mesh, MeshBasicMaterial, Shape, Vector2 } from "three";
+import { type Group, type Mesh, MeshBasicMaterial, PerspectiveCamera, Shape, Vector2 } from "three";
 
 import { messages } from "#/components/SolarSystem/messages";
 import type { PlanetState, Point } from "#/components/SolarSystem/types";
@@ -25,15 +25,20 @@ import { findPlanet } from "#/utils/planets";
 
 import type { SceneState } from "../../../../types";
 import { setGroupOpacity } from "../../../../utils/groupOpacity";
-import { damp, FADED_OPACITY, getOrbitPace, toScenePosition } from "../../../../utils/sceneMath";
+import {
+  damp,
+  FADED_OPACITY,
+  getOrbitPace,
+  getPixelsPerUnit,
+  isDragRelease,
+  toPlanePosition,
+  toScenePosition,
+} from "../../../../utils/sceneMath";
 import { getFlightPose } from "./utils/shipFlight";
 import { getTrailPuff, PUFF_COUNT } from "./utils/shipTrail";
 
 gsap.registerPlugin(useGSAP);
 
-// Behind every planet, moon and ring (they reach 75 units toward the camera and away from it),
-// so a planet passing by covers the ship, never the other way round.
-const SHIP_DEPTH = -80;
 // On a phone the ship would be a speck: it never draws shorter than this many pixels.
 const SHIP_MIN_LENGTH_PX = 34;
 // It bobs toward and away from the sun, and rocks a little, slowly.
@@ -195,7 +200,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
     { dependencies: [explorer.flight] },
   );
 
-  useFrame(({ camera }, delta) => {
+  useFrame(({ camera, size }, delta) => {
     const group = groupRef.current;
     const body = bodyRef.current;
     if (!group || !body) return;
@@ -236,12 +241,14 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
       radius: Math.sin(time * BOB_SPEED) * BOB_UNITS * bobLevel,
       phase: orbitAngle,
     });
-    group.position.set(
-      ...toScenePosition({ x: pose.x + bob.x, y: pose.y + bob.y, depth: SHIP_DEPTH }),
-    );
-    scaleRef.current?.scale.setScalar(
-      Math.max(SHIP_SCALE, SHIP_MIN_LENGTH_PX / (SHIP_LENGTH * camera.zoom)),
-    );
+    const position = toPlanePosition({ x: pose.x + bob.x, y: pose.y + bob.y });
+    group.position.set(...position);
+    if (camera instanceof PerspectiveCamera) {
+      const pixelsPerUnit = getPixelsPerUnit({ camera, viewport: size, position });
+      scaleRef.current?.scale.setScalar(
+        Math.max(SHIP_SCALE, SHIP_MIN_LENGTH_PX / (SHIP_LENGTH * pixelsPerUnit)),
+      );
+    }
     // The screen's clockwise turn is negative around the camera's axis.
     body.rotation.z = -(pose.heading + Math.sin(time * TILT_SPEED) * TILT_RADIANS * bobLevel);
 
@@ -298,64 +305,67 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
 
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
+    if (isDragRelease(event.delta)) return;
     explorer.openCockpit();
   }
 
   return (
     <group ref={handleGroupRef}>
-      <group ref={scaleRef}>
-        <group ref={bodyRef}>
-          <mesh
-            onPointerOver={handlePointerOver}
-            onPointerOut={handlePointerOut}
-            onClick={isFaded ? undefined : handleClick}
-          >
-            <circleGeometry args={[HIT_RADIUS, CIRCLE_SEGMENTS]} />
-            <meshBasicMaterial colorWrite={false} depthWrite={false} />
-          </mesh>
-          {PUFF_IDS.map((id) => (
+      <Billboard>
+        <group ref={scaleRef}>
+          <group ref={bodyRef}>
             <mesh
-              key={id}
-              ref={(mesh) => {
-                puffMeshesRef.current[id] = mesh;
-              }}
-              visible={false}
+              onPointerOver={handlePointerOver}
+              onPointerOut={handlePointerOut}
+              onClick={isFaded ? undefined : handleClick}
             >
-              <circleGeometry args={[PUFF_RADIUS, CIRCLE_SEGMENTS]} />
-              <meshBasicMaterial color={PALETTE.terracotta.soft} transparent depthWrite={false} />
+              <circleGeometry args={[HIT_RADIUS, CIRCLE_SEGMENTS]} />
+              <meshBasicMaterial colorWrite={false} depthWrite={false} />
             </mesh>
-          ))}
-          <mesh ref={glowRef} position={ENGINE_POSITION}>
-            <circleGeometry args={[SHIP_ENGINE.radius, CIRCLE_SEGMENTS]} />
-            <meshBasicMaterial transparent depthWrite={false}>
-              <canvasTexture attach="map" args={[glowCanvas]} />
-            </meshBasicMaterial>
-          </mesh>
-          <mesh>
-            <shapeGeometry args={[shapes.hull]} />
-            <meshBasicMaterial color={PALETTE.neutral.vivid} />
-          </mesh>
-          <mesh position={[0, 0, 0.1]}>
-            <shapeGeometry args={[shapes.canopy]} />
-            <meshBasicMaterial color={PALETTE.terracotta.soft} />
-          </mesh>
-        </group>
-        {isActive && !isFlying ? (
-          <Html
-            position={[0, -HIT_RADIUS, 0]}
-            zIndexRange={LABEL_Z_INDEX_RANGE}
-            className="pointer-events-none"
-          >
-            <span
-              role="tooltip"
-              className="flex -translate-x-1/2 translate-y-1 flex-col items-center rounded-sm bg-background px-1.5 py-0.5 text-label-sub whitespace-nowrap"
+            {PUFF_IDS.map((id) => (
+              <mesh
+                key={id}
+                ref={(mesh) => {
+                  puffMeshesRef.current[id] = mesh;
+                }}
+                visible={false}
+              >
+                <circleGeometry args={[PUFF_RADIUS, CIRCLE_SEGMENTS]} />
+                <meshBasicMaterial color={PALETTE.terracotta.soft} transparent depthWrite={false} />
+              </mesh>
+            ))}
+            <mesh ref={glowRef} position={ENGINE_POSITION}>
+              <circleGeometry args={[SHIP_ENGINE.radius, CIRCLE_SEGMENTS]} />
+              <meshBasicMaterial transparent depthWrite={false}>
+                <canvasTexture attach="map" args={[glowCanvas]} />
+              </meshBasicMaterial>
+            </mesh>
+            <mesh>
+              <shapeGeometry args={[shapes.hull]} />
+              <meshBasicMaterial color={PALETTE.neutral.vivid} />
+            </mesh>
+            <mesh position={[0, 0, 0.1]}>
+              <shapeGeometry args={[shapes.canopy]} />
+              <meshBasicMaterial color={PALETTE.terracotta.soft} />
+            </mesh>
+          </group>
+          {isActive && !isFlying ? (
+            <Html
+              position={[0, -HIT_RADIUS, 0]}
+              zIndexRange={LABEL_Z_INDEX_RANGE}
+              className="pointer-events-none"
             >
-              <span className="text-foreground">{messages.shipName}</span>
-              <span className="text-terracotta">{messages.shipAction}</span>
-            </span>
-          </Html>
-        ) : null}
-      </group>
+              <span
+                role="tooltip"
+                className="flex -translate-x-1/2 translate-y-1 flex-col items-center rounded-sm bg-background px-1.5 py-0.5 text-label-sub whitespace-nowrap"
+              >
+                <span className="text-foreground">{messages.shipName}</span>
+                <span className="text-terracotta">{messages.shipAction}</span>
+              </span>
+            </Html>
+          ) : null}
+        </group>
+      </Billboard>
     </group>
   );
 }

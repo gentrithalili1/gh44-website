@@ -1,11 +1,9 @@
-import { MathUtils } from "three";
+import { MathUtils, type PerspectiveCamera, Vector3 } from "three";
 
 import type { PlanetState } from "#/components/SolarSystem/types";
 
 // Below this width (the `md` breakpoint) the screen is a phone and the panel a bottom sheet.
 export const PHONE_MAX_WIDTH = 720;
-// The camera looks straight down at the system from this height.
-export const CAMERA_HEIGHT = 1000;
 // How fast fades and color changes settle (higher is faster).
 export const FADE_LAMBDA = 6;
 // A long frame (a background tab coming back) must not jump anything across its orbit, or
@@ -20,6 +18,42 @@ type ScenePoint = { x: number; y: number; depth?: number };
 // `z` toward the camera.
 export function toScenePosition({ x, y, depth = 0 }: ScenePoint): [number, number, number] {
   return [x, -y, depth];
+}
+
+// A press that moved further than this many pixels was a drag to orbit the camera, not a click.
+const DRAG_TOLERANCE_PX = 4;
+
+// Whether a click event (its `delta`: pixels between press and release) ended a drag.
+export function isDragRelease(delta: number) {
+  return delta > DRAG_TOLERANCE_PX;
+}
+
+type PlanePoint = { x: number; y: number; height?: number };
+
+// The system lies on the scene's x/z plane: system `y` (down on the home view) is the scene's
+// `z`, toward the viewer; `height` rises off the plane.
+export function toPlanePosition({ x, y, height = 0 }: PlanePoint): [number, number, number] {
+  return [x, height, y];
+}
+
+const forward = new Vector3();
+const toPoint = new Vector3();
+
+type GetPixelsPerUnitParams = {
+  camera: PerspectiveCamera;
+  viewport: { width: number; height: number };
+  position: [number, number, number];
+};
+
+// How many screen pixels one scene unit spans at a point, seen through the perspective camera.
+export function getPixelsPerUnit({ camera, viewport, position }: GetPixelsPerUnitParams) {
+  camera.getWorldDirection(forward);
+  const depth = toPoint
+    .set(...position)
+    .sub(camera.position)
+    .dot(forward);
+
+  return viewport.height / (2 * depth * Math.tan(MathUtils.degToRad(camera.fov / 2)));
 }
 
 // Closer than this, an easing value snaps to its target and stops changing.
