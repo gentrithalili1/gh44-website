@@ -39,12 +39,18 @@ export function Cockpit() {
   // The ship in the scene flies there first and opens the page on arrival; without one (reduced
   // motion, no WebGL) the page opens at once.
   function handleGo(destination: Destination) {
-    if (explorer.hasShip()) {
-      explorer.startFlight(destination);
-      return;
+    const outcome = explorer.launch(destination);
+    switch (outcome.status) {
+      case "flying":
+        return;
+      case "arrived":
+        void navigate({ to: "/$planetId", params: { planetId: destination.name } });
+        return;
+      default: {
+        const unknownOutcome: never = outcome;
+        return unknownOutcome;
+      }
     }
-    explorer.closeCockpit();
-    void navigate({ to: "/$planetId", params: { planetId: destination.name } });
   }
 
   if (explorer.cockpit.status === "closed") return null;

@@ -15,6 +15,10 @@ type Cockpit =
 // The ship's trip to a destination, from the cockpit's `go` to the page opening.
 type ExplorerFlight = { status: "idle" } | { status: "flying"; destination: Destination };
 
+// How a launch goes: the ship in the scene flies there first, or (no ship) the visitor arrives
+// at once and the page opens now.
+type LaunchOutcome = { status: "flying" } | { status: "arrived" };
+
 type Explorer = {
   cockpit: Cockpit;
   flight: ExplorerFlight;
@@ -26,8 +30,10 @@ type Explorer = {
   // A ship in the scene boards when it mounts; without one there is nothing to fly.
   boardShip: () => () => void;
   hasShip: () => boolean;
-  startFlight: (destination: Destination) => void;
+  launch: (destination: Destination) => LaunchOutcome;
   endFlight: () => void;
+  // The planet the visitor last launched to from the cockpit: its page leads back to the cockpit.
+  cockpitTripPlanetId: string | undefined;
 };
 
 const CLOSED: Cockpit = { status: "closed" };
@@ -45,6 +51,7 @@ interface ExplorerProviderProps {
 export function ExplorerProvider({ children }: ExplorerProviderProps) {
   const [cockpit, setCockpit] = useState<Cockpit>(CLOSED);
   const [flight, setFlight] = useState<ExplorerFlight>(IDLE);
+  const [cockpitTripPlanetId, setCockpitTripPlanetId] = useState<string>();
   // How many ships are in the scene: read in handlers only, so it never re-renders.
   const shipCountRef = useRef(0);
 
@@ -57,6 +64,7 @@ export function ExplorerProvider({ children }: ExplorerProviderProps) {
     flight,
     openCockpit: () => {
       if (flight.status === "flying") return;
+      setCockpitTripPlanetId(undefined);
       setCockpit({ status: "open", reveal: hasShip() ? "flight" : "instant" });
     },
     closeCockpit: () =>
@@ -71,8 +79,17 @@ export function ExplorerProvider({ children }: ExplorerProviderProps) {
       };
     },
     hasShip,
-    startFlight: (destination) => setFlight({ status: "flying", destination }),
+    launch: (destination) => {
+      setCockpitTripPlanetId(destination.name);
+      if (hasShip()) {
+        setFlight({ status: "flying", destination });
+        return { status: "flying" };
+      }
+      setCockpit(CLOSED);
+      return { status: "arrived" };
+    },
     endFlight: () => setFlight(IDLE),
+    cockpitTripPlanetId,
   };
 
   return <ExplorerContext value={explorer}>{children}</ExplorerContext>;

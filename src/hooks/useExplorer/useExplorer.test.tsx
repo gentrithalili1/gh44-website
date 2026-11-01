@@ -57,7 +57,9 @@ describe("useExplorer", () => {
       result.current.boardShip();
     });
     act(() => result.current.openCockpit());
-    act(() => result.current.startFlight(WORK));
+    act(() => {
+      result.current.launch(WORK);
+    });
     act(() => result.current.closeCockpit());
 
     act(() => result.current.openCockpit());
@@ -66,5 +68,41 @@ describe("useExplorer", () => {
     act(() => result.current.endFlight());
     act(() => result.current.openCockpit());
     expect(result.current.cockpit).toEqual({ status: "open", reveal: "flight" });
+  });
+
+  it("flies the ship to a launch's destination, or arrives at once without a ship", () => {
+    const withShip = renderExplorer();
+    act(() => {
+      withShip.result.current.boardShip();
+    });
+    act(() => withShip.result.current.openCockpit());
+    let outcome;
+    act(() => {
+      outcome = withShip.result.current.launch(WORK);
+    });
+    expect(outcome).toEqual({ status: "flying" });
+    expect(withShip.result.current.flight).toEqual({ status: "flying", destination: WORK });
+
+    const withoutShip = renderExplorer();
+    act(() => withoutShip.result.current.openCockpit());
+    act(() => {
+      outcome = withoutShip.result.current.launch(WORK);
+    });
+    expect(outcome).toEqual({ status: "arrived" });
+    expect(withoutShip.result.current.cockpit).toEqual({ status: "closed" });
+  });
+
+  it("remembers the planet reached from the cockpit, until the cockpit opens again", () => {
+    const { result } = renderExplorer();
+    expect(result.current.cockpitTripPlanetId).toBeUndefined();
+
+    act(() => result.current.openCockpit());
+    act(() => {
+      result.current.launch(WORK);
+    });
+    expect(result.current.cockpitTripPlanetId).toBe("work");
+
+    act(() => result.current.openCockpit());
+    expect(result.current.cockpitTripPlanetId).toBeUndefined();
   });
 });
