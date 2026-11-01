@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getModelRequests, getSpokenLines, stubFloki } from "#/test/floki";
+import { getModelRequests, getSpokenLines, stubFloki, stubSpeechRecognition } from "#/test/floki";
 
 import { renderInRouter } from "#/test/renderInRouter";
 
@@ -118,6 +118,41 @@ describe("CockpitTerminal", () => {
     expect(await getOutput().findByText(/Gentrit built me\./)).toBeInTheDocument();
     expect(players[0]?.pause).toHaveBeenCalled();
     expect(onGo).not.toHaveBeenCalled();
+  });
+
+  it("greets out loud, hears the visitor and flies", async () => {
+    const user = userEvent.setup();
+    const { fetchStub } = stubFloki({ replies: [{ say: "unused" }] });
+    stubSpeechRecognition([{ text: "take me to work" }]);
+    const onGo = vi.fn();
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+
+    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+
+    expect(await getOutput().findByText(/take me to work/)).toHaveTextContent(
+      "you> take me to work",
+    );
+    await waitFor(() =>
+      expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/work" })),
+    );
+    expect(getSpokenLines(fetchStub)).toEqual(["Floki online. Where to?", "course set for work."]);
+  });
+
+  it("says when the mic is refused", async () => {
+    const user = userEvent.setup();
+    stubFloki({ replies: [{ say: "unused" }] });
+    stubSpeechRecognition([{ error: "not-allowed" }]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+
+    expect(await getOutput().findByText(/no mic access/)).toBeInTheDocument();
+  });
+
+  it("has no talk button where the browser cannot hear", async () => {
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    expect(screen.queryByRole("button", { name: "talk to floki" })).not.toBeInTheDocument();
   });
 
   it("says when floki's comms are down", async () => {

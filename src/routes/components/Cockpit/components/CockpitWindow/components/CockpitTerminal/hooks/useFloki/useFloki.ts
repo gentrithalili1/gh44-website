@@ -3,6 +3,7 @@ import { useState } from "react";
 import { DESTINATIONS, type Destination } from "#/utils/destinations";
 
 import { askFloki } from "./askFloki";
+import { useFlokiListening } from "./hooks/useFlokiListening";
 import { useFlokiVoice } from "./hooks/useFlokiVoice";
 import type { AskFlokiOutcome, FlokiTurn } from "./types";
 import { getFlokiCommand } from "./utils/flokiCommand";
@@ -12,7 +13,7 @@ export const DEFAULT_HUMOR = 60;
 // How many earlier turns go along with a question.
 const HISTORY_TURNS = 10;
 
-export type FlokiStatus = "idle" | "thinking" | "speaking";
+export type FlokiStatus = "idle" | "listening" | "thinking" | "speaking";
 
 export type FlokiFailureReason = "busy" | "rateLimited" | "unavailable";
 
@@ -43,6 +44,7 @@ async function requestAnswer({
 // The component prints, speaks and flies.
 export function useFloki() {
   const voice = useFlokiVoice();
+  const listening = useFlokiListening();
   const [requestStatus, setRequestStatus] = useState<"idle" | "thinking">("idle");
   const [turns, setTurns] = useState<readonly FlokiTurn[]>([]);
   const [humor, setHumor] = useState(DEFAULT_HUMOR);
@@ -85,10 +87,25 @@ export function useFloki() {
   }
 
   function getStatus(): FlokiStatus {
+    if (listening.status === "listening") return "listening";
     if (requestStatus === "thinking") return "thinking";
     if (voice.isSpeaking) return "speaking";
     return "idle";
   }
 
-  return { status: getStatus(), ask, speak: voice.speak, stopSpeaking: voice.stop };
+  // Opens the mic for one sentence; it cuts Floki off first.
+  function listen() {
+    voice.stop();
+    return listening.listen();
+  }
+
+  return {
+    status: getStatus(),
+    canListen: listening.status !== "unsupported",
+    ask,
+    listen,
+    stopListening: listening.stop,
+    speak: voice.speak,
+    stopSpeaking: voice.stop,
+  };
 }

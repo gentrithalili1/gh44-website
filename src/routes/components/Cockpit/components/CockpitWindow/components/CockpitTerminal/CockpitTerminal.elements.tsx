@@ -35,6 +35,11 @@ export function FlokiPrompt() {
   return <span className="whitespace-nowrap text-lavender">{messages.floki.prompt}</span>;
 }
 
+// "you>" before what the visitor said to Floki.
+export function VisitorPrompt() {
+  return <span className="whitespace-nowrap text-sage">{messages.floki.visitorPrompt}</span>;
+}
+
 interface TerminalCursorProps {
   // The character under the block; a space at the end of the line.
   children: React.ReactNode;

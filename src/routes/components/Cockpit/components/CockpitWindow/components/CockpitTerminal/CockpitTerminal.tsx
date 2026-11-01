@@ -8,8 +8,15 @@ import {
   TerminalCursor,
   TerminalPrompt,
   TerminalTitleBar,
+  VisitorPrompt,
 } from "./CockpitTerminal.elements";
-import { type FlokiFailureReason, type FlokiOutcome, useFloki } from "./hooks/useFloki";
+import { TerminalFloki } from "./components/TerminalFloki";
+import {
+  type FlokiFailureReason,
+  type FlokiHearing,
+  type FlokiOutcome,
+  useFloki,
+} from "./hooks/useFloki";
 import { type TerminalLine, useTerminal } from "./hooks/useTerminal";
 import { messages } from "./messages";
 import { getLineSegments } from "./utils/terminalLinks";
@@ -25,6 +32,8 @@ interface CockpitTerminalProps {
 export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
   const terminal = useTerminal();
   const floki = useFloki();
+  // Floki says hello out loud once, on the first tap of talk.
+  const [hasGreeted, setHasGreeted] = useState(false);
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -79,6 +88,47 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
         ? outcome.destination
         : undefined;
     if (destination) onGo(destination);
+  }
+
+  // What Floki prints when a turn at the mic gave no question; nothing when it did.
+  function getHearingLine(hearing: FlokiHearing) {
+    switch (hearing.status) {
+      case "heard":
+        return undefined;
+      case "quiet":
+      case "failed":
+        return messages.floki.quiet;
+      case "denied":
+        return messages.floki.micDenied;
+      default: {
+        const unknownHearing: never = hearing;
+        return unknownHearing;
+      }
+    }
+  }
+
+  // Talk opens the mic for one sentence; while Floki listens or speaks, it stops him instead.
+  async function handleTalk() {
+    if (floki.status === "listening") {
+      floki.stopListening();
+      return;
+    }
+    if (floki.status === "speaking") {
+      floki.stopSpeaking();
+      return;
+    }
+    if (!hasGreeted) {
+      setHasGreeted(true);
+      await floki.speak(messages.floki.spokenGreeting);
+    }
+    const hearing = await floki.listen();
+    if (hearing.status === "heard") {
+      terminal.print([{ kind: "visitor", text: hearing.text }]);
+      await handleAsk(hearing.text);
+      return;
+    }
+    const line = getHearingLine(hearing);
+    if (line) terminal.print([{ kind: "floki", text: line }]);
   }
 
   function handleRun(command: string) {
@@ -153,6 +203,12 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
             <TerminalPrompt /> {line.text}
           </>
         );
+      case "visitor":
+        return (
+          <>
+            <VisitorPrompt /> {line.text}
+          </>
+        );
       case "floki":
         return (
           <>
@@ -194,6 +250,12 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
       className="flex max-h-[min(20rem,38dvh)] w-full min-h-0 flex-col overflow-hidden rounded-lg border border-rule bg-night shadow-[0_18px_40px_-16px_rgb(0_0_0/0.7)] md:h-full md:max-h-none"
     >
       <TerminalTitleBar />
+      <TerminalFloki
+        status={floki.status}
+        canListen={floki.canListen}
+        isLocked={isLocked}
+        onTalk={() => void handleTalk()}
+      />
       {/* Reversed, so the newest line stays in view as lines arrive. A click anywhere in the
           window types at the prompt, like a terminal. */}
       <div

@@ -7,9 +7,13 @@ import { getWelcomeLines, runCommand } from "../../utils/terminalCommands";
 
 import { messages } from "../../messages";
 
-// A line on the screen: a command echoed at the prompt, what a command printed, or what Floki
-// said.
-export type TerminalLine = { id: number; kind: "command" | "output" | "floki"; text: string };
+// A line on the screen: a command echoed at the prompt, what a command printed, or what the
+// visitor and Floki said to each other.
+export type TerminalLine = {
+  id: number;
+  kind: "command" | "output" | "visitor" | "floki";
+  text: string;
+};
 
 type Screen = { lines: readonly TerminalLine[]; nextLineId: number };
 

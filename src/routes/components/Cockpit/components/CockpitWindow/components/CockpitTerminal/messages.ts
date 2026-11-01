@@ -44,7 +44,11 @@ export const messages = {
   ],
   floki: {
     prompt: "floki>",
-    greeting: "floki online. ask me anything: floki <question>",
+    visitorPrompt: "you>",
+    greeting: "floki online. tap talk, or type floki <question>.",
+    spokenGreeting: "Floki online. Where to?",
+    quiet: "didn't catch that. tap talk and try again.",
+    micDenied: "no mic access. type floki <question> instead.",
     courseSet: (name: string) => `course set for ${name}.`,
     humorSet: (humor: number) =>
       `humor setting: ${humor}%. ${humor > 80 ? "you asked for it." : "noted."}`,

@@ -80,3 +80,42 @@ export function getModelRequests(fetchStub: ReturnType<typeof stubFloki>["fetchS
     .filter(([url]) => !String(url).startsWith(VOICE_URL))
     .map(([, init]) => String(init?.body));
 }
+
+type Hearing = { text: string } | { error: string };
+
+// Stands in for the browser's speech recognition: each turn at the mic hears the next entry,
+// words or an error, then ends. Returns the recognizers it made.
+export function stubSpeechRecognition(hearings: readonly Hearing[]) {
+  let hearingIndex = 0;
+  const recognizers: FakeRecognition[] = [];
+
+  class FakeRecognition extends EventTarget {
+    lang = "";
+    continuous = true;
+    interimResults = true;
+    maxAlternatives = 0;
+    onresult: ((event: { results: { transcript: string }[][] }) => void) | null = null;
+    onerror: ((event: { error: string }) => void) | null = null;
+    onend: (() => void) | null = null;
+    stop = vi.fn(() => this.onend?.());
+    abort = vi.fn(() => this.onend?.());
+    start = vi.fn(() => {
+      const hearing = hearings[Math.min(hearingIndex, hearings.length - 1)];
+      hearingIndex += 1;
+      queueMicrotask(() => {
+        if (hearing && "text" in hearing)
+          this.onresult?.({ results: [[{ transcript: hearing.text }]] });
+        if (hearing && "error" in hearing) this.onerror?.({ error: hearing.error });
+        this.onend?.();
+      });
+    });
+
+    constructor() {
+      super();
+      recognizers.push(this);
+    }
+  }
+  vi.stubGlobal("SpeechRecognition", FakeRecognition);
+
+  return recognizers;
+}
