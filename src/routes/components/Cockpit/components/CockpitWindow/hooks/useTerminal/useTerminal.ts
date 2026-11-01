@@ -3,10 +3,20 @@ import { useState } from "react";
 
 import { useExploration } from "#/hooks/useExploration";
 
-import { getWelcomeLines, runCommand } from "../../utils/terminalCommands";
+import {
+  getWelcomeLines,
+  runCommand,
+} from "../../components/CockpitTerminal/utils/terminalCommands";
 
-// A line on the screen: a command echoed at the prompt, or what a command printed.
-export type TerminalLine = { id: number; kind: "command" | "output"; text: string };
+import { messages } from "../../components/CockpitTerminal/messages";
+
+// A line on the screen: a command echoed at the prompt, what a command printed, or what the
+// visitor and Floki said to each other.
+export type TerminalLine = {
+  id: number;
+  kind: "command" | "output" | "visitor" | "floki";
+  text: string;
+};
 
 type Screen = { lines: readonly TerminalLine[]; nextLineId: number };
 
@@ -14,12 +24,12 @@ type Screen = { lines: readonly TerminalLine[]; nextLineId: number };
 type HistoryPosition = { status: "typing" } | { status: "browsing"; index: number };
 
 function getWelcomeScreen(): Screen {
-  const welcome = getWelcomeLines();
+  const lines = [
+    ...getWelcomeLines().map((text) => ({ kind: "output", text }) as const),
+    { kind: "floki", text: messages.floki.greeting } as const,
+  ];
 
-  return {
-    lines: welcome.map((text, id) => ({ id, kind: "output", text })),
-    nextLineId: welcome.length,
-  };
+  return { lines: lines.map((line, id) => ({ ...line, id })), nextLineId: lines.length };
 }
 
 function addLines({
@@ -37,6 +47,8 @@ function addLines({
     nextLineId: screen.nextLineId + lines.length,
   };
 }
+
+export type Terminal = ReturnType<typeof useTerminal>;
 
 // The cockpit's terminal: what it shows, what is typed, and the commands typed before.
 export function useTerminal() {
@@ -71,6 +83,11 @@ export function useTerminal() {
     return result;
   }
 
+  // Adds lines that no command printed, such as Floki's answers.
+  function print(lines: readonly Omit<TerminalLine, "id">[]) {
+    setScreen((current) => addLines({ screen: current, lines }));
+  }
+
   function showHistoryEntry(index: number) {
     setHistoryPosition({ status: "browsing", index });
     setInput(history[index] ?? "");
@@ -98,6 +115,7 @@ export function useTerminal() {
     input,
     setInput,
     run,
+    print,
     showPrevious,
     showNext,
   };

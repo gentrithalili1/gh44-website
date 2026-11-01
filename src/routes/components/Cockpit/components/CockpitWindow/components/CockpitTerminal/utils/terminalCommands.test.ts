@@ -26,6 +26,7 @@ describe("runCommand", () => {
         "  coordinates       where you are",
         "  explore           what you have visited",
         "  go <destination>  fly to a destination",
+        "  floki <question>  ask the onboard computer",
         DESTINATION_LIST,
       ],
     });
@@ -126,5 +127,20 @@ describe("runCommand", () => {
 
   it("prints nothing for an empty line", () => {
     expect(runCommand({ input: "   ", context: AT_HOME })).toEqual({ kind: "print", lines: [] });
+  });
+
+  it("asks floki the rest of the line", () => {
+    expect(runCommand({ input: "floki What is   gh44-brain?", context: AT_HOME })).toEqual({
+      kind: "ask",
+      question: "what is gh44-brain?",
+      lines: [],
+    });
+  });
+
+  it("shows floki's usage without a question", () => {
+    expect(runCommand({ input: "floki", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["usage: floki <question>"],
+    });
   });
 });

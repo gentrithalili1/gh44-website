@@ -18,6 +18,7 @@ export const messages = {
     coordinates: { usage: "coordinates", description: "where you are" },
     explore: { usage: "explore", description: "what you have visited" },
     go: { usage: "go <destination>", description: "fly to a destination" },
+    floki: { usage: "floki <question>", description: "ask the onboard computer" },
   },
   usage: (usage: string) => `usage: ${usage}`,
   whoami: ["gentrit halili", "senior frontend engineer", "pristina, kosovo"],
@@ -41,5 +42,22 @@ export const messages = {
     "navigation locked.",
     "initiating transition...",
   ],
+  floki: {
+    prompt: "floki>",
+    visitorPrompt: "you>",
+    greeting: "floki online. tap talk, or type floki <question>.",
+    spokenGreeting: "Floki online. Where to?",
+    quiet: "didn't catch that. tap talk and try again.",
+    goingQuiet: "going quiet. tap talk when you need me.",
+    micDenied: "no mic access. type floki <question> instead.",
+    courseSet: (name: string) => `course set for ${name}.`,
+    humorSet: (humor: number) =>
+      `humor setting: ${humor}%. ${humor > 80 ? "you asked for it." : "noted."}`,
+    questionLimit:
+      "that's my limit for this trip. reopen the cockpit to start over, or use the terminal.",
+    busy: "still thinking. one question at a time.",
+    rateLimited: "cooling down. too many questions for now. the terminal still works.",
+    unavailable: "comms down. the terminal still works.",
+  },
   commandNotFound: (name: string) => [`command not found: ${name}`, "type help for commands."],
 } as const;

@@ -3,23 +3,38 @@ import { useRef, useState } from "react";
 
 import type { Destination } from "#/utils/destinations";
 
-import { TerminalCursor, TerminalPrompt, TerminalTitleBar } from "./CockpitTerminal.elements";
-import { type TerminalLine, useTerminal } from "./hooks/useTerminal";
+import {
+  FlokiPrompt,
+  TerminalCursor,
+  TerminalLights,
+  TerminalPrompt,
+  TerminalTitleBar,
+  VisitorPrompt,
+} from "./CockpitTerminal.elements";
+import type { Terminal, TerminalLine } from "../../hooks/useTerminal";
 import { messages } from "./messages";
 import { getLineSegments } from "./utils/terminalLinks";
 
 interface CockpitTerminalProps {
+  terminal: Terminal;
   // After `go`: the terminal shows the confirmation and takes no more commands.
   isLocked: boolean;
   // A greeting cockpit leaves focus where it was: the command line waits for the visitor.
   shouldFocus: boolean;
+  // `floki <question>`: Floki answers in the terminal.
+  onAsk: (question: string) => void;
   onGo: (destination: Destination) => void;
 }
 
 // A zsh window in the gh44 Warp theme on the console's center screen. Every destination it prints
 // is a link: clicking one runs `go` for it.
-export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminalProps) {
-  const terminal = useTerminal();
+export function CockpitTerminal({
+  terminal,
+  isLocked,
+  shouldFocus,
+  onAsk,
+  onGo,
+}: CockpitTerminalProps) {
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,6 +53,9 @@ export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminal
         return;
       case "go":
         onGo(result.destination);
+        return;
+      case "ask":
+        onAsk(result.question);
         return;
       default: {
         const unknownResult: never = result;
@@ -90,6 +108,35 @@ export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminal
     handleRun(`go ${destination.name}`);
   }
 
+  function renderLine(line: TerminalLine) {
+    switch (line.kind) {
+      case "command":
+        return (
+          <>
+            <TerminalPrompt /> {line.text}
+          </>
+        );
+      case "visitor":
+        return (
+          <>
+            <VisitorPrompt /> {line.text}
+          </>
+        );
+      case "floki":
+        return (
+          <>
+            <FlokiPrompt /> {line.text}
+          </>
+        );
+      case "output":
+        return renderOutput(line);
+      default: {
+        const unknownKind: never = line.kind;
+        return unknownKind;
+      }
+    }
+  }
+
   function renderOutput(line: TerminalLine) {
     return getLineSegments(line.text).map((segment) => {
       if (segment.kind === "text") return segment.text;
@@ -116,6 +163,7 @@ export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminal
       className="flex max-h-[min(20rem,38dvh)] w-full min-h-0 flex-col overflow-hidden rounded-lg border border-rule bg-night shadow-[0_18px_40px_-16px_rgb(0_0_0/0.7)] md:h-full md:max-h-none"
     >
       <TerminalTitleBar />
+      <TerminalLights />
       {/* Reversed, so the newest line stays in view as lines arrive. A click anywhere in the
           window types at the prompt, like a terminal. */}
       <div
@@ -126,13 +174,7 @@ export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminal
           <div role="log" aria-label={messages.outputLabel}>
             {terminal.lines.map((line) => (
               <p key={line.id} className="break-words whitespace-pre-wrap">
-                {line.kind === "command" ? (
-                  <>
-                    <TerminalPrompt /> {line.text}
-                  </>
-                ) : (
-                  renderOutput(line)
-                )}
+                {renderLine(line)}
               </p>
             ))}
           </div>

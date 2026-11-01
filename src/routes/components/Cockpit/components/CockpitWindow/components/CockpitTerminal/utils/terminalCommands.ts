@@ -11,7 +11,8 @@ export type CommandContext = { pathname: string; visitedIds: readonly PlanetId[]
 export type CommandResult =
   | { kind: "print"; lines: readonly string[] }
   | { kind: "clear" }
-  | { kind: "go"; destination: Destination; lines: readonly string[] };
+  | { kind: "go"; destination: Destination; lines: readonly string[] }
+  | { kind: "ask"; question: string; lines: readonly string[] };
 
 type CommandParams = { args: readonly string[]; context: CommandContext };
 
@@ -44,6 +45,13 @@ function go({ args }: CommandParams): CommandResult {
   if (!destination) return print([messages.goUnknown(name), getDestinationList()]);
 
   return { kind: "go", destination, lines: messages.goConfirm(destination) };
+}
+
+function floki({ args }: CommandParams): CommandResult {
+  const question = args.join(" ");
+  if (question === "") return print([messages.usage(messages.commands.floki.usage)]);
+
+  return { kind: "ask", question, lines: [] };
 }
 
 // Every command the terminal knows, in the order help lists them.
@@ -89,6 +97,7 @@ const COMMANDS: Readonly<Record<string, Command>> = {
       ]),
   },
   go: { ...messages.commands.go, run: go },
+  floki: { ...messages.commands.floki, run: floki },
 };
 
 // What the terminal shows when the cockpit opens.

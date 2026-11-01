@@ -7,6 +7,9 @@ vi.mock("@tanstack/react-start", async (importOriginal) => ({
   ...(await import("./serverFn")),
 }));
 
+// Server functions run in place in tests, with no request to read the visitor's IP from.
+vi.mock("@tanstack/react-start/server", () => ({ getRequestHeader: () => "127.0.0.1" }));
+
 // jsdom has no scrolling; the router scrolls to the top on every navigation.
 window.scrollTo = vi.fn();
 
