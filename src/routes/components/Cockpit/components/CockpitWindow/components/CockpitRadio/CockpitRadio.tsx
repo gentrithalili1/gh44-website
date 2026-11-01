@@ -55,12 +55,13 @@ export function CockpitRadio() {
       aria-label={messages.label}
       className="flex min-w-0 flex-col gap-2 md:min-h-0 md:flex-1 md:gap-2.5"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 md:flex-col md:items-stretch md:gap-2">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 md:gap-1.5">
-          <p className="hidden items-center justify-between text-[0.6875rem] text-muted md:flex">
-            <span aria-hidden="true">{messages.label}</span>
-            <RadioLevel isPlaying={isPlaying} />
-          </p>
+          {statusText === null ? null : (
+            <p aria-hidden="true" className="hidden text-[0.6875rem] text-muted md:block">
+              {messages.label}
+            </p>
+          )}
           {statusText === null ? (
             <RadioTrack
               isPlaying={isPlaying}
@@ -94,6 +95,11 @@ export function CockpitRadio() {
             >
               <RadioIcon name="next" />
             </RadioButton>
+            {/* On desktop the radio's name and level meter sit at the row's end. */}
+            <span className="ml-auto hidden items-center gap-2 text-[0.6875rem] text-muted md:flex">
+              <span aria-hidden="true">{messages.label}</span>
+              <RadioLevel isPlaying={isPlaying} />
+            </span>
             <span className="md:hidden">
               <RadioButton
                 aria-label={messages.playlistLabel}

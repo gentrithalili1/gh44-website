@@ -73,7 +73,8 @@ export function RadioTrack({ isPlaying, artist, separator, title }: RadioTrackPr
       <span className="md:hidden">
         <RadioLevel isPlaying={isPlaying} />
       </span>
-      <span className="min-w-0 truncate">
+      {/* One truncated line on phones; on desktop the whole name shows, wrapping if needed. */}
+      <span className="min-w-0 truncate md:overflow-visible md:text-clip md:whitespace-normal">
         <span className="text-muted">
           {artist}
           {separator}
