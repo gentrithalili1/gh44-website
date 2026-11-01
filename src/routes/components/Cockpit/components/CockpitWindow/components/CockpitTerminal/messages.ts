@@ -18,6 +18,7 @@ export const messages = {
     coordinates: { usage: "coordinates", description: "where you are" },
     explore: { usage: "explore", description: "what you have visited" },
     go: { usage: "go <destination>", description: "fly to a destination" },
+    floki: { usage: "floki <question>", description: "ask the onboard computer" },
   },
   usage: (usage: string) => `usage: ${usage}`,
   whoami: ["gentrit halili", "senior frontend engineer", "pristina, kosovo"],
@@ -41,5 +42,12 @@ export const messages = {
     "navigation locked.",
     "initiating transition...",
   ],
+  floki: {
+    prompt: "floki>",
+    greeting: "floki online. ask me anything: floki <question>",
+    busy: "still thinking. one question at a time.",
+    rateLimited: "cooling down. too many questions for now. the terminal still works.",
+    unavailable: "comms down. the terminal still works.",
+  },
   commandNotFound: (name: string) => [`command not found: ${name}`, "type help for commands."],
 } as const;

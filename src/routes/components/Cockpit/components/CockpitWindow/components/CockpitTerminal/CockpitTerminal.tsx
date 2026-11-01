@@ -3,7 +3,13 @@ import { useRef, useState } from "react";
 
 import type { Destination } from "#/utils/destinations";
 
-import { TerminalCursor, TerminalPrompt, TerminalTitleBar } from "./CockpitTerminal.elements";
+import {
+  FlokiPrompt,
+  TerminalCursor,
+  TerminalPrompt,
+  TerminalTitleBar,
+} from "./CockpitTerminal.elements";
+import { type FlokiOutcome, useFloki } from "./hooks/useFloki";
 import { type TerminalLine, useTerminal } from "./hooks/useTerminal";
 import { messages } from "./messages";
 import { getLineSegments } from "./utils/terminalLinks";
@@ -18,6 +24,7 @@ interface CockpitTerminalProps {
 // is a link: clicking one runs `go` for it.
 export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
   const terminal = useTerminal();
+  const floki = useFloki();
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -26,6 +33,28 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
   const beforeCaret = terminal.input.slice(0, caret);
   const underCaret = terminal.input.at(caret) ?? " ";
   const afterCaret = terminal.input.slice(caret + 1);
+
+  function getFlokiLine(outcome: FlokiOutcome) {
+    if (outcome.status === "answered") return outcome.say;
+    switch (outcome.reason) {
+      case "busy":
+        return messages.floki.busy;
+      case "rateLimited":
+        return messages.floki.rateLimited;
+      case "unavailable":
+        return messages.floki.unavailable;
+      default: {
+        const unknownReason: never = outcome.reason;
+        return unknownReason;
+      }
+    }
+  }
+
+  async function handleAsk(question: string) {
+    const outcome = await floki.ask(question);
+    terminal.print([{ kind: "floki", text: getFlokiLine(outcome) }]);
+    if (outcome.status === "answered" && outcome.destination) onGo(outcome.destination);
+  }
 
   function handleRun(command: string) {
     const result = terminal.run(command);
@@ -36,6 +65,9 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
         return;
       case "go":
         onGo(result.destination);
+        return;
+      case "ask":
+        void handleAsk(result.question);
         return;
       default: {
         const unknownResult: never = result;
@@ -88,6 +120,29 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
     handleRun(`go ${destination.name}`);
   }
 
+  function renderLine(line: TerminalLine) {
+    switch (line.kind) {
+      case "command":
+        return (
+          <>
+            <TerminalPrompt /> {line.text}
+          </>
+        );
+      case "floki":
+        return (
+          <>
+            <FlokiPrompt /> {line.text}
+          </>
+        );
+      case "output":
+        return renderOutput(line);
+      default: {
+        const unknownKind: never = line.kind;
+        return unknownKind;
+      }
+    }
+  }
+
   function renderOutput(line: TerminalLine) {
     return getLineSegments(line.text).map((segment) => {
       if (segment.kind === "text") return segment.text;
@@ -124,13 +179,7 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
           <div role="log" aria-label={messages.outputLabel}>
             {terminal.lines.map((line) => (
               <p key={line.id} className="break-words whitespace-pre-wrap">
-                {line.kind === "command" ? (
-                  <>
-                    <TerminalPrompt /> {line.text}
-                  </>
-                ) : (
-                  renderOutput(line)
-                )}
+                {renderLine(line)}
               </p>
             ))}
           </div>

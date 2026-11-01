@@ -5,8 +5,11 @@ import { useExploration } from "#/hooks/useExploration";
 
 import { getWelcomeLines, runCommand } from "../../utils/terminalCommands";
 
-// A line on the screen: a command echoed at the prompt, or what a command printed.
-export type TerminalLine = { id: number; kind: "command" | "output"; text: string };
+import { messages } from "../../messages";
+
+// A line on the screen: a command echoed at the prompt, what a command printed, or what Floki
+// said.
+export type TerminalLine = { id: number; kind: "command" | "output" | "floki"; text: string };
 
 type Screen = { lines: readonly TerminalLine[]; nextLineId: number };
 
@@ -14,12 +17,12 @@ type Screen = { lines: readonly TerminalLine[]; nextLineId: number };
 type HistoryPosition = { status: "typing" } | { status: "browsing"; index: number };
 
 function getWelcomeScreen(): Screen {
-  const welcome = getWelcomeLines();
+  const lines = [
+    ...getWelcomeLines().map((text) => ({ kind: "output", text }) as const),
+    { kind: "floki", text: messages.floki.greeting } as const,
+  ];
 
-  return {
-    lines: welcome.map((text, id) => ({ id, kind: "output", text })),
-    nextLineId: welcome.length,
-  };
+  return { lines: lines.map((line, id) => ({ ...line, id })), nextLineId: lines.length };
 }
 
 function addLines({
@@ -71,6 +74,11 @@ export function useTerminal() {
     return result;
   }
 
+  // Adds lines that no command printed, such as Floki's answers.
+  function print(lines: readonly Omit<TerminalLine, "id">[]) {
+    setScreen((current) => addLines({ screen: current, lines }));
+  }
+
   function showHistoryEntry(index: number) {
     setHistoryPosition({ status: "browsing", index });
     setInput(history[index] ?? "");
@@ -98,6 +106,7 @@ export function useTerminal() {
     input,
     setInput,
     run,
+    print,
     showPrevious,
     showNext,
   };

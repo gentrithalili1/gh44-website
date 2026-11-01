@@ -1,6 +1,8 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { stubGroq } from "#/test/groq";
 
 import { renderInRouter } from "#/test/renderInRouter";
 
@@ -10,7 +12,62 @@ function getOutput() {
   return within(screen.getByRole("log", { name: "terminal output" }));
 }
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+async function typeCommand(command: string) {
+  const user = userEvent.setup();
+  await user.type(screen.getByRole("textbox", { name: "command" }), `${command}{Enter}`);
+}
+
 describe("CockpitTerminal", () => {
+  it("greets the visitor as floki", async () => {
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    expect(getOutput().getByText(/floki online/)).toBeInTheDocument();
+  });
+
+  it("prints floki's answer to a question", async () => {
+    stubGroq([{ say: "gh44-brain is how Gentrit works with Claude Code." }]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await typeCommand("floki what is gh44-brain");
+
+    expect(
+      await getOutput().findByText(/gh44-brain is how Gentrit works with Claude Code\./),
+    ).toHaveTextContent("floki> gh44-brain is how Gentrit works with Claude Code.");
+  });
+
+  it("flies where floki sets course", async () => {
+    stubGroq([{ say: "Course set for work.", go: "work" }]);
+    const onGo = vi.fn();
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+
+    await typeCommand("floki take me to your jobs");
+
+    expect(await getOutput().findByText(/Course set for work\./)).toBeInTheDocument();
+    expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/work" }));
+  });
+
+  it("says when floki's comms are down", async () => {
+    stubGroq([{ status: 503 }]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await typeCommand("floki hello");
+
+    expect(await getOutput().findByText(/comms down/)).toBeInTheDocument();
+  });
+
+  it("says when floki is cooling down", async () => {
+    stubGroq([{ status: 429 }]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await typeCommand("floki hello");
+
+    expect(await getOutput().findByText(/cooling down/)).toBeInTheDocument();
+  });
+
   it("runs go for a destination clicked in the output", async () => {
     const user = userEvent.setup();
     const onGo = vi.fn();
