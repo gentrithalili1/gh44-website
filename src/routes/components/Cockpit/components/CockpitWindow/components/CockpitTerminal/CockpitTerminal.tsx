@@ -9,7 +9,7 @@ import {
   TerminalPrompt,
   TerminalTitleBar,
 } from "./CockpitTerminal.elements";
-import { type FlokiOutcome, useFloki } from "./hooks/useFloki";
+import { type FlokiFailureReason, type FlokiOutcome, useFloki } from "./hooks/useFloki";
 import { type TerminalLine, useTerminal } from "./hooks/useTerminal";
 import { messages } from "./messages";
 import { getLineSegments } from "./utils/terminalLinks";
@@ -35,8 +35,24 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
   const afterCaret = terminal.input.slice(caret + 1);
 
   function getFlokiLine(outcome: FlokiOutcome) {
-    if (outcome.status === "answered") return outcome.say;
-    switch (outcome.reason) {
+    switch (outcome.status) {
+      case "answered":
+        return outcome.say;
+      case "navigating":
+        return messages.floki.courseSet(outcome.destination.name);
+      case "humorSet":
+        return messages.floki.humorSet(outcome.humor);
+      case "failed":
+        return getFlokiFailure(outcome.reason);
+      default: {
+        const unknownOutcome: never = outcome;
+        return unknownOutcome;
+      }
+    }
+  }
+
+  function getFlokiFailure(reason: FlokiFailureReason) {
+    switch (reason) {
       case "busy":
         return messages.floki.busy;
       case "rateLimited":
@@ -44,7 +60,7 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
       case "unavailable":
         return messages.floki.unavailable;
       default: {
-        const unknownReason: never = outcome.reason;
+        const unknownReason: never = reason;
         return unknownReason;
       }
     }
@@ -53,7 +69,11 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
   async function handleAsk(question: string) {
     const outcome = await floki.ask(question);
     terminal.print([{ kind: "floki", text: getFlokiLine(outcome) }]);
-    if (outcome.status === "answered" && outcome.destination) onGo(outcome.destination);
+    const destination =
+      outcome.status === "answered" || outcome.status === "navigating"
+        ? outcome.destination
+        : undefined;
+    if (destination) onGo(destination);
   }
 
   function handleRun(command: string) {

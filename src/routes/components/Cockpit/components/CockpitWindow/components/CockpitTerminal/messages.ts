@@ -45,6 +45,9 @@ export const messages = {
   floki: {
     prompt: "floki>",
     greeting: "floki online. ask me anything: floki <question>",
+    courseSet: (name: string) => `course set for ${name}.`,
+    humorSet: (humor: number) =>
+      `humor setting: ${humor}%. ${humor > 80 ? "you asked for it." : "noted."}`,
     busy: "still thinking. one question at a time.",
     rateLimited: "cooling down. too many questions for now. the terminal still works.",
     unavailable: "comms down. the terminal still works.",

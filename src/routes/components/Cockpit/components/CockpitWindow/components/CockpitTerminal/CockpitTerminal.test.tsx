@@ -44,10 +44,34 @@ describe("CockpitTerminal", () => {
     const onGo = vi.fn();
     await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
 
-    await typeCommand("floki take me to your jobs");
+    await typeCommand("floki i want to see where he worked");
 
     expect(await getOutput().findByText(/Course set for work\./)).toBeInTheDocument();
     expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/work" }));
+  });
+
+  it("flies at once on a plain order, without asking the model", async () => {
+    const fetchStub = stubGroq([{ say: "unused" }]);
+    const onGo = vi.fn();
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+
+    await typeCommand("floki take me to saturn");
+
+    expect(getOutput().getByText(/course set for gh44-theme\./)).toBeInTheDocument();
+    expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/gh44-theme" }));
+    expect(fetchStub).not.toHaveBeenCalled();
+  });
+
+  it("answers with the humor setting the visitor picked", async () => {
+    const fetchStub = stubGroq([{ say: "Gentrit. Frontend. Kosovo." }]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await typeCommand("floki set humor to 10%");
+    await typeCommand("floki who is gentrit");
+
+    expect(getOutput().getByText(/humor setting: 10%/)).toBeInTheDocument();
+    expect(await getOutput().findByText(/Gentrit\. Frontend\. Kosovo\./)).toBeInTheDocument();
+    expect(String(fetchStub.mock.calls[0]?.[1]?.body)).toContain("Humor setting: 10%.");
   });
 
   it("says when floki's comms are down", async () => {

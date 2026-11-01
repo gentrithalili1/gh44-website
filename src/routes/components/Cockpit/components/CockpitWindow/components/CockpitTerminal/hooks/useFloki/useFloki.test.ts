@@ -28,7 +28,7 @@ describe("useFloki", () => {
 
     let outcome;
     await act(async () => {
-      outcome = await result.current.ask("take me to your jobs");
+      outcome = await result.current.ask("i want to see where he worked");
     });
 
     expect(outcome).toEqual({
