@@ -137,6 +137,21 @@ function createMusicPlayer(tracks: readonly Track[]) {
     }
   }
 
+  // A track picked from the list: a playing radio switches to it at once, a quiet one starts with
+  // it.
+  async function playTrack(trackIndex: number) {
+    if (!audio || state.status === "checking" || state.status === "unavailable") return;
+    if (trackIndex !== state.trackIndex) {
+      audio.src = tracks[trackIndex]?.path ?? "";
+      setState({ trackIndex });
+    }
+    if (state.status !== "playing") {
+      await play();
+      return;
+    }
+    await audio.play().catch(() => setStatus("unavailable"));
+  }
+
   function subscribe(listener: () => void) {
     load();
     listeners.add(listener);
@@ -148,6 +163,7 @@ function createMusicPlayer(tracks: readonly Track[]) {
     stop,
     next: () => skip(1),
     previous: () => skip(-1),
+    playTrack,
     subscribe,
     getSnapshot: () => state,
   };
@@ -188,10 +204,13 @@ export function useMusic() {
   return {
     status: state.status,
     track: tracks[state.trackIndex] ?? TRACKS[0],
+    trackIndex: state.trackIndex,
+    tracks,
     hasManyTracks: tracks.length > 1,
     play: player.play,
     stop: player.stop,
     next: player.next,
     previous: player.previous,
+    playTrack: player.playTrack,
   };
 }

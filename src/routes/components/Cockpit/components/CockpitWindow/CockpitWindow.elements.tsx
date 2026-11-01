@@ -124,7 +124,7 @@ interface ConsoleScreenProps {
 export function ConsoleScreen({ className = "", children }: ConsoleScreenProps) {
   return (
     <div
-      className={`min-h-0 rounded-md border border-border-subtle bg-night p-3 shadow-[inset_0_2px_10px_rgb(0_0_0/0.35)] ${className}`}
+      className={`min-h-0 min-w-0 rounded-md border border-border-subtle bg-night p-3 shadow-[inset_0_2px_10px_rgb(0_0_0/0.35)] ${className}`}
     >
       {children}
     </div>

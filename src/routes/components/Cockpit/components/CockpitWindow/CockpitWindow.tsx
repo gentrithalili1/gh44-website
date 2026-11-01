@@ -140,7 +140,7 @@ export function CockpitWindow({
         </button>
       </header>
       <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
-        <div className="mx-auto grid max-w-[96rem] gap-4 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-4 md:px-8 md:pt-12 md:pb-8">
+        <div className="mx-auto grid max-w-[96rem] gap-4 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)_auto] md:gap-x-6 md:gap-y-4 md:px-8 md:pt-12 md:pb-8">
           <div className="hidden min-h-0 flex-col gap-4 pb-[clamp(2.5rem,4vw,3.5rem)] md:row-span-3 md:flex">
             <ConsoleScreen className="flex-1">
               <CockpitRadar />
@@ -150,7 +150,7 @@ export function CockpitWindow({
           <ConsoleScreen className="hidden md:col-start-3 md:row-start-1 md:block">
             <CockpitReadout />
           </ConsoleScreen>
-          <ConsoleScreen className="md:col-start-3 md:row-start-2">
+          <ConsoleScreen className="md:col-start-3 md:row-start-2 md:flex md:flex-col">
             <CockpitRadio />
           </ConsoleScreen>
           <div className="flex min-h-0 flex-col md:col-start-2 md:row-span-3 md:row-start-1">
