@@ -2,6 +2,11 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach, vi } from "vitest";
 
+vi.mock("@tanstack/react-start", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  ...(await import("./serverFn")),
+}));
+
 // jsdom has no scrolling; the router scrolls to the top on every navigation.
 window.scrollTo = vi.fn();
 

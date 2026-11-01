@@ -1,11 +1,12 @@
 import type { PaletteColor } from "#/utils/palette";
 import type { Planet } from "#/utils/planets";
-import { THEME_TOOLS } from "#/utils/themeTools";
+import { THEME_TOOLS, type ThemeToolId } from "#/utils/themeTools";
 
 import { messages } from "../messages";
 
+// Each band is an app gh44-theme covers.
 export type RingBand = {
-  id: string;
+  id: ThemeToolId;
   label: string;
   color: PaletteColor;
   innerRadius: number;

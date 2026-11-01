@@ -1,0 +1,76 @@
+import { useFrame } from "@react-three/fiber";
+import { type RefObject, useRef } from "react";
+import { Vector3 } from "three";
+
+import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
+import { PLANETS } from "#/utils/planets";
+
+import type { SceneState } from "../../types";
+import { PHONE_MAX_WIDTH, toScenePosition } from "../../utils/sceneMath";
+import { getLabelNudges, type LabelBox } from "./utils/labelNudges";
+
+// The least space between two labels, in pixels.
+const LABEL_GAP = 6;
+const NO_NUDGE = { x: 0, y: 0 } as const;
+
+const anchor = new Vector3();
+
+function setNudge(nudge: { x: number; y: number }) {
+  return (element: HTMLElement) => {
+    element.style.setProperty("--label-nudge-x", `${nudge.x}px`);
+    element.style.setProperty("--label-nudge-y", `${nudge.y}px`);
+  };
+}
+
+interface LabelNudgesProps {
+  labelList: HTMLUListElement;
+  openPlanetId: string | undefined;
+  sceneStateRef: RefObject<SceneState>;
+}
+
+// On phones the inner planets pass close, and their fixed-size labels would touch: every frame,
+// labels that would are moved apart. Desktop has room, and an open planet hides the labels.
+export function LabelNudges({ labelList, openPlanetId, sceneStateRef }: LabelNudgesProps) {
+  // Whether the labels may still carry a nudge from an earlier frame.
+  const hasNudgesRef = useRef(false);
+
+  useFrame(({ camera, size }) => {
+    const isActive = size.width < PHONE_MAX_WIDTH && openPlanetId === undefined;
+    if (!isActive) {
+      // Put the labels back once, then do nothing until nudging is needed again.
+      if (hasNudgesRef.current) {
+        labelList.querySelectorAll<HTMLElement>("[data-planet-label]").forEach(setNudge(NO_NUDGE));
+        hasNudgesRef.current = false;
+      }
+      return;
+    }
+    hasNudgesRef.current = true;
+    const labels: { element: HTMLElement; box: LabelBox }[] = [];
+
+    for (const planet of PLANETS) {
+      const element = labelList.querySelector<HTMLElement>(`[data-planet-label="${planet.id}"]`);
+      if (!element) continue;
+      const phase = sceneStateRef.current.planetAngles.get(planet.id) ?? planet.orbit.phase;
+      const position = getOrbitPosition({ radius: planet.orbit.radius, phase });
+      // The label hangs from the planet's lowest point.
+      anchor
+        .set(...toScenePosition({ x: position.x, y: position.y + planet.size }))
+        .project(camera);
+      labels.push({
+        element,
+        box: {
+          id: planet.id,
+          x: ((anchor.x + 1) / 2) * size.width,
+          y: ((1 - anchor.y) / 2) * size.height,
+          width: element.offsetWidth,
+          height: element.offsetHeight,
+        },
+      });
+    }
+
+    const nudges = getLabelNudges({ labels: labels.map(({ box }) => box), gap: LABEL_GAP });
+    for (const { element, box } of labels) setNudge(nudges.get(box.id) ?? NO_NUDGE)(element);
+  });
+
+  return null;
+}

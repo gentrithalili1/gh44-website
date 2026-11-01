@@ -28,11 +28,13 @@ export const PALETTE = {
   neutral: { soft: "#dfe1e5", vivid: "#a8abb2" },
 } as const satisfies Record<PaletteColor, PaletteShades>;
 
-// The page's own colors (styles.css `--background`, `--foreground`, `--muted`, `--rule`).
+// The page's own colors (styles.css `--background`, `--foreground`, `--muted`, `--faint`,
+// `--rule`).
 export const SPACE_COLORS = {
   background: "#1e1f22",
   foreground: "#dfe1e5",
   muted: "#a8abb2",
+  faint: "#868a92",
   rule: "#414349",
 } as const;
 

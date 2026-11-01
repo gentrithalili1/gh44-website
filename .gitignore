@@ -12,3 +12,14 @@ __unconfig*
 todos.json
 .zed
 .vscode/
+
+# The music track is not ours to publish; drop it in locally.
+public/audio/*.mp3
+
+# Impeccable: keep shared config and notes, ignore machine-only and throwaway files.
+.impeccable/config.local.json
+.impeccable/hook.cache.json
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/review/
+.impeccable/build/
