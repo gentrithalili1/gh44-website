@@ -1,7 +1,13 @@
-import { PerspectiveCamera } from "three";
+import { Object3D, PerspectiveCamera, Vector3 } from "three";
 import { describe, expect, it } from "vitest";
 
-import { getOrbitPace, getPixelsPerUnit, toPlanePosition, toScenePosition } from "./sceneMath";
+import {
+  getOrbitPace,
+  getPixelsPerUnit,
+  getPlaneYaw,
+  toPlanePosition,
+  toScenePosition,
+} from "./sceneMath";
 
 describe("getOrbitPace", () => {
   it("orbits at full speed while nothing is open", () => {
@@ -43,5 +49,24 @@ describe("getPixelsPerUnit", () => {
     const far = getPixelsPerUnit({ camera, viewport, position: [0, 0, 0] });
     expect(far).toBeCloseTo(900 / (2 * 500 * Math.tan(Math.PI / 8)));
     expect(near).toBeCloseTo(far * 2);
+  });
+});
+
+describe("getPlaneYaw", () => {
+  it("turns a model's nose (-z) to a heading, clockwise from up on the home view", () => {
+    const model = new Object3D();
+    const nose = new Vector3();
+
+    for (const [heading, expected] of [
+      [0, toPlanePosition({ x: 0, y: -1 })],
+      [Math.PI / 2, toPlanePosition({ x: 1, y: 0 })],
+      [Math.PI, toPlanePosition({ x: 0, y: 1 })],
+    ] as const) {
+      model.rotation.y = getPlaneYaw(heading);
+      model.updateMatrixWorld();
+      nose.set(0, 0, -1).applyQuaternion(model.quaternion);
+      expect(nose.x).toBeCloseTo(expected[0]);
+      expect(nose.z).toBeCloseTo(expected[2]);
+    }
   });
 });

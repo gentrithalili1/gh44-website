@@ -144,24 +144,24 @@ export function ScenePlanet({
         onPointerOut={isSitePlanet ? handlePointerOut : undefined}
         onClick={isSitePlanet ? handleClick : undefined}
       />
-      {/* What the 2D scene drew around the planet faces the camera, until it moves to 3D. */}
+      {uprightRing ? <UprightRing ring={uprightRing} /> : null}
+      <Orbiters
+        orbiters={getOrbiters(planet)}
+        isPlanetOpen={state === "current"}
+        onHoverChange={handleHoverChange}
+        onPlanetClick={handleOpen}
+        sceneStateRef={sceneStateRef}
+      />
+      <Rings
+        bands={ringBands}
+        onHoverChange={handleHoverChange}
+        onBandClick={handleRingBandClick}
+      />
+      {planet.features.hasRocket ? (
+        <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
+      ) : null}
+      {/* The label hangs under the planet as seen: it turns to face the camera. */}
       <Billboard>
-        {uprightRing ? <UprightRing ring={uprightRing} /> : null}
-        <Orbiters
-          orbiters={getOrbiters(planet)}
-          isPlanetOpen={state === "current"}
-          onHoverChange={handleHoverChange}
-          onPlanetClick={handleOpen}
-          sceneStateRef={sceneStateRef}
-        />
-        <Rings
-          bands={ringBands}
-          onHoverChange={handleHoverChange}
-          onBandClick={handleRingBandClick}
-        />
-        {planet.features.hasRocket ? (
-          <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
-        ) : null}
         {planet.kind === "site" ? (
           <Html
             as="li"

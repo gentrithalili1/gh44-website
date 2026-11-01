@@ -36,6 +36,12 @@ export function toPlanePosition({ x, y, height = 0 }: PlanePoint): [number, numb
   return [x, height, y];
 }
 
+// The turn around the scene's up axis that points a model's nose (built along -z) along a
+// heading: radians clockwise from up on the home view, as the 2D drawings measure them.
+export function getPlaneYaw(heading: number) {
+  return -heading;
+}
+
 const forward = new Vector3();
 const toPoint = new Vector3();
 
