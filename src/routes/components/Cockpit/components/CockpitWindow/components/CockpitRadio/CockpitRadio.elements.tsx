@@ -66,10 +66,11 @@ interface RadioTrackProps {
   title: string;
 }
 
-// Now playing: the artist, then the title; on phones the level meter leads the line.
+// Now playing: the artist, then the title; on phones the level meter leads the line, on desktop
+// it sits in the radio's header.
 export function RadioTrack({ isPlaying, artist, separator, title }: RadioTrackProps) {
   return (
-    <p role="status" className="flex min-w-0 items-baseline gap-2 text-xs">
+    <p role="status" className="flex min-w-0 items-baseline gap-2 text-xs md:justify-center">
       <span className="md:hidden">
         <RadioLevel isPlaying={isPlaying} />
       </span>
