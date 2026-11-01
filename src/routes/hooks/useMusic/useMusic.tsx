@@ -192,7 +192,7 @@ export function MusicProvider({ tracks = TRACKS, children }: MusicProviderProps)
   return <MusicContext value={{ player, tracks }}>{children}</MusicContext>;
 }
 
-// The radio: its tracks in turn, from s.t.a.y. It plays on load, or on the first gesture when
+// The radio: its tracks in turn, from crystalline. It plays on load, or on the first gesture when
 // the browser blocks autoplay, and the visitor can stop it any time; a stop holds for the visit.
 // It fades each way.
 export function useMusic() {

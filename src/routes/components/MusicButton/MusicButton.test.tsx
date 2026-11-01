@@ -6,8 +6,8 @@ import { removeGestureListeners, stubAudio } from "#/test/audio";
 import { fakeFrames, playFor } from "#/test/motion";
 import { renderAt } from "#/test/renderAt";
 
-const TRACK = "/audio/stay.mp3";
-const PLAY_LABEL = "play s.t.a.y. by hans zimmer";
+const TRACK = "/audio/crystalline.mp3";
+const PLAY_LABEL = "play crystalline by thomas newman";
 const STOP_LABEL = "stop the music";
 describe("MusicButton", () => {
   afterEach(() => {

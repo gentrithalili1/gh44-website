@@ -3,6 +3,12 @@ export type Track = { id: string; title: string; artist: string; path: string };
 // What the radio plays, in order, round and round. Served from public/audio/, which git ignores:
 // the files are not in the repository.
 export const TRACKS = [
+  {
+    id: "crystalline",
+    title: "crystalline",
+    artist: "thomas newman",
+    path: "/audio/crystalline.mp3",
+  },
   { id: "stay", title: "s.t.a.y.", artist: "hans zimmer", path: "/audio/stay.mp3" },
   { id: "spacewalk", title: "spacewalk", artist: "thomas newman", path: "/audio/spacewalk.mp3" },
   {
@@ -10,12 +16,6 @@ export const TRACKS = [
     title: "the starship avalon",
     artist: "thomas newman",
     path: "/audio/the-starship-avalon.mp3",
-  },
-  {
-    id: "crystalline",
-    title: "crystalline",
-    artist: "thomas newman",
-    path: "/audio/crystalline.mp3",
   },
 ] as const satisfies readonly Track[];
 

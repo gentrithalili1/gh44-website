@@ -9,7 +9,7 @@ import { renderAt } from "#/test/renderAt";
 
 import { CockpitRadio } from "./CockpitRadio";
 
-const [STAY] = TRACKS;
+const [FIRST_TRACK] = TRACKS;
 
 type User = ReturnType<typeof userEvent.setup>;
 
@@ -40,7 +40,7 @@ describe("CockpitRadio", () => {
 
     await openCockpit(user);
 
-    expect(getNowPlaying()).toHaveTextContent("hans zimmer - s.t.a.y.");
+    expect(getNowPlaying()).toHaveTextContent("thomas newman - crystalline");
     expect(within(getRadio()).getByRole("button", { name: "stop the radio" })).toBeInTheDocument();
   });
 
@@ -54,7 +54,7 @@ describe("CockpitRadio", () => {
     await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
     await user.keyboard("{Escape}");
 
-    expect(screen.getByRole("button", { name: "play s.t.a.y. by hans zimmer" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "play crystalline by thomas newman" })).toBeVisible();
     expect(players).toHaveLength(1);
     // The stop holds for the visit: no gesture starts it again.
     await user.keyboard("a");
@@ -70,7 +70,7 @@ describe("CockpitRadio", () => {
 
     await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
     await user.click(
-      within(getRadio()).getByRole("button", { name: "play s.t.a.y. by hans zimmer" }),
+      within(getRadio()).getByRole("button", { name: "play crystalline by thomas newman" }),
     );
 
     expect(
@@ -82,7 +82,7 @@ describe("CockpitRadio", () => {
   it("has nothing to skip to with a single track", async () => {
     stubAudio({ hasTrack: true, autoplay: "allowed" });
     render(
-      <MusicProvider tracks={[STAY]}>
+      <MusicProvider tracks={[FIRST_TRACK]}>
         <CockpitRadio />
       </MusicProvider>,
     );
@@ -101,14 +101,14 @@ describe("CockpitRadio", () => {
     await openCockpit(user);
 
     await user.click(within(getRadio()).getByRole("button", { name: "next track" }));
-    expect(getNowPlaying()).toHaveTextContent("thomas newman - spacewalk");
-    expect(players[0]?.currentSrc).toBe("/audio/spacewalk.mp3");
+    expect(getNowPlaying()).toHaveTextContent("hans zimmer - s.t.a.y.");
+    expect(players[0]?.currentSrc).toBe("/audio/stay.mp3");
     expect(players[0]?.play).toHaveBeenCalledTimes(2);
 
     await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
-    expect(getNowPlaying()).toHaveTextContent("hans zimmer - s.t.a.y.");
-    await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
     expect(getNowPlaying()).toHaveTextContent("thomas newman - crystalline");
+    await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
+    expect(getNowPlaying()).toHaveTextContent("thomas newman - the starship avalon");
   });
 
   it("only picks the track while stopped", async () => {
@@ -121,9 +121,9 @@ describe("CockpitRadio", () => {
 
     await user.click(within(getRadio()).getByRole("button", { name: "next track" }));
 
-    expect(getNowPlaying()).toHaveTextContent("thomas newman - spacewalk");
+    expect(getNowPlaying()).toHaveTextContent("hans zimmer - s.t.a.y.");
     expect(
-      within(getRadio()).getByRole("button", { name: "play spacewalk by thomas newman" }),
+      within(getRadio()).getByRole("button", { name: "play s.t.a.y. by hans zimmer" }),
     ).toBeInTheDocument();
     expect(players[0]?.play).toHaveBeenCalledOnce();
   });
@@ -139,7 +139,7 @@ describe("CockpitRadio", () => {
       players[0]?.dispatchEvent(new Event("ended"));
     });
 
-    expect(getNowPlaying()).toHaveTextContent("thomas newman - spacewalk");
+    expect(getNowPlaying()).toHaveTextContent("hans zimmer - s.t.a.y.");
     expect(players[0]?.play).toHaveBeenCalledTimes(2);
   });
 
@@ -167,13 +167,13 @@ describe("CockpitRadio", () => {
         .getAllByRole("button")
         .map((button) => button.textContent),
     ).toEqual([
+      "thomas newman - crystalline",
       "hans zimmer - s.t.a.y.",
       "thomas newman - spacewalk",
       "thomas newman - the starship avalon",
-      "thomas newman - crystalline",
     ]);
     expect(
-      within(playlist).getByRole("button", { name: "hans zimmer - s.t.a.y." }),
+      within(playlist).getByRole("button", { name: "thomas newman - crystalline" }),
     ).toHaveAttribute("aria-current", "true");
 
     await user.click(
@@ -186,7 +186,7 @@ describe("CockpitRadio", () => {
       within(playlist).getByRole("button", { name: "thomas newman - the starship avalon" }),
     ).toHaveAttribute("aria-current", "true");
     expect(
-      within(playlist).getByRole("button", { name: "hans zimmer - s.t.a.y." }),
+      within(playlist).getByRole("button", { name: "thomas newman - crystalline" }),
     ).not.toHaveAttribute("aria-current");
   });
 
@@ -198,14 +198,12 @@ describe("CockpitRadio", () => {
     await openCockpit(user);
     await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
 
-    await user.click(
-      within(getRadio()).getByRole("button", { name: "thomas newman - crystalline" }),
-    );
+    await user.click(within(getRadio()).getByRole("button", { name: "thomas newman - spacewalk" }));
 
     expect(
       await within(getRadio()).findByRole("button", { name: "stop the radio" }),
     ).toBeInTheDocument();
-    expect(players[0]?.currentSrc).toBe("/audio/crystalline.mp3");
+    expect(players[0]?.currentSrc).toBe("/audio/spacewalk.mp3");
   });
 
   it("opens and closes the playlist from its toggle on phones", async () => {
