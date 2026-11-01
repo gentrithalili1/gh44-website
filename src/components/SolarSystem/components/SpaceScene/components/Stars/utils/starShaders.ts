@@ -1,21 +1,17 @@
-// Stars live in screen space: each sits at a spot on the screen, drifts with the camera by its
-// depth (parallax) and wraps around the edges. Colors are sRGB as given; no conversion.
+// Stars sit on a far shell around the system and twinkle; they keep their pixel size at any
+// distance. Colors are sRGB as given; no conversion.
 export const STAR_VERTEX_SHADER = /* glsl */ `
   attribute float aDepth;
   attribute float aSize;
   attribute float aPhase;
   attribute float aSpeed;
-  uniform vec2 uViewport;
-  uniform vec2 uOffset;
   uniform float uTime;
   uniform float uPixelRatio;
   uniform float uSizeBoost;
   varying float vAlpha;
 
   void main() {
-    vec2 pixel = mod(position.xy * uViewport - uOffset * aDepth, uViewport);
-    vec2 clip = pixel / uViewport * 2.0 - 1.0;
-    gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     gl_PointSize = aSize * 2.0 * uPixelRatio * uSizeBoost;
     float twinkle = 0.35 + 0.45 * sin(uTime * aSpeed + aPhase);
     vAlpha = twinkle * aDepth + 0.1;

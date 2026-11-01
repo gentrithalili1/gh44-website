@@ -183,6 +183,7 @@ export function useCameraFlight({
       : angleRef.current;
     poseRef.current = pose;
     angleRef.current = angle;
+    sceneState.cameraZoom = pose.zoom;
 
     const placement = getCameraPlacement({ pose, angle, viewport: size });
     camera.position.set(...placement.position);

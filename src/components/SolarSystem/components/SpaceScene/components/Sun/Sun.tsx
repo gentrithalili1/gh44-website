@@ -15,8 +15,9 @@ const GLOW_OPACITY = 0.35;
 const PULSE_AMOUNT = 8;
 const PULSE_SPEED = 1.2;
 const SPHERE_SEGMENTS = 64;
-// The sun lights every planet from its center, as strongly near as far.
-const LIGHT_INTENSITY = 2.6;
+// The sun lights every planet from its center, as strongly near as far. Lambert surfaces reflect
+// a 1/pi share of it: with the ambient light, the side facing the sun shows its palette color.
+const LIGHT_INTENSITY = Math.PI * 0.85;
 
 // A radial fade from the sun's color to transparent, like the static system's gradient.
 function drawGlow() {

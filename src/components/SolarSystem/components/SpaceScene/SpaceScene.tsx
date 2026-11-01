@@ -23,10 +23,10 @@ import { PHONE_MAX_WIDTH } from "./utils/sceneMath";
 // Phones get a lower pixel ratio, which keeps the scene smooth.
 const PHONE_MAX_DPR = 1.5;
 const DESKTOP_MAX_DPR = 2;
-// Past the farthest the visitor can zoom out on a phone, plus the system behind its center.
-const CAMERA_FAR = 10000;
+// Past the stars' shell seen from the farthest the visitor can zoom out on a phone.
+const CAMERA_FAR = 16000;
 // The planets' night sides stay visible: a little light from everywhere.
-const AMBIENT_INTENSITY = 0.3;
+const AMBIENT_INTENSITY = 0.45;
 
 interface SpaceSceneProps {
   openPlanetId: string | undefined;
@@ -45,6 +45,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
     frameStep: 0,
     planetAngles: new Map(),
     shipPose: getShipPose(SHIP_ORBIT.phase),
+    cameraZoom: 1,
   });
 
   // The open cockpit steps the system back, like an open planet.
@@ -72,7 +73,11 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         <ambientLight intensity={AMBIENT_INTENSITY} />
         <SceneClock sceneStateRef={sceneStateRef} />
         <SceneCamera openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
-        <Stars openPlanetId={openPlanetId} isCruising={isCockpitOpen} />
+        <Stars
+          openPlanetId={openPlanetId}
+          isCruising={isCockpitOpen}
+          sceneStateRef={sceneStateRef}
+        />
         <Sun isPlanetOpen={isSystemFaded} />
         <Orbits isPlanetOpen={isSystemFaded} />
         {labelList

@@ -8,4 +8,6 @@ export type SceneState = {
   planetAngles: Map<string, number>;
   // Where the gh44 explorer is now, and its heading.
   shipPose: ShipPose;
+  // How many pixels one unit spans where the camera looks.
+  cameraZoom: number;
 };
