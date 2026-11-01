@@ -7,8 +7,6 @@ type SurfaceStyle = {
   color: SurfaceColor;
   shade: Shade;
   opacity: number;
-  // Features (craters, land, dust, storms) slide across the disc as the planet turns; bands stay still.
-  shouldSpin: boolean;
 };
 
 // Flat shapes drawn on a planet's disc, in system units from its center (`y` grows downward).
@@ -79,7 +77,7 @@ type GetSpotsParams = {
   planet: PlanetBody;
   name: string;
   spots: readonly Spot[];
-  style: Omit<SurfaceStyle, "id" | "shouldSpin">;
+  style: Omit<SurfaceStyle, "id">;
 };
 
 // Round features that turn with the planet, from spots in planet radii.
@@ -87,7 +85,6 @@ function getSpots({ planet, name, spots, style }: GetSpotsParams): SurfaceShape[
   return spots.map((spot, index) => ({
     ...style,
     id: `${name}-${index}`,
-    shouldSpin: true,
     kind: "ellipse",
     x: spot.x * planet.size,
     y: spot.y * planet.size,
@@ -99,14 +96,13 @@ function getSpots({ planet, name, spots, style }: GetSpotsParams): SurfaceShape[
 type GetBandsParams = {
   planet: PlanetBody;
   bands: readonly (readonly [number, number])[];
-  style: Omit<SurfaceStyle, "id" | "shouldSpin">;
+  style: Omit<SurfaceStyle, "id">;
 };
 
 function getBands({ planet, bands, style }: GetBandsParams): SurfaceShape[] {
   return bands.map(([top, bottom]) => ({
     ...style,
     id: `band-${top}`,
-    shouldSpin: false,
     kind: "polygon",
     points: getBandOutline({
       radius: planet.size,
@@ -167,7 +163,6 @@ export function getSurfaceShapes(planet: PlanetBody): SurfaceShape[] {
         }),
         {
           id: "red-spot",
-          shouldSpin: true,
           kind: "ellipse",
           color: "red",
           shade: "soft",

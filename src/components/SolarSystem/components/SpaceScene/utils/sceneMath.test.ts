@@ -1,13 +1,7 @@
 import { Object3D, PerspectiveCamera, Vector3 } from "three";
 import { describe, expect, it } from "vitest";
 
-import {
-  getOrbitPace,
-  getPixelsPerUnit,
-  getPlaneYaw,
-  toPlanePosition,
-  toScenePosition,
-} from "./sceneMath";
+import { getOrbitPace, getPixelsPerUnit, getPlaneYaw, toPlanePosition } from "./sceneMath";
 
 describe("getOrbitPace", () => {
   it("orbits at full speed while nothing is open", () => {
@@ -24,16 +18,9 @@ describe("getOrbitPace", () => {
   });
 });
 
-describe("toScenePosition", () => {
-  it("flips y to grow upward and puts depth toward the camera", () => {
-    expect(toScenePosition({ x: 3, y: 4, depth: 5 })).toEqual([3, -4, 5]);
-  });
-});
-
 describe("toPlanePosition", () => {
-  it("lays system points on the orbit plane, `y` toward the viewer and height up", () => {
+  it("lays system points on the orbit plane, `y` toward the viewer", () => {
     expect(toPlanePosition({ x: 3, y: 4 })).toEqual([3, 0, 4]);
-    expect(toPlanePosition({ x: 3, y: 4, height: 5 })).toEqual([3, 5, 4]);
   });
 });
 

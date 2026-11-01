@@ -1,6 +1,6 @@
 import { MathUtils, type PerspectiveCamera, Vector3 } from "three";
 
-import type { PlanetState } from "#/components/SolarSystem/types";
+import type { PlanetState, Point } from "#/components/SolarSystem/types";
 
 // Below this width (the `md` breakpoint) the screen is a phone and the panel a bottom sheet.
 export const PHONE_MAX_WIDTH = 720;
@@ -12,14 +12,6 @@ export const MAX_FRAME_STEP = 0.05;
 // Opacity of everything that steps back while a planet is open.
 export const FADED_OPACITY = 0.08;
 
-type ScenePoint = { x: number; y: number; depth?: number };
-
-// System units have `y` growing downward, like the SVG; the scene's `y` grows upward and its
-// `z` toward the camera.
-export function toScenePosition({ x, y, depth = 0 }: ScenePoint): [number, number, number] {
-  return [x, -y, depth];
-}
-
 // A press that moved further than this many pixels was a drag to orbit the camera, not a click.
 const DRAG_TOLERANCE_PX = 4;
 
@@ -28,12 +20,10 @@ export function isDragRelease(delta: number) {
   return delta > DRAG_TOLERANCE_PX;
 }
 
-type PlanePoint = { x: number; y: number; height?: number };
-
 // The system lies on the scene's x/z plane: system `y` (down on the home view) is the scene's
-// `z`, toward the viewer; `height` rises off the plane.
-export function toPlanePosition({ x, y, height = 0 }: PlanePoint): [number, number, number] {
-  return [x, height, y];
+// `z`, toward the viewer.
+export function toPlanePosition({ x, y }: Point): [number, number, number] {
+  return [x, 0, y];
 }
 
 // The turn around the scene's up axis that points a model's nose (built along -z) along a

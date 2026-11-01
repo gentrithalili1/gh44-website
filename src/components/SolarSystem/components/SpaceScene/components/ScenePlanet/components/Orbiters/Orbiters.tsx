@@ -4,8 +4,8 @@ import type { Orbiter as OrbiterData } from "#/components/SolarSystem/utils/orbi
 import { SPACE_COLORS } from "#/utils/palette";
 
 import type { SceneState } from "../../../../types";
-import type { HoverChange } from "../../types";
 import { toPlanePosition } from "../../../../utils/sceneMath";
+import type { HoverChange } from "../../types";
 import { Orbiter } from "./components/Orbiter";
 
 const ORBIT_OPACITY = 0.14;
