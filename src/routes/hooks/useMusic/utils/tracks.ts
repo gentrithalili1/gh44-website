@@ -5,6 +5,18 @@ export type Track = { id: string; title: string; artist: string; path: string };
 export const TRACKS = [
   { id: "stay", title: "s.t.a.y.", artist: "hans zimmer", path: "/audio/stay.mp3" },
   { id: "spacewalk", title: "spacewalk", artist: "thomas newman", path: "/audio/spacewalk.mp3" },
+  {
+    id: "the-starship-avalon",
+    title: "the starship avalon",
+    artist: "thomas newman",
+    path: "/audio/the-starship-avalon.mp3",
+  },
+  {
+    id: "crystalline",
+    title: "crystalline",
+    artist: "thomas newman",
+    path: "/audio/crystalline.mp3",
+  },
 ] as const satisfies readonly Track[];
 
 type GetTrackIndexParams = { index: number; step: 1 | -1; count: number };

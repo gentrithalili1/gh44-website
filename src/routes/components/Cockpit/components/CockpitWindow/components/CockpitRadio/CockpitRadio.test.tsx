@@ -98,10 +98,10 @@ describe("CockpitRadio", () => {
     expect(players[0]?.currentSrc).toBe("/audio/spacewalk.mp3");
     expect(players[0]?.play).toHaveBeenCalledTimes(2);
 
-    await user.click(within(getRadio()).getByRole("button", { name: "next track" }));
+    await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
     expect(getRadio()).toHaveTextContent("hans zimmer - s.t.a.y.");
     await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
-    expect(getRadio()).toHaveTextContent("thomas newman - spacewalk");
+    expect(getRadio()).toHaveTextContent("thomas newman - crystalline");
   });
 
   it("only picks the track while stopped", async () => {
