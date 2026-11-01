@@ -55,13 +55,17 @@ export function CockpitRadio() {
       aria-label={messages.label}
       className="flex min-w-0 flex-col gap-2 md:min-h-0 md:flex-1 md:gap-2.5"
     >
-      <div className="flex items-center gap-3 md:flex-col md:items-stretch md:gap-2">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5 md:gap-1.5">
-          {statusText === null ? null : (
-            <p aria-hidden="true" className="hidden text-[0.6875rem] text-muted md:block">
-              {messages.label}
-            </p>
-          )}
+      {/* On desktop the radio reads like the other screens: its name top left, the level top right. */}
+      <div
+        aria-hidden="true"
+        className="hidden items-center justify-between text-[0.6875rem] text-muted md:flex"
+      >
+        <span>{messages.label}</span>
+        {statusText === null ? <RadioLevel isPlaying={isPlaying} /> : null}
+      </div>
+      {/* Phones: one row. Desktop: the controls centered, what plays under them. */}
+      <div className="flex items-center gap-3 md:flex-col-reverse md:items-stretch md:gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5 md:items-center md:text-center">
           {statusText === null ? (
             <RadioTrack
               isPlaying={isPlaying}
@@ -74,7 +78,7 @@ export function CockpitRadio() {
           )}
         </div>
         {statusText === null ? (
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5 md:justify-center">
             <RadioButton
               aria-label={messages.previousLabel}
               disabled={!music.hasManyTracks}
@@ -95,11 +99,6 @@ export function CockpitRadio() {
             >
               <RadioIcon name="next" />
             </RadioButton>
-            {/* On desktop the radio's name and level meter sit at the row's end. */}
-            <span className="ml-auto hidden items-center gap-2 text-[0.6875rem] text-muted md:flex">
-              <span aria-hidden="true">{messages.label}</span>
-              <RadioLevel isPlaying={isPlaying} />
-            </span>
             <span className="md:hidden">
               <RadioButton
                 aria-label={messages.playlistLabel}
