@@ -11,3 +11,8 @@ export type AskFlokiInput = { turns: readonly FlokiTurn[]; humor: number };
 export type AskFlokiOutcome =
   | { status: "answered"; reply: FlokiReply }
   | { status: "failed"; reason: "rateLimited" | "unavailable" };
+
+export type SpeakFlokiOutcome =
+  // A WAV data URL, ready for an audio element.
+  | { status: "spoken"; audioUrl: string }
+  | { status: "failed"; reason: "rateLimited" | "unavailable" };

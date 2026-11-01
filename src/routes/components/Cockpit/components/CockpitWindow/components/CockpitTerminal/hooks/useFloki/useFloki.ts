@@ -3,6 +3,7 @@ import { useState } from "react";
 import { DESTINATIONS, type Destination } from "#/utils/destinations";
 
 import { askFloki } from "./askFloki";
+import { useFlokiVoice } from "./hooks/useFlokiVoice";
 import type { AskFlokiOutcome, FlokiTurn } from "./types";
 import { getFlokiCommand } from "./utils/flokiCommand";
 
@@ -11,7 +12,7 @@ export const DEFAULT_HUMOR = 60;
 // How many earlier turns go along with a question.
 const HISTORY_TURNS = 10;
 
-export type FlokiStatus = "idle" | "thinking";
+export type FlokiStatus = "idle" | "thinking" | "speaking";
 
 export type FlokiFailureReason = "busy" | "rateLimited" | "unavailable";
 
@@ -37,15 +38,19 @@ async function requestAnswer({
   }
 }
 
-// Floki, the explorer's onboard computer: carries out plain orders at once, takes a question, keeps the conversation while the
-// cockpit is open, and returns what he says and where to fly. The component prints and flies.
+// Floki, the explorer's onboard computer: carries out plain orders at once, takes a question,
+// keeps the conversation while the cockpit is open, and returns what he says and where to fly.
+// The component prints, speaks and flies.
 export function useFloki() {
-  const [status, setStatus] = useState<FlokiStatus>("idle");
+  const voice = useFlokiVoice();
+  const [requestStatus, setRequestStatus] = useState<"idle" | "thinking">("idle");
   const [turns, setTurns] = useState<readonly FlokiTurn[]>([]);
   const [humor, setHumor] = useState(DEFAULT_HUMOR);
 
   async function ask(question: string): Promise<FlokiOutcome> {
-    if (status !== "idle") return { status: "failed", reason: "busy" };
+    if (requestStatus === "thinking") return { status: "failed", reason: "busy" };
+    // A new question cuts him off.
+    voice.stop();
     const command = getFlokiCommand(question);
     switch (command?.kind) {
       case "go":
@@ -61,12 +66,12 @@ export function useFloki() {
       }
     }
     const visitorTurn = { role: "visitor", text: question.trim() } as const;
-    setStatus("thinking");
+    setRequestStatus("thinking");
     const outcome = await requestAnswer({
       turns: [...turns.slice(-HISTORY_TURNS), visitorTurn],
       humor,
     });
-    setStatus("idle");
+    setRequestStatus("idle");
     if (outcome.status === "failed") return outcome;
 
     const { say, go } = outcome.reply;
@@ -79,5 +84,11 @@ export function useFloki() {
     };
   }
 
-  return { status, ask };
+  function getStatus(): FlokiStatus {
+    if (requestStatus === "thinking") return "thinking";
+    if (voice.isSpeaking) return "speaking";
+    return "idle";
+  }
+
+  return { status: getStatus(), ask, speak: voice.speak, stopSpeaking: voice.stop };
 }

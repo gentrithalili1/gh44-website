@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { stubGroq } from "#/test/groq";
+import { stubFloki } from "#/test/floki";
 
 import { useFloki } from "./useFloki";
 
@@ -13,7 +13,7 @@ function getMessages({
   fetchStub,
   call,
 }: {
-  fetchStub: ReturnType<typeof stubGroq>;
+  fetchStub: ReturnType<typeof stubFloki>["fetchStub"];
   call: number;
 }): unknown[] {
   const body: unknown = JSON.parse(String(fetchStub.mock.calls[call]?.[1]?.body));
@@ -23,7 +23,7 @@ function getMessages({
 
 describe("useFloki", () => {
   it("answers with what to say and where to fly", async () => {
-    stubGroq([{ say: "Course set for work.", go: "work" }]);
+    stubFloki({ replies: [{ say: "Course set for work.", go: "work" }] });
     const { result } = renderHook(() => useFloki());
 
     let outcome;
@@ -39,7 +39,9 @@ describe("useFloki", () => {
   });
 
   it("sends the earlier turns along with a new question", async () => {
-    const fetchStub = stubGroq([{ say: "Gentrit built me." }, { say: "In Pristina." }]);
+    const { fetchStub } = stubFloki({
+      replies: [{ say: "Gentrit built me." }, { say: "In Pristina." }],
+    });
     const { result } = renderHook(() => useFloki());
 
     await act(() => result.current.ask("who built you"));
@@ -53,7 +55,7 @@ describe("useFloki", () => {
   });
 
   it("says when the comms are down", async () => {
-    stubGroq([{ status: 500 }]);
+    stubFloki({ replies: [{ status: 500 }] });
     const { result } = renderHook(() => useFloki());
 
     let outcome;

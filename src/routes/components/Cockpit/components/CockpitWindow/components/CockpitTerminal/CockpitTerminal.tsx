@@ -66,9 +66,14 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
     }
   }
 
+  // Floki answers on screen and out loud, and flies once he has said it.
   async function handleAsk(question: string) {
     const outcome = await floki.ask(question);
-    terminal.print([{ kind: "floki", text: getFlokiLine(outcome) }]);
+    const line = getFlokiLine(outcome);
+    terminal.print([{ kind: "floki", text: line }]);
+    if (outcome.status === "failed") return;
+    // Cut off by a newer question: that one decides where to go.
+    if ((await floki.speak(line)) === "interrupted") return;
     const destination =
       outcome.status === "answered" || outcome.status === "navigating"
         ? outcome.destination
