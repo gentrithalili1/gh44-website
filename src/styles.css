@@ -1,9 +1,7 @@
 @import "tailwindcss";
 @import "@fontsource-variable/lilex";
 
-@custom-variant dark (&:is(.dark *));
-
-/* gh44-theme palette: palette/tokens.json in gh44-theme. Each hue swaps with the theme. */
+/* gh44-theme dark palette: palette/tokens.json in gh44-theme, mirrored in src/utils/palette.ts. */
 @theme inline {
   --font-mono: "Lilex Variable", ui-monospace, Menlo, monospace;
   --font-sans: var(--font-mono);
@@ -74,41 +72,6 @@
 }
 
 :root {
-  color-scheme: light;
-  --background: #faf7f3;
-  --foreground: #2b2d30;
-  --muted: #5f6269;
-  --faint: #6e6a66;
-  --rule: #d2c4b6;
-  --sun: #fbb42a;
-  --accent: var(--sun);
-
-  --terracotta: #a9502f;
-  --sage: #5e7350;
-  --lavender: #6f58a0;
-  --sand: #7d5b45;
-  --blue: #3f6a8c;
-  --ochre: #8c6a2e;
-  --rose: #a4506a;
-  --seafoam: #3d7a75;
-  --red: #c23b32;
-
-  --terracotta-vivid: #b94000;
-  --sage-vivid: #497c15;
-  --lavender-vivid: #744bbb;
-  --sand-vivid: #8d532a;
-  --blue-vivid: #026ba6;
-  --ochre-vivid: #936705;
-  --rose-vivid: #b93667;
-  --seafoam-vivid: #077f78;
-  --red-vivid: #d50310;
-
-  /* Past roles: foreground in the dark theme, muted in the light one. */
-  --neutral: var(--foreground);
-  --neutral-vivid: var(--muted);
-}
-
-.dark {
   color-scheme: dark;
   --background: #1e1f22;
   --foreground: #dfe1e5;
@@ -116,6 +79,7 @@
   --faint: #868a92;
   --rule: #414349;
   --sun: #ddbe8e;
+  --accent: var(--sun);
 
   --terracotta: #e49b80;
   --sage: #b8c5ac;
@@ -137,20 +101,20 @@
   --seafoam-vivid: #2bd5cb;
   --red-vivid: #ff5a60;
 
-  /* The space around an open planet (planets.ts colors), dark theme only. */
+  /* Past roles and man-made things: foreground, and muted as the vivid shade. */
+  --neutral: var(--foreground);
+  --neutral-vivid: var(--muted);
+
+  /* The space around an open planet (planets.ts colors). */
+  --blue-tint: #161b20;
   --terracotta-tint: #221713;
-  --sage-tint: #171c15;
-  --lavender-tint: #1a1622;
-  --sand-tint: #1f1c1a;
   --ochre-tint: #211c13;
+  --sand-tint: #1f1c1a;
+  --lavender-tint: #1a1622;
 }
 
 /* An open planet recolors the space around it (set from planets.ts). */
 [data-planet] {
-  --accent: var(--vivid);
-}
-
-.dark [data-planet] {
   --accent: var(--hue);
   --background: var(--tint);
 }

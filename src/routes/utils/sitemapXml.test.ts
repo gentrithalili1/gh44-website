@@ -9,10 +9,10 @@ describe("getSitemapXml", () => {
     expect(urls).toEqual([
       "https://gh44.dev/",
       "https://gh44.dev/me",
-      "https://gh44.dev/work",
-      "https://gh44.dev/gh44-brain",
-      "https://gh44.dev/gh44-theme",
       "https://gh44.dev/confirm",
+      "https://gh44.dev/work",
+      "https://gh44.dev/gh44-theme",
+      "https://gh44.dev/gh44-brain",
     ]);
   });
 });
