@@ -1,7 +1,5 @@
 import type { PlanetBody, RealPlanet } from "#/utils/planets";
 
-import { getSurfaceShapes } from "./surface";
-
 type PlanetMotion = {
   // Relative animation speed around the sun: a visual multiplier, not astronomical.
   orbitMultiplier: number;
@@ -45,7 +43,7 @@ export function getOrbitAngle({ planet, time }: PlanetTimeParams) {
   return planet.orbit.phase + getOrbitSpeed(planet) * time;
 }
 
-// Seconds Earth's surface takes to slide once across its disc; every other planet scales from
+// Seconds Earth takes to turn once on its axis; every other planet scales from
 // it by its day length.
 const EARTH_SPIN_PERIOD = 25;
 
@@ -54,48 +52,4 @@ export function getSpinPeriod(planet: PlanetBody) {
   return (
     (EARTH_SPIN_PERIOD * PLANET_MOTION[planet.realPlanet].dayHours) / PLANET_MOTION.earth.dayHours
   );
-}
-
-// Half the width of a planet's widest spinning feature.
-function getWidestFeatureReach(planet: PlanetBody) {
-  const reaches = getSurfaceShapes(planet)
-    .filter((shape) => shape.shouldSpin)
-    .map((shape) => {
-      switch (shape.kind) {
-        case "ellipse":
-          return shape.rx;
-        case "polygon": {
-          const xs = shape.points.map((point) => point.x);
-          return (Math.max(...xs) - Math.min(...xs)) / 2;
-        }
-        default: {
-          const unknownShape: never = shape;
-          return unknownShape;
-        }
-      }
-    });
-
-  return Math.max(0, ...reaches);
-}
-
-// How far a planet's surface slides before it wraps around: the disc's width plus its widest
-// feature's. Wrapping at the disc's width alone shows a feature twice while it crosses the edge:
-// part leaving one side, part coming back at the other. It builds the surface shapes: compute it
-// once per planet, not every frame.
-export function getSpinWidth(planet: PlanetBody) {
-  return 2 * (planet.size + getWidestFeatureReach(planet));
-}
-
-// Where the two copies of a planet's surface features sit (system units, right of center) after
-// `time` seconds, like a turning globe seen from above: the trailing copy follows one spin width
-// behind the leading one, so a feature leaving one edge comes back in at the other.
-export function getSpinCopyOffsets({
-  planet,
-  time,
-  spinWidth,
-}: PlanetTimeParams & { spinWidth: number }) {
-  const turns = time / getSpinPeriod(planet);
-  const lead = (turns - Math.floor(turns)) * spinWidth;
-
-  return [lead, lead - spinWidth] as const;
 }

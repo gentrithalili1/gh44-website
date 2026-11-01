@@ -7,14 +7,26 @@ import { renderInRouter } from "#/test/renderInRouter";
 
 import { CockpitWindow } from "./CockpitWindow";
 
-type RenderCockpitWindowParams = { isLocked: boolean; onClose: () => void };
+type RenderCockpitWindowParams = {
+  isLocked: boolean;
+  onClose: () => void;
+  isGreeting?: boolean;
+  onBoard?: () => void;
+};
 
-async function renderCockpitWindow({ isLocked, onClose }: RenderCockpitWindowParams) {
+async function renderCockpitWindow({
+  isLocked,
+  onClose,
+  isGreeting = false,
+  onBoard = vi.fn(),
+}: RenderCockpitWindowParams) {
   return renderInRouter({
     ui: (
       <MusicProvider>
         <CockpitWindow
           reveal="instant"
+          isGreeting={isGreeting}
+          onBoard={onBoard}
           isClosing={false}
           isLocked={isLocked}
           onClose={onClose}
@@ -54,5 +66,29 @@ describe("CockpitWindow", () => {
 
     expect(screen.getByRole("dialog", { name: "gh44 explorer" })).toBeInTheDocument();
     expect(screen.getByText("systems online")).toBeInTheDocument();
+  });
+
+  it("takes the command line's focus and holds the page behind as a modal dialog", async () => {
+    await renderCockpitWindow({ isLocked: false, onClose: vi.fn() });
+
+    expect(screen.getByRole("dialog", { name: "gh44 explorer" })).toHaveAttribute(
+      "aria-modal",
+      "true",
+    );
+    expect(screen.getByRole("textbox", { name: "command" })).toHaveFocus();
+  });
+
+  it("greets without a modal or taking focus, and boards once the visitor steps in", async () => {
+    const user = userEvent.setup();
+    const onBoard = vi.fn();
+    await renderCockpitWindow({ isLocked: false, onClose: vi.fn(), isGreeting: true, onBoard });
+
+    const cockpit = screen.getByRole("dialog", { name: "gh44 explorer" });
+    expect(cockpit).not.toHaveAttribute("aria-modal");
+    expect(screen.getByRole("textbox", { name: "command" })).not.toHaveFocus();
+
+    await user.click(screen.getByRole("textbox", { name: "command" }));
+
+    expect(onBoard).toHaveBeenCalled();
   });
 });

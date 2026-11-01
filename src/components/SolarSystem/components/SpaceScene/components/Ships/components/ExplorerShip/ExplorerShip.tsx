@@ -1,10 +1,18 @@
 import { useGSAP } from "@gsap/react";
-import { Html, useCursor } from "@react-three/drei";
+import { Billboard, Html, useCursor } from "@react-three/drei";
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { useNavigate } from "@tanstack/react-router";
 import gsap from "gsap";
 import { type RefObject, useRef, useState } from "react";
-import { type Group, type Mesh, MeshBasicMaterial, Shape, Vector2 } from "three";
+import {
+  type Group,
+  Material,
+  type Mesh,
+  PerspectiveCamera,
+  Shape,
+  type Sprite,
+  Vector2,
+} from "three";
 
 import { messages } from "#/components/SolarSystem/messages";
 import type { PlanetState, Point } from "#/components/SolarSystem/types";
@@ -25,15 +33,20 @@ import { findPlanet } from "#/utils/planets";
 
 import type { SceneState } from "../../../../types";
 import { setGroupOpacity } from "../../../../utils/groupOpacity";
-import { damp, FADED_OPACITY, getOrbitPace, toScenePosition } from "../../../../utils/sceneMath";
+import {
+  damp,
+  FADED_OPACITY,
+  getOrbitPace,
+  getPixelsPerUnit,
+  getPlaneYaw,
+  isDragRelease,
+  toPlanePosition,
+} from "../../../../utils/sceneMath";
 import { getFlightPose } from "./utils/shipFlight";
 import { getTrailPuff, PUFF_COUNT } from "./utils/shipTrail";
 
 gsap.registerPlugin(useGSAP);
 
-// Behind every planet, moon and ring (they reach 75 units toward the camera and away from it),
-// so a planet passing by covers the ship, never the other way round.
-const SHIP_DEPTH = -80;
 // On a phone the ship would be a speck: it never draws shorter than this many pixels.
 const SHIP_MIN_LENGTH_PX = 34;
 // It bobs toward and away from the sun, and rocks a little, slowly.
@@ -55,8 +68,14 @@ const GLOW_TEXTURE_SIZE = 64;
 const GLOW_CORE = 0.2;
 // The pointer target: a circle around the whole ship, easier to hit than its outline.
 const HIT_RADIUS = 10;
-const CIRCLE_SEGMENTS = 32;
+const SPHERE_SEGMENTS = 12;
 const PUFF_RADIUS = 0.9;
+// The hull is a flat outline given thickness, its edges rounded; the canopy rises out of it.
+const HULL_THICKNESS = 1.4;
+const HULL_BEVEL = { bevelEnabled: true, bevelThickness: 0.4, bevelSize: 0.3, bevelSegments: 2 };
+const CANOPY_THICKNESS = 0.8;
+// Outlines are drawn on the x/y plane; turned this way they lie on the orbit plane, nose to -z.
+const LIE_FLAT = Math.PI / 2;
 const PUFF_IDS = Array.from({ length: PUFF_COUNT }, (_, index) => index);
 // Over the labels, like the names of hovered moons.
 const LABEL_Z_INDEX_RANGE = [2, 0];
@@ -70,16 +89,11 @@ const TRAVEL_STARTS_INTO_TURN = 0.6;
 const TURN_EASE = "power2.inOut";
 const TRAVEL_EASE = "power2.in";
 
-// Under the hull, so the glow spills out from behind the tail.
-const ENGINE_POSITION = toScenePosition({ ...SHIP_ENGINE, depth: -0.1 });
+// Just behind the tail, so the glow spills out from it.
+const ENGINE_POSITION = toPlanePosition(SHIP_ENGINE);
 
 function createShape(points: readonly Point[]) {
-  return new Shape(
-    points.map((point) => {
-      const [x, y] = toScenePosition(point);
-      return new Vector2(x, y);
-    }),
-  );
+  return new Shape(points.map((point) => new Vector2(point.x, point.y)));
 }
 
 // A radial fade from the engine's color to transparent.
@@ -116,8 +130,14 @@ function getShipState({ isFlying, isFaded }: { isFlying: boolean; isFaded: boole
   return isFaded ? "faded" : "idle";
 }
 
-function setMaterialOpacity({ mesh, opacity }: { mesh: Mesh | null; opacity: number }) {
-  if (mesh?.material instanceof MeshBasicMaterial) mesh.material.opacity = opacity;
+function setMaterialOpacity({
+  object,
+  opacity,
+}: {
+  object: Mesh | Sprite | null;
+  opacity: number;
+}) {
+  if (object?.material instanceof Material) object.material.opacity = opacity;
 }
 
 interface ExplorerShipProps {
@@ -128,8 +148,8 @@ interface ExplorerShipProps {
 // The gh44 explorer orbits the sun between Mars and Jupiter on the scene clock, nose first,
 // bobbing, its engine glowing and now and then puffing a trail. It holds still while hovered.
 // Clicking it opens the cockpit: the camera flies in and follows it, its engine flared. On
-// `go` it turns toward the planet and flies there, then the page opens. It steps back, and takes
-// no clicks, while a planet is open.
+// `go` it turns toward the planet and flies there, then the page opens. It steps back while a
+// planet is open, and still opens the cockpit from there, coming forward while hovered.
 export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps) {
   const explorer = useExplorer();
   const navigate = useNavigate();
@@ -138,7 +158,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
   const groupRef = useRef<Group>(null);
   const scaleRef = useRef<Group>(null);
   const bodyRef = useRef<Group>(null);
-  const glowRef = useRef<Mesh>(null);
+  const glowRef = useRef<Sprite>(null);
   const puffMeshesRef = useRef<(Mesh | null)[]>([]);
   const timeRef = useRef(0);
   // Seconds of orbit: the scene clock, at the ship's pace.
@@ -160,7 +180,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
   // Over an open planet the cockpit still flies to the ship, so it comes forward for it.
   const isFaded = openPlanetId !== undefined && !isCockpitOpen && !isFlying;
   // The cockpit covers the ship, so a hover from before it opened no longer counts.
-  const isActive = isHovered && !isFaded && !isCockpitOpen;
+  const isActive = isHovered && !isCockpitOpen;
   useCursor(isActive);
 
   // `go`: a beat for the confirmation, the cockpit closes, the ship turns and flies, and the page
@@ -195,7 +215,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
     { dependencies: [explorer.flight] },
   );
 
-  useFrame(({ camera }, delta) => {
+  useFrame(({ camera, size }, delta) => {
     const group = groupRef.current;
     const body = bodyRef.current;
     if (!group || !body) return;
@@ -236,18 +256,22 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
       radius: Math.sin(time * BOB_SPEED) * BOB_UNITS * bobLevel,
       phase: orbitAngle,
     });
-    group.position.set(
-      ...toScenePosition({ x: pose.x + bob.x, y: pose.y + bob.y, depth: SHIP_DEPTH }),
+    const position = toPlanePosition({ x: pose.x + bob.x, y: pose.y + bob.y });
+    group.position.set(...position);
+    if (camera instanceof PerspectiveCamera) {
+      const pixelsPerUnit = getPixelsPerUnit({ camera, viewport: size, position });
+      scaleRef.current?.scale.setScalar(
+        Math.max(SHIP_SCALE, SHIP_MIN_LENGTH_PX / (SHIP_LENGTH * pixelsPerUnit)),
+      );
+    }
+    body.rotation.y = getPlaneYaw(
+      pose.heading + Math.sin(time * TILT_SPEED) * TILT_RADIANS * bobLevel,
     );
-    scaleRef.current?.scale.setScalar(
-      Math.max(SHIP_SCALE, SHIP_MIN_LENGTH_PX / (SHIP_LENGTH * camera.zoom)),
-    );
-    // The screen's clockwise turn is negative around the camera's axis.
-    body.rotation.z = -(pose.heading + Math.sin(time * TILT_SPEED) * TILT_RADIANS * bobLevel);
 
     opacityRef.current = damp({
       current: opacityRef.current,
-      target: isFaded ? FADED_OPACITY : 1,
+      // Pointed at, a stepped-back ship comes forward: it opens the cockpit from any page.
+      target: isFaded && !isActive ? FADED_OPACITY : 1,
       delta,
     });
     const opacity = opacityRef.current * pose.fade;
@@ -260,8 +284,10 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
     });
     const glowLevel = glowLevelRef.current;
     const flicker = Math.sin(time * GLOW_FLICKER_SPEED) * GLOW_FLICKER;
-    setMaterialOpacity({ mesh: glowRef.current, opacity: (glowLevel + flicker) * opacity });
-    glowRef.current?.scale.setScalar(1 + (glowLevel - GLOW_IDLE) * GLOW_HOVER_GROWTH);
+    setMaterialOpacity({ object: glowRef.current, opacity: (glowLevel + flicker) * opacity });
+    glowRef.current?.scale.setScalar(
+      SHIP_ENGINE.radius * 2 * (1 + (glowLevel - GLOW_IDLE) * GLOW_HOVER_GROWTH),
+    );
 
     puffMeshesRef.current.forEach((mesh, index) => {
       if (!mesh) return;
@@ -269,10 +295,10 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
       mesh.visible = puff !== null;
       if (!puff) return;
       mesh.position.set(
-        ...toScenePosition({ x: SHIP_ENGINE.x + puff.x, y: SHIP_ENGINE.y + puff.y }),
+        ...toPlanePosition({ x: SHIP_ENGINE.x + puff.x, y: SHIP_ENGINE.y + puff.y }),
       );
       mesh.scale.setScalar(puff.scale);
-      setMaterialOpacity({ mesh, opacity: puff.opacity * opacity });
+      setMaterialOpacity({ object: mesh, opacity: puff.opacity * opacity });
     });
   });
 
@@ -298,6 +324,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
 
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
+    if (isDragRelease(event.delta)) return;
     explorer.openCockpit();
   }
 
@@ -308,9 +335,9 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
           <mesh
             onPointerOver={handlePointerOver}
             onPointerOut={handlePointerOut}
-            onClick={isFaded ? undefined : handleClick}
+            onClick={handleClick}
           >
-            <circleGeometry args={[HIT_RADIUS, CIRCLE_SEGMENTS]} />
+            <sphereGeometry args={[HIT_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
             <meshBasicMaterial colorWrite={false} depthWrite={false} />
           </mesh>
           {PUFF_IDS.map((id) => (
@@ -321,39 +348,41 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
               }}
               visible={false}
             >
-              <circleGeometry args={[PUFF_RADIUS, CIRCLE_SEGMENTS]} />
+              <sphereGeometry args={[PUFF_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
               <meshBasicMaterial color={PALETTE.terracotta.soft} transparent depthWrite={false} />
             </mesh>
           ))}
-          <mesh ref={glowRef} position={ENGINE_POSITION}>
-            <circleGeometry args={[SHIP_ENGINE.radius, CIRCLE_SEGMENTS]} />
-            <meshBasicMaterial transparent depthWrite={false}>
+          <sprite ref={glowRef} position={ENGINE_POSITION}>
+            <spriteMaterial transparent depthWrite={false}>
               <canvasTexture attach="map" args={[glowCanvas]} />
-            </meshBasicMaterial>
+            </spriteMaterial>
+          </sprite>
+          <mesh rotation-x={LIE_FLAT} position-y={HULL_THICKNESS / 2}>
+            <extrudeGeometry args={[shapes.hull, { depth: HULL_THICKNESS, ...HULL_BEVEL }]} />
+            <meshLambertMaterial color={PALETTE.neutral.vivid} />
           </mesh>
-          <mesh>
-            <shapeGeometry args={[shapes.hull]} />
-            <meshBasicMaterial color={PALETTE.neutral.vivid} />
-          </mesh>
-          <mesh position={[0, 0, 0.1]}>
-            <shapeGeometry args={[shapes.canopy]} />
-            <meshBasicMaterial color={PALETTE.terracotta.soft} />
+          <mesh rotation-x={LIE_FLAT} position-y={HULL_THICKNESS / 2 + CANOPY_THICKNESS}>
+            <extrudeGeometry args={[shapes.canopy, { depth: CANOPY_THICKNESS, ...HULL_BEVEL }]} />
+            <meshLambertMaterial color={PALETTE.terracotta.soft} />
           </mesh>
         </group>
         {isActive && !isFlying ? (
-          <Html
-            position={[0, -HIT_RADIUS, 0]}
-            zIndexRange={LABEL_Z_INDEX_RANGE}
-            className="pointer-events-none"
-          >
-            <span
-              role="tooltip"
-              className="flex -translate-x-1/2 translate-y-1 flex-col items-center rounded-sm bg-background px-1.5 py-0.5 text-label-sub whitespace-nowrap"
+          // Hangs under the ship as seen: it turns to face the camera.
+          <Billboard>
+            <Html
+              position={[0, -HIT_RADIUS, 0]}
+              zIndexRange={LABEL_Z_INDEX_RANGE}
+              className="pointer-events-none"
             >
-              <span className="text-foreground">{messages.shipName}</span>
-              <span className="text-terracotta">{messages.shipAction}</span>
-            </span>
-          </Html>
+              <span
+                role="tooltip"
+                className="flex -translate-x-1/2 translate-y-1 flex-col items-center rounded-sm bg-background px-1.5 py-0.5 text-label-sub whitespace-nowrap"
+              >
+                <span className="text-foreground">{messages.shipName}</span>
+                <span className="text-terracotta">{messages.shipAction}</span>
+              </span>
+            </Html>
+          </Billboard>
         ) : null}
       </group>
     </group>

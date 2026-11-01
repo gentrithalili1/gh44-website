@@ -1,76 +1,109 @@
-import { useFrame } from "@react-three/fiber";
+import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { type RefObject, useRef, useState } from "react";
-import type { Group } from "three";
+import { type Mesh, SRGBColorSpace } from "three";
 
-import { getSpinCopyOffsets, getSpinWidth } from "#/components/SolarSystem/utils/motion";
-import { getSurfaceShapes } from "#/components/SolarSystem/utils/surface";
+import { getSpinPeriod } from "#/components/SolarSystem/utils/motion";
+import { getSurfaceHex } from "#/components/SolarSystem/utils/surfaceColor";
+import { PALETTE } from "#/utils/palette";
 import type { PlanetBody } from "#/utils/planets";
 
 import type { SceneState } from "../../../../types";
-import { createSurfaceOutline } from "../../utils/sceneGeometry";
-import { PlanetSurfaceMesh } from "./PlanetSurface.elements";
+import { getSurfacePaint, type SurfacePaint } from "./utils/surfacePaint";
+
+// The map wrapped around a planet, in pixels: twice as wide as tall, like any globe's.
+const MAP_WIDTH = 512;
+const MAP_HEIGHT = 256;
+const SPHERE_SEGMENTS = 48;
+const FULL_TURN = Math.PI * 2;
+
+function paintSurface({
+  context,
+  paint,
+}: {
+  context: CanvasRenderingContext2D;
+  paint: SurfacePaint;
+}) {
+  context.globalAlpha = paint.opacity;
+  context.fillStyle = getSurfaceHex(paint);
+  switch (paint.kind) {
+    case "stripe":
+      context.fillRect(
+        0,
+        paint.top * MAP_HEIGHT,
+        MAP_WIDTH,
+        (paint.bottom - paint.top) * MAP_HEIGHT,
+      );
+      return;
+    case "spot":
+      context.beginPath();
+      context.ellipse(
+        paint.u * MAP_WIDTH,
+        paint.v * MAP_HEIGHT,
+        paint.radiusU * MAP_WIDTH,
+        paint.radiusV * MAP_HEIGHT,
+        0,
+        0,
+        FULL_TURN,
+      );
+      context.fill();
+      return;
+    default: {
+      const unknownPaint: never = paint;
+      return unknownPaint;
+    }
+  }
+}
+
+// The planet's color, with its bands and features painted on.
+function drawSurfaceMap(planet: PlanetBody) {
+  const canvas = document.createElement("canvas");
+  canvas.width = MAP_WIDTH;
+  canvas.height = MAP_HEIGHT;
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.fillStyle = PALETTE[planet.color].soft;
+    context.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+    for (const paint of getSurfacePaint(planet)) paintSurface({ context, paint });
+  }
+
+  return canvas;
+}
 
 interface PlanetSurfaceProps {
   planet: PlanetBody;
   sceneStateRef: RefObject<SceneState>;
-  // The planet's own stencil ref: its features show only on its body.
-  stencilRef: number;
+  onPointerOver?: (event: ThreeEvent<PointerEvent>) => void;
+  onPointerOut?: () => void;
+  onClick?: (event: ThreeEvent<MouseEvent>) => void;
 }
 
-// What is drawn on a planet's disc. Bands stay still; land and storms slide across as the planet
-// turns, wrapping around like a globe seen from above: two copies, never both on the disc.
-export function PlanetSurface({ planet, sceneStateRef, stencilRef }: PlanetSurfaceProps) {
-  const [shapes] = useState(() =>
-    getSurfaceShapes(planet).map((shape) => ({ shape, outline: createSurfaceOutline(shape) })),
-  );
-  const [spinWidth] = useState(() => getSpinWidth(planet));
-  const leadRef = useRef<Group>(null);
-  const trailRef = useRef<Group>(null);
+// The planet's globe, its surface painted on, turning on its own axis at its own pace.
+export function PlanetSurface({
+  planet,
+  sceneStateRef,
+  onPointerOver,
+  onPointerOut,
+  onClick,
+}: PlanetSurfaceProps) {
+  const [map] = useState(() => drawSurfaceMap(planet));
+  const meshRef = useRef<Mesh>(null);
   // Seconds of spin. It runs on the scene clock alone: hovering or opening the planet stops its
   // orbit, not its turning.
   const spinTimeRef = useRef(0);
 
-  const bands = shapes.filter(({ shape }) => !shape.shouldSpin);
-  const features = shapes.filter(({ shape }) => shape.shouldSpin);
-
   useFrame(() => {
-    const lead = leadRef.current;
-    const trail = trailRef.current;
-    if (!lead || !trail) return;
     spinTimeRef.current += sceneStateRef.current.frameStep;
-    const [leadOffset, trailOffset] = getSpinCopyOffsets({
-      planet,
-      time: spinTimeRef.current,
-      spinWidth,
-    });
-    lead.position.x = leadOffset;
-    trail.position.x = trailOffset;
+    if (meshRef.current) {
+      meshRef.current.rotation.y = (FULL_TURN * spinTimeRef.current) / getSpinPeriod(planet);
+    }
   });
 
-  function renderMeshes(entries: typeof shapes) {
-    return entries.map(({ shape, outline }) => (
-      <PlanetSurfaceMesh
-        key={shape.id}
-        outline={outline}
-        color={shape.color}
-        shade={shape.shade}
-        opacity={shape.opacity}
-        stencilRef={stencilRef}
-      />
-    ));
-  }
-
-  const featureMeshes = renderMeshes(features);
-
   return (
-    <>
-      {renderMeshes(bands)}
-      {features.length > 0 ? (
-        <>
-          <group ref={leadRef}>{featureMeshes}</group>
-          <group ref={trailRef}>{featureMeshes}</group>
-        </>
-      ) : null}
-    </>
+    <mesh ref={meshRef} onPointerOver={onPointerOver} onPointerOut={onPointerOut} onClick={onClick}>
+      <sphereGeometry args={[planet.size, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
+      <meshLambertMaterial>
+        <canvasTexture attach="map" args={[map]} colorSpace={SRGBColorSpace} />
+      </meshLambertMaterial>
+    </mesh>
   );
 }

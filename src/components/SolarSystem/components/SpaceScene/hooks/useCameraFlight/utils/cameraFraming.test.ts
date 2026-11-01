@@ -1,40 +1,81 @@
+import { PerspectiveCamera, Vector3 } from "three";
 import { describe, expect, it } from "vitest";
 
-import { findPlanet } from "#/utils/planets";
+import { getOrbitAngle } from "#/components/SolarSystem/utils/motion";
+import { getShipAngle, getShipPose } from "#/components/SolarSystem/utils/ship";
+import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
+import { findPlanet, SOLAR_SYSTEM } from "#/utils/planets";
 
 import {
+  CAMERA_FOV,
+  type CameraAngle,
+  type CameraPose,
+  getCameraAngle,
+  getCameraDistance,
   getCameraFocus,
+  getCameraPlacement,
+  getDistanceLimits,
   getHomePose,
   getPlanetPose,
   getPlanetReach,
+  getShipCameraAngle,
   getShipCameraPose,
+  HOME_ANGLE,
+  mixAngles,
   mixPoses,
 } from "./cameraFraming";
 
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
 
-type Pose = { x: number; y: number; zoom: number };
-
-// Where a system point lands on screen, in pixels from the top left.
+// Where a system point lands on screen, in pixels from the top left, through a real perspective
+// camera placed for the pose.
 function project({
   pose,
   point,
   viewport,
+  angle = HOME_ANGLE,
 }: {
-  pose: Pose;
+  pose: CameraPose;
   point: { x: number; y: number };
   viewport: typeof DESKTOP;
+  angle?: CameraAngle;
 }) {
+  const placement = getCameraPlacement({ pose, angle, viewport });
+  const camera = new PerspectiveCamera(CAMERA_FOV, viewport.width / viewport.height, 1, 10000);
+  camera.position.set(...placement.position);
+  camera.lookAt(...placement.target);
+  camera.setViewOffset(
+    viewport.width,
+    viewport.height,
+    placement.viewOffset.x,
+    placement.viewOffset.y,
+    viewport.width,
+    viewport.height,
+  );
+  camera.updateMatrixWorld();
+  const projected = new Vector3(point.x, 0, point.y).project(camera);
+
   return {
-    x: viewport.width / 2 + (point.x - pose.x) * pose.zoom,
-    y: viewport.height / 2 + (point.y - pose.y) * pose.zoom,
+    x: ((projected.x + 1) / 2) * viewport.width,
+    y: ((1 - projected.y) / 2) * viewport.height,
   };
 }
 
 describe("getHomePose", () => {
   it("centers the sun and fits the whole system to the shorter side", () => {
-    expect(getHomePose(DESKTOP)).toEqual({ x: 0, y: 0, zoom: 900 / 1040 });
+    expect(getHomePose(DESKTOP)).toEqual({ x: 0, y: 0, zoom: 900 / 1040, offset: { x: 0, y: 0 } });
+  });
+
+  it("shows the sun in the middle of the screen from the home angle", () => {
+    const onScreen = project({
+      pose: getHomePose(DESKTOP),
+      point: { x: 0, y: 0 },
+      viewport: DESKTOP,
+    });
+
+    expect(onScreen.x).toBeCloseTo(720);
+    expect(onScreen.y).toBeCloseTo(450);
   });
 });
 
@@ -49,6 +90,19 @@ describe("getPlanetPose", () => {
     expect(onScreen.y).toBeCloseTo(450);
     // Its reach fills 42% of the 648px box.
     expect(40 * pose.zoom).toBeCloseTo(272.16);
+  });
+
+  it("keeps the planet there from any angle the visitor orbits to", () => {
+    const pose = getPlanetPose({ viewport: DESKTOP, planetPosition: planet, reach: 40 });
+
+    const onScreen = project({
+      pose,
+      point: planet,
+      viewport: DESKTOP,
+      angle: { polar: 1.2, azimuth: -2 },
+    });
+    expect(onScreen.x).toBeCloseTo((1440 - 672) / 2);
+    expect(onScreen.y).toBeCloseTo(450);
   });
 
   it("keeps the planet and its reach clear of the panel on a 1280px screen", () => {
@@ -76,6 +130,62 @@ describe("getPlanetPose", () => {
   });
 });
 
+describe("getCameraPlacement", () => {
+  it("backs off far enough that one unit at the target spans `zoom` pixels", () => {
+    const pose = { x: 0, y: 0, zoom: 2, offset: { x: 0, y: 0 } };
+
+    const left = project({ pose, point: { x: -10, y: 0 }, viewport: DESKTOP });
+    const right = project({ pose, point: { x: 10, y: 0 }, viewport: DESKTOP });
+    expect(right.x - left.x).toBeCloseTo(40, 0);
+  });
+
+  it("never looks from under the system", () => {
+    const placement = getCameraPlacement({
+      pose: getHomePose(DESKTOP),
+      angle: HOME_ANGLE,
+      viewport: DESKTOP,
+    });
+
+    expect(placement.position[1]).toBeGreaterThan(0);
+  });
+});
+
+describe("getDistanceLimits", () => {
+  it("lets the visitor zoom in and out around every framing, home, planets and ship", () => {
+    for (const viewport of [DESKTOP, PHONE]) {
+      const limits = getDistanceLimits(viewport);
+      const framings = [
+        getHomePose(viewport),
+        getPlanetPose({ viewport, planetPosition: { x: 0, y: 0 }, reach: 1 }),
+        getShipCameraPose({ viewport, shipPosition: { x: 0, y: 0 } }),
+      ];
+
+      for (const pose of framings) {
+        const distance = getCameraDistance({ viewport, zoom: pose.zoom });
+        expect(distance).toBeGreaterThan(limits.min);
+        expect(distance).toBeLessThan(limits.max);
+      }
+    }
+  });
+});
+
+describe("getCameraAngle", () => {
+  it("reads back the angle a placement looks from", () => {
+    const angle = { polar: 1.1, azimuth: -2.3 };
+    const placement = getCameraPlacement({
+      pose: { x: 40, y: -70, zoom: 2, offset: { x: -300, y: 20 } },
+      angle,
+      viewport: DESKTOP,
+    });
+    const [x, y, z] = placement.position;
+    const [targetX, targetY, targetZ] = placement.target;
+
+    const readBack = getCameraAngle({ x: x - targetX, y: y - targetY, z: z - targetZ });
+    expect(readBack.polar).toBeCloseTo(angle.polar);
+    expect(readBack.azimuth).toBeCloseTo(angle.azimuth);
+  });
+});
+
 describe("getShipCameraPose", () => {
   const ship = { x: -180, y: -160 };
 
@@ -92,6 +202,68 @@ describe("getShipCameraPose", () => {
   it("zooms to 3 pixels a unit on any screen: close on the ship, wide enough for planets nearby", () => {
     for (const viewport of [DESKTOP, PHONE]) {
       expect(getShipCameraPose({ viewport, shipPosition: ship }).zoom).toBe(3);
+    }
+  });
+});
+
+describe("getShipCameraAngle", () => {
+  // The cockpit's windshield: the screen above its console, which is shorter on phones.
+  function getWindshield(viewport: typeof DESKTOP) {
+    return { left: 0.05, right: 0.95, top: 0.06, bottom: viewport.width < 720 ? 0.68 : 0.53 };
+  }
+
+  type CountParams = { viewport: typeof DESKTOP; shipTime: number; planetTime: number };
+
+  function countPlanetsInView({ viewport, shipTime, planetTime }: CountParams) {
+    const ship = getShipPose(getShipAngle(shipTime));
+    const pose = getShipCameraPose({ viewport, shipPosition: ship });
+    const angle = getShipCameraAngle(ship);
+    const windshield = getWindshield(viewport);
+
+    return SOLAR_SYSTEM.filter((planet) => {
+      const onScreen = project({
+        pose,
+        angle,
+        viewport,
+        point: getOrbitPosition({
+          radius: planet.orbit.radius,
+          phase: getOrbitAngle({ planet, time: planetTime }),
+        }),
+      });
+      return (
+        onScreen.x > viewport.width * windshield.left &&
+        onScreen.x < viewport.width * windshield.right &&
+        onScreen.y > viewport.height * windshield.top &&
+        onScreen.y < viewport.height * windshield.bottom
+      );
+    }).length;
+  }
+
+  it("looks from behind the ship in toward the sun, straight ahead of it", () => {
+    const ship = getShipPose(1);
+    const pose = getShipCameraPose({ viewport: DESKTOP, shipPosition: ship });
+
+    const sun = project({
+      pose,
+      angle: getShipCameraAngle(ship),
+      viewport: DESKTOP,
+      point: { x: 0, y: 0 },
+    });
+    expect(sun.x).toBeCloseTo(720);
+    expect(sun.y).toBeLessThan(900 * 0.86);
+  });
+
+  it("usually shows a planet or two through the windshield, on desktop and phones", () => {
+    for (const viewport of [DESKTOP, PHONE, { width: 360, height: 740 }]) {
+      // Ten laps of the ship, the planets anywhere on their orbits when the cockpit opens.
+      const counts = Array.from({ length: 200 }, (_, step) =>
+        countPlanetsInView({ viewport, shipTime: step * 3.5, planetTime: step * 37.3 }),
+      );
+
+      expect(counts.filter((count) => count >= 1).length / counts.length).toBeGreaterThan(0.85);
+      const average = counts.reduce((sum, count) => sum + count, 0) / counts.length;
+      expect(average).toBeGreaterThan(1);
+      expect(average).toBeLessThan(3);
     }
   });
 });
@@ -151,22 +323,72 @@ describe("getPlanetReach", () => {
 });
 
 describe("mixPoses", () => {
-  const from = { x: 0, y: 0, zoom: 1 };
-  const to = { x: 100, y: 0, zoom: 4 };
+  const from = { x: 0, y: 0, zoom: 1, offset: { x: 0, y: 0 } };
+  const to = { x: 100, y: 0, zoom: 4, offset: { x: -360, y: 0 } };
   const anchor = { x: 100, y: 0 };
+  // Straight down, where the screen and the plane line up.
+  const TOP_DOWN = { polar: 0, azimuth: 0 };
+  const angles = { fromAngle: TOP_DOWN, toAngle: TOP_DOWN };
 
   it("starts at the first pose and lands on the second", () => {
-    expect(mixPoses({ from, to, anchor, progress: 0 })).toEqual(from);
-    expect(mixPoses({ from, to, anchor, progress: 1 })).toEqual(to);
+    expect(mixPoses({ from, to, anchor, progress: 0, ...angles })).toEqual(from);
+    expect(mixPoses({ from, to, anchor, progress: 1, ...angles })).toEqual(to);
   });
 
   it("zooms on a log scale and moves the anchor straight across the screen", () => {
-    // Halfway: zoom 2 (between 1 and 4 on a log scale); the anchor is 50px right of center,
-    // halfway between 100px and 0px, so the camera sits 25 units left of it.
-    const pose = mixPoses({ from, to, anchor, progress: 0.5 });
+    // Halfway: zoom 2 (between 1 and 4 on a log scale); the anchor sits halfway between 100px
+    // right of center and 360px left of it: 130px left.
+    const pose = mixPoses({ from, to, anchor, progress: 0.5, ...angles });
 
     expect(pose.zoom).toBeCloseTo(2);
-    expect(pose.x).toBeCloseTo(75);
+    expect(pose.offset.x).toBeCloseTo(-180);
+    expect((anchor.x - pose.x) * pose.zoom + pose.offset.x).toBeCloseTo(-130);
     expect(pose.y).toBeCloseTo(0);
+  });
+
+  it("moves the planet left behind straight on screen, flying home from round the back", () => {
+    // Orbited behind the open planet, low; closing it flies home and turns to the home angle.
+    const orbited = { polar: 1, azimuth: 2.8 };
+    const planet = { x: 200, y: -120 };
+    const start = getPlanetPose({ viewport: DESKTOP, planetPosition: planet, reach: 40 });
+    const end = getHomePose(DESKTOP);
+    const onScreen = (progress: number) => {
+      const pose = mixPoses({
+        from: start,
+        to: end,
+        anchor: planet,
+        progress,
+        fromAngle: orbited,
+        toAngle: HOME_ANGLE,
+      });
+      const angle = mixAngles({ from: orbited, to: HOME_ANGLE, progress });
+      return project({ pose, angle, point: planet, viewport: DESKTOP });
+    };
+
+    const first = onScreen(0);
+    const last = onScreen(1);
+    const length = Math.hypot(last.x - first.x, last.y - first.y);
+    for (const progress of [0.25, 0.5, 0.75]) {
+      const point = onScreen(progress);
+      // How far it strays from the straight line between where it starts and lands.
+      const offLine =
+        Math.abs(
+          (last.x - first.x) * (first.y - point.y) - (first.x - point.x) * (last.y - first.y),
+        ) / length;
+      expect(offLine).toBeLessThan(length * 0.05);
+    }
+  });
+});
+
+describe("mixAngles", () => {
+  it("turns the short way round", () => {
+    const angle = mixAngles({
+      from: { polar: 0.4, azimuth: 3 },
+      to: { polar: 0.8, azimuth: -3 },
+      progress: 0.5,
+    });
+
+    expect(angle.polar).toBeCloseTo(0.6);
+    expect(Math.cos(angle.azimuth)).toBeCloseTo(-1);
   });
 });

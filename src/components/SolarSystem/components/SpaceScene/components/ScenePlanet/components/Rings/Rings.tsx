@@ -6,11 +6,14 @@ import type { RingBand } from "#/components/SolarSystem/utils/rings";
 import { PALETTE } from "#/utils/palette";
 import type { ThemeToolId } from "#/utils/themeTools";
 
+import { isDragRelease } from "../../../../utils/sceneMath";
 import type { HoverChange } from "../../types";
-import { TILTED_PLANE_ROTATION } from "../../utils/sceneGeometry";
 import { HoverName } from "../HoverName";
 
 const RING_SEGMENTS = 128;
+// Flat on the orbit plane, then tipped away from the home view: seen about as open as the 2D
+// drawing's tilted rings, the far half behind the planet and the near half across it.
+const RING_TILT = -Math.PI / 2 - 0.45;
 
 interface RingsProps {
   bands: RingBand[];
@@ -18,9 +21,8 @@ interface RingsProps {
   onBandClick: (bandId: ThemeToolId) => void;
 }
 
-// Saturn's rings on the tilted plane: the near half crosses in front of the planet, the far
-// half behind. Each band names its app on hover and holds the planet still; a click opens the
-// planet at that app's install tab.
+// Saturn's rings around its tipped equator. Each band names its app on hover
+// and holds the planet still; a click opens the planet at that app's install tab.
 export function Rings({ bands, onHoverChange, onBandClick }: RingsProps) {
   const [hoveredBandId, setHoveredBandId] = useState<string | null>(null);
 
@@ -33,11 +35,12 @@ export function Rings({ bands, onHoverChange, onBandClick }: RingsProps) {
 
   function handleClick({ event, bandId }: { event: ThreeEvent<MouseEvent>; bandId: ThemeToolId }) {
     event.stopPropagation();
+    if (isDragRelease(event.delta)) return;
     onBandClick(bandId);
   }
 
   return (
-    <group rotation-x={TILTED_PLANE_ROTATION}>
+    <group rotation-x={RING_TILT}>
       {bands.map((band) => (
         <mesh
           key={band.id}
@@ -49,6 +52,7 @@ export function Rings({ bands, onHoverChange, onBandClick }: RingsProps) {
           onClick={(event) => handleClick({ event, bandId: band.id })}
         >
           <ringGeometry args={[band.innerRadius, band.outerRadius, RING_SEGMENTS]} />
+          {/* Unlit: each band shows its app's exact palette color. */}
           <meshBasicMaterial color={PALETTE[band.color].soft} side={DoubleSide} />
         </mesh>
       ))}

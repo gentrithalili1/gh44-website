@@ -1,15 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { findPlanet, type PlanetBody, PLANETS, SOLAR_SYSTEM } from "#/utils/planets";
+import { findPlanet, PLANETS, SOLAR_SYSTEM } from "#/utils/planets";
 
-import {
-  getOrbitAngle,
-  getOrbitSpeed,
-  getSpinCopyOffsets,
-  getSpinPeriod,
-  getSpinWidth,
-} from "./motion";
-import { getSurfaceShapes } from "./surface";
+import { getOrbitAngle, getOrbitSpeed, getSpinPeriod } from "./motion";
 
 function getPlanet(id: string) {
   const planet = findPlanet(id);
@@ -77,54 +70,5 @@ describe("getSpinPeriod", () => {
 
     expect(Math.sign(period)).toBe(-Math.sign(getSpinPeriod(getPlanet("me"))));
     expect(Math.abs(period)).toBe(100);
-  });
-});
-
-describe("getSpinCopyOffsets", () => {
-  // A copy shows when its shape reaches past the disc's edge.
-  function countVisibleCopies({ planet, time }: { planet: PlanetBody; time: number }) {
-    return getSurfaceShapes(planet)
-      .filter((shape) => shape.shouldSpin)
-      .map((shape) => {
-        if (shape.kind !== "ellipse") throw new Error("Spinning features are ellipses");
-        return getSpinCopyOffsets({ planet, time, spinWidth: getSpinWidth(planet) }).filter(
-          (offset) => Math.abs(shape.x + offset) < planet.size + shape.rx,
-        ).length;
-      });
-  }
-
-  it("never shows two copies of the same feature on a planet, at any spin offset", () => {
-    for (const planet of SOLAR_SYSTEM) {
-      const period = getSpinPeriod(planet);
-      for (let step = 0; step < 200; step++) {
-        for (const count of countVisibleCopies({ planet, time: (period * step) / 200 })) {
-          expect(count).toBeLessThanOrEqual(1);
-        }
-      }
-    }
-  });
-
-  it("brings every feature back onto the disc once per turn", () => {
-    const jupiter = getPlanet("work");
-    const period = getSpinPeriod(jupiter);
-    const visibleSteps = Array.from(
-      { length: 200 },
-      (_, step) => countVisibleCopies({ planet: jupiter, time: (period * step) / 200 })[0],
-    ).filter((count) => count === 1);
-
-    expect(visibleSteps.length).toBeGreaterThan(100);
-    expect(
-      getSpinCopyOffsets({
-        planet: jupiter,
-        time: period * 1.25,
-        spinWidth: getSpinWidth(jupiter),
-      }),
-    ).toEqual(
-      getSpinCopyOffsets({
-        planet: jupiter,
-        time: period * 0.25,
-        spinWidth: getSpinWidth(jupiter),
-      }).map((offset) => expect.closeTo(offset)),
-    );
   });
 });

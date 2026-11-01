@@ -3,6 +3,7 @@ const ICON_PATHS = {
   stop: "M4.5 4.5h7v7h-7z",
   previous: "M4 3.5v9M12.5 3.5 6 8l6.5 4.5z",
   next: "M12 3.5v9M3.5 3.5 10 8l-6.5 4.5z",
+  playlist: "M3 4.5h10M3 8h10M3 11.5h6",
 } as const;
 
 const LEVEL_BAR_IDS = ["a", "b", "c", "d", "e"] as const;
@@ -65,14 +66,16 @@ interface RadioTrackProps {
   title: string;
 }
 
-// Now playing: the artist, then the title; on phones the level meter leads the line.
+// Now playing: the artist, then the title; on phones the level meter leads the line, on desktop
+// it sits in the radio's header.
 export function RadioTrack({ isPlaying, artist, separator, title }: RadioTrackProps) {
   return (
-    <p className="flex min-w-0 items-baseline gap-2 text-xs">
+    <p role="status" className="flex min-w-0 items-baseline gap-2 text-xs md:justify-center">
       <span className="md:hidden">
         <RadioLevel isPlaying={isPlaying} />
       </span>
-      <span className="truncate">
+      {/* One truncated line on phones; on desktop the whole name shows, wrapping if needed. */}
+      <span className="min-w-0 truncate md:overflow-visible md:text-clip md:whitespace-normal">
         <span className="text-muted">
           {artist}
           {separator}
@@ -80,5 +83,43 @@ export function RadioTrack({ isPlaying, artist, separator, title }: RadioTrackPr
         <span className="text-foreground">{title}</span>
       </span>
     </p>
+  );
+}
+
+interface PlaylistTrackProps {
+  isCurrent: boolean;
+  isPlaying: boolean;
+  artist: string;
+  separator: string;
+  title: string;
+  onClick: () => void;
+}
+
+// One row of the playlist: the current track stands out, its level meter bouncing while it plays.
+export function PlaylistTrack({
+  isCurrent,
+  isPlaying,
+  artist,
+  separator,
+  title,
+  onClick,
+}: PlaylistTrackProps) {
+  return (
+    <li>
+      <button
+        type="button"
+        data-music-control=""
+        aria-current={isCurrent ? "true" : undefined}
+        onClick={onClick}
+        className="flex w-full items-center justify-between gap-2 rounded-sm px-1.5 py-0.5 text-left text-xs text-muted transition-colors hover:bg-surface hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-foreground aria-[current=true]:text-foreground"
+      >
+        <span className="min-w-0 truncate">
+          {artist}
+          {separator}
+          {title}
+        </span>
+        {isCurrent ? <RadioLevel isPlaying={isPlaying} /> : null}
+      </button>
+    </li>
   );
 }

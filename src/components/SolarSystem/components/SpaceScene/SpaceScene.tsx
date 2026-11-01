@@ -1,4 +1,5 @@
 import { Canvas } from "@react-three/fiber";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
 import { messages } from "#/components/SolarSystem/messages";
@@ -14,30 +15,39 @@ import { ScenePlanet } from "./components/ScenePlanet";
 import { Ships } from "./components/Ships";
 import { Stars } from "./components/Stars";
 import { Sun } from "./components/Sun";
+import { CAMERA_FOV } from "./hooks/useCameraFlight";
 import { usePageVisible } from "./hooks/usePageVisible";
 import type { SceneState } from "./types";
-import { CAMERA_HEIGHT, PHONE_MAX_WIDTH } from "./utils/sceneMath";
+import { PHONE_MAX_WIDTH } from "./utils/sceneMath";
 
+const HOME_PATH = "/";
 // Phones get a lower pixel ratio, which keeps the scene smooth.
 const PHONE_MAX_DPR = 1.5;
 const DESKTOP_MAX_DPR = 2;
-const CAMERA_FAR = CAMERA_HEIGHT * 4;
+// Past the stars' shell seen from the farthest the visitor can zoom out on a phone.
+const CAMERA_FAR = 16000;
+// The planets' night sides stay visible: a little light from everywhere.
+const AMBIENT_INTENSITY = 0.45;
 
 interface SpaceSceneProps {
   openPlanetId: string | undefined;
 }
 
-// The living system: a WebGL canvas drawn flat from straight above, with each site planet's
-// label as a real link in the "planets" list on top of it. Decorative planets have no label.
+// The living system: a WebGL canvas in 3D, lit by the sun and seen at an angle, with each site
+// planet's label as a real link in the "planets" list on top of it. Decorative planets have no
+// label. Clicking empty space while a planet is open goes back home.
 export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isPageVisible = usePageVisible();
   // The labels render into this list once it exists.
   const [labelList, setLabelList] = useState<HTMLUListElement | null>(null);
   const explorer = useExplorer();
+  const navigate = useNavigate();
+  const pathname = useLocation({ select: (location) => location.pathname });
   const sceneStateRef = useRef<SceneState>({
     frameStep: 0,
     planetAngles: new Map(),
     shipPose: getShipPose(SHIP_ORBIT.phase),
+    cameraZoom: 1,
   });
 
   // The open cockpit steps the system back, like an open planet.
@@ -45,26 +55,41 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isSystemFaded = openPlanetId !== undefined || isCockpitOpen;
   const maxDpr = window.innerWidth < PHONE_MAX_WIDTH ? PHONE_MAX_DPR : DESKTOP_MAX_DPR;
 
+  // The scene up at home greets the session's first visit from the cockpit. Reduced motion and
+  // the static system have no scene, so no greeting.
+  function handleSceneRef(scene: HTMLDivElement | null) {
+    if (scene && pathname === HOME_PATH) explorer.greetVisitor();
+  }
+
+  function handlePointerMissed() {
+    if (openPlanetId === undefined || explorer.cockpit.status !== "closed") return;
+    void navigate({ to: "/" });
+  }
+
   return (
-    <div className="absolute inset-0 isolate overflow-hidden">
+    <div ref={handleSceneRef} className="absolute inset-0 isolate overflow-hidden">
       <Canvas
-        orthographic
-        // No tone mapping: flat palette colors, exactly as in styles.css.
+        // No tone mapping: palette colors as in styles.css, where the light falls fully.
         flat
         dpr={[1, maxDpr]}
         frameloop={isPageVisible ? "always" : "never"}
-        // The stencil clips each planet's spinning surface to its disc.
-        gl={{ alpha: true, antialias: true, stencil: true }}
-        camera={{ position: [0, 0, CAMERA_HEIGHT], near: 1, far: CAMERA_FAR }}
+        gl={{ alpha: true, antialias: true }}
+        camera={{ fov: CAMERA_FOV, near: 1, far: CAMERA_FAR }}
+        onPointerMissed={handlePointerMissed}
         aria-hidden="true"
       >
+        <ambientLight intensity={AMBIENT_INTENSITY} />
         <SceneClock sceneStateRef={sceneStateRef} />
         <SceneCamera openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
-        <Stars openPlanetId={openPlanetId} isCruising={isCockpitOpen} />
+        <Stars
+          openPlanetId={openPlanetId}
+          isCruising={isCockpitOpen}
+          sceneStateRef={sceneStateRef}
+        />
         <Sun isPlanetOpen={isSystemFaded} />
         <Orbits isPlanetOpen={isSystemFaded} />
         {labelList
-          ? SOLAR_SYSTEM.map((planet, index) => (
+          ? SOLAR_SYSTEM.map((planet) => (
               <ScenePlanet
                 key={planet.id}
                 planet={planet}
@@ -72,8 +97,6 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
                 isCockpitOpen={isCockpitOpen}
                 sceneStateRef={sceneStateRef}
                 labelList={labelList}
-                // 0 is the cleared stencil, so refs start at 1.
-                stencilRef={index + 1}
               />
             ))
           : null}

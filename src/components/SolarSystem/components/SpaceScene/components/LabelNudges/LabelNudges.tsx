@@ -1,12 +1,12 @@
 import { useFrame } from "@react-three/fiber";
 import { type RefObject, useRef } from "react";
-import { Vector3 } from "three";
 
 import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
 import { PLANETS } from "#/utils/planets";
 
 import type { SceneState } from "../../types";
-import { damp, PHONE_MAX_WIDTH, toScenePosition } from "../../utils/sceneMath";
+import { damp, PHONE_MAX_WIDTH } from "../../utils/sceneMath";
+import { getLabelAnchor } from "./utils/labelAnchor";
 import { getLabelNudges, type LabelBox } from "./utils/labelNudges";
 
 // The least space between two labels, in pixels.
@@ -15,8 +15,6 @@ const NO_NUDGE = { x: 0, y: 0 } as const;
 // How fast a label eases to its new nudge (higher is faster): two labels part smoothly instead
 // of jumping.
 const NUDGE_LAMBDA = 8;
-
-const anchor = new Vector3();
 
 function setNudge(nudge: { x: number; y: number }) {
   return (element: HTMLElement) => {
@@ -59,16 +57,12 @@ export function LabelNudges({ labelList, openPlanetId, sceneStateRef }: LabelNud
       if (!element) continue;
       const phase = sceneStateRef.current.planetAngles.get(planet.id) ?? planet.orbit.phase;
       const position = getOrbitPosition({ radius: planet.orbit.radius, phase });
-      // The label hangs from the planet's lowest point.
-      anchor
-        .set(...toScenePosition({ x: position.x, y: position.y + planet.size }))
-        .project(camera);
+      const anchor = getLabelAnchor({ position, size: planet.size, camera, viewport: size });
       labels.push({
         element,
         box: {
           id: planet.id,
-          x: ((anchor.x + 1) / 2) * size.width,
-          y: ((1 - anchor.y) / 2) * size.height,
+          ...anchor,
           width: element.offsetWidth,
           height: element.offsetHeight,
         },

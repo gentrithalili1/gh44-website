@@ -1,6 +1,6 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
-import type { Group, Mesh } from "three";
+import type { Group, Sprite } from "three";
 
 import { SUN_GLOW_RADIUS, SUN_RADIUS } from "#/components/SolarSystem/utils/space";
 import { PALETTE } from "#/utils/palette";
@@ -14,7 +14,10 @@ const GLOW_OPACITY = 0.35;
 // The glow breathes by this many system units, about every 5 seconds.
 const PULSE_AMOUNT = 8;
 const PULSE_SPEED = 1.2;
-const CIRCLE_SEGMENTS = 64;
+const SPHERE_SEGMENTS = 64;
+// The sun lights every planet from its center, as strongly near as far. Lambert surfaces reflect
+// a 1/pi share of it: with the ambient light, the side facing the sun shows its palette color.
+const LIGHT_INTENSITY = Math.PI * 0.85;
 
 // A radial fade from the sun's color to transparent, like the static system's gradient.
 function drawGlow() {
@@ -38,16 +41,17 @@ interface SunProps {
   isPlanetOpen: boolean;
 }
 
-// gh44: everything revolves around it. Decorative: no label, no events.
+// gh44: everything revolves around it, and it lights the planets. Decorative: no label, no
+// events.
 export function Sun({ isPlanetOpen }: SunProps) {
   const [glowCanvas] = useState(drawGlow);
   const groupRef = useRef<Group>(null);
-  const glowRef = useRef<Mesh>(null);
+  const glowRef = useRef<Sprite>(null);
   const opacityRef = useRef(1);
 
   useFrame(({ clock }, delta) => {
     const pulse = 1 + (Math.sin(clock.elapsedTime * PULSE_SPEED) * PULSE_AMOUNT) / SUN_GLOW_RADIUS;
-    glowRef.current?.scale.setScalar(pulse);
+    glowRef.current?.scale.setScalar(SUN_GLOW_RADIUS * 2 * pulse);
     opacityRef.current = damp({
       current: opacityRef.current,
       target: isPlanetOpen ? FADED_OPACITY : 1,
@@ -58,16 +62,16 @@ export function Sun({ isPlanetOpen }: SunProps) {
 
   return (
     <group ref={groupRef}>
-      <mesh ref={glowRef} position={[0, 0, -2]}>
-        <circleGeometry args={[SUN_GLOW_RADIUS, CIRCLE_SEGMENTS]} />
-        <meshBasicMaterial transparent depthWrite={false} userData={{ baseOpacity: GLOW_OPACITY }}>
+      <sprite ref={glowRef}>
+        <spriteMaterial transparent depthWrite={false} userData={{ baseOpacity: GLOW_OPACITY }}>
           <canvasTexture attach="map" args={[glowCanvas]} />
-        </meshBasicMaterial>
-      </mesh>
-      <mesh position={[0, 0, -1]}>
-        <circleGeometry args={[SUN_RADIUS, CIRCLE_SEGMENTS]} />
+        </spriteMaterial>
+      </sprite>
+      <mesh>
+        <sphereGeometry args={[SUN_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
         <meshBasicMaterial color={SUN_COLOR} />
       </mesh>
+      <pointLight intensity={LIGHT_INTENSITY} decay={0} />
     </group>
   );
 }

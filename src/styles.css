@@ -65,19 +65,12 @@
 
   --ease-space: cubic-bezier(0.33, 1, 0.68, 1);
 
-  --animate-music-bar: music-bar 900ms var(--ease-space) infinite alternate;
   --animate-cockpit-iris: cockpit-iris 450ms var(--ease-space) 550ms both;
   --animate-cockpit-close: cockpit-close 350ms var(--ease-space) forwards;
   --animate-cursor-blink: cursor-blink 1.1s steps(1) infinite;
   --animate-light-blink: light-blink 3.2s ease-in-out infinite;
   --animate-radar-sweep: radar-sweep 4s linear infinite;
   --animate-radio-level: radio-level 700ms var(--ease-space) infinite alternate;
-
-  @keyframes music-bar {
-    to {
-      height: 1rem;
-    }
-  }
 
   /* The cockpit opens out of the ship's window once the camera arrives (--ship-y: how far down
      the screen the ship is). */

@@ -6,6 +6,8 @@ import type { Destination } from "#/utils/destinations";
 
 import { CockpitWindow } from "./components/CockpitWindow";
 
+// The cockpit's command line, which Cmd+K focuses when the cockpit is already up.
+const COMMAND_SELECTOR = "[data-cockpit-command]";
 // Fields the visitor types in: Cmd+K there belongs to them.
 const TYPING_SELECTOR = "input, textarea, select, [contenteditable]:not([contenteditable='false'])";
 
@@ -24,6 +26,8 @@ export function Cockpit() {
     if (!isShortcut || isTyping(event.target)) return;
     event.preventDefault();
     explorer.openCockpit();
+    // A cockpit already up (greeting the visitor) takes them to its command line.
+    document.querySelector<HTMLInputElement>(COMMAND_SELECTOR)?.focus();
   });
 
   // Added once: the effect event always reads the current explorer.
@@ -39,12 +43,18 @@ export function Cockpit() {
   // The ship in the scene flies there first and opens the page on arrival; without one (reduced
   // motion, no WebGL) the page opens at once.
   function handleGo(destination: Destination) {
-    if (explorer.hasShip()) {
-      explorer.startFlight(destination);
-      return;
+    const outcome = explorer.launch(destination);
+    switch (outcome.status) {
+      case "flying":
+        return;
+      case "arrived":
+        void navigate({ to: "/$planetId", params: { planetId: destination.name } });
+        return;
+      default: {
+        const unknownOutcome: never = outcome;
+        return unknownOutcome;
+      }
     }
-    explorer.closeCockpit();
-    void navigate({ to: "/$planetId", params: { planetId: destination.name } });
   }
 
   if (explorer.cockpit.status === "closed") return null;
@@ -52,6 +62,8 @@ export function Cockpit() {
   return (
     <CockpitWindow
       reveal={explorer.cockpit.status === "open" ? explorer.cockpit.reveal : "instant"}
+      isGreeting={explorer.cockpit.status === "open" && explorer.cockpit.isGreeting}
+      onBoard={explorer.boardCockpit}
       isClosing={explorer.cockpit.status === "closing"}
       isLocked={explorer.flight.status === "flying"}
       onClose={explorer.closeCockpit}
