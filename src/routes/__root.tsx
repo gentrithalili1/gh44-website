@@ -4,12 +4,16 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import { SolarSystem } from "#/components/SolarSystem";
 import { SPACE_COLORS } from "#/utils/palette";
-import { PANEL_STYLE } from "#/utils/panel";
 import { findPlanet } from "#/utils/planets";
 
 import appCss from "../styles.css?url";
+import { MusicButton } from "./components/MusicButton";
+import { NotFound } from "./components/NotFound";
 import { messages } from "./messages";
 import { getPlanetStyle } from "./utils/planetStyle";
+
+// Without JavaScript nothing types in or plays, so code and the session replay show whole.
+const NO_SCRIPT_STYLE = "[data-hidden] { visibility: visible !important; }";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -34,6 +38,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <noscript>
+          <style>{NO_SCRIPT_STYLE}</style>
+        </noscript>
       </head>
       <body>
         {children}
@@ -63,24 +70,11 @@ function RootLayout() {
     <div
       data-planet={planet?.id}
       style={getPlanetStyle(planet)}
-      className="fixed inset-0 bg-background transition-colors duration-900 ease-space"
+      className="group/root fixed inset-0 bg-background transition-colors duration-900 ease-space"
     >
       <SolarSystem openPlanetId={planet?.id} />
       <Outlet />
+      <MusicButton />
     </div>
-  );
-}
-
-function NotFound() {
-  return (
-    <main
-      style={PANEL_STYLE}
-      className="fixed inset-x-0 bottom-0 z-20 h-(--sheet-height) overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(var(--panel-width),100%)] md:border-t-0 md:border-l md:px-12 md:pt-24 md:pb-12"
-    >
-      <h1 className="mb-1.5 text-planet-sm font-bold tracking-planet md:text-planet">
-        {messages.notFoundHeading}
-      </h1>
-      <p className="text-lede text-muted">{messages.notFoundDescription}</p>
-    </main>
   );
 }

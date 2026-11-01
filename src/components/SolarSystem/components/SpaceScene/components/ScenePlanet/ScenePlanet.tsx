@@ -15,6 +15,7 @@ import {
 import { getSurfaceShapes } from "#/components/SolarSystem/utils/surface";
 import { PALETTE } from "#/utils/palette";
 import type { Planet } from "#/utils/planets";
+import type { ThemeToolId } from "#/utils/themeTools";
 
 import type { SceneState } from "../../types";
 import { setGroupOpacity } from "../../utils/groupOpacity";
@@ -65,8 +66,11 @@ export function ScenePlanet({ planet, openPlanetId, sceneStateRef, labelList }: 
 
   const state = getPlanetState({ planetId: planet.id, openPlanetId });
   const speed = getOrbitSpeed(planet.orbit.radius);
+  const ringBands = getRingBands(planet);
   const isHovered = hoverSources.size > 0;
-  useCursor(isHovered && state === "idle");
+  // An open gh44-theme still takes ring band clicks: each opens its app's tab.
+  const isRingBandHovered = ringBands.some((band) => hoverSources.has(band.id));
+  useCursor(isHovered && (state === "idle" || (state === "current" && isRingBandHovered)));
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -114,6 +118,17 @@ export function ScenePlanet({ planet, openPlanetId, sceneStateRef, labelList }: 
     void navigate({ to: "/$planetId", params: { planetId: planet.id } });
   }
 
+  function handleRingBandClick(app: ThemeToolId) {
+    if (state === "faded") return;
+    // On the open planet a band switches tabs, like the tabs themselves: no new history entry.
+    void navigate({
+      to: "/$planetId",
+      params: { planetId: planet.id },
+      search: { app },
+      replace: state === "current",
+    });
+  }
+
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
     handleOpen();
@@ -141,9 +156,9 @@ export function ScenePlanet({ planet, openPlanetId, sceneStateRef, labelList }: 
         onPlanetClick={handleOpen}
       />
       <Rings
-        bands={getRingBands(planet)}
+        bands={ringBands}
         onHoverChange={handleHoverChange}
-        onPlanetClick={handleOpen}
+        onBandClick={handleRingBandClick}
       />
       {planet.features.hasRocket ? <Rocket planetSize={planet.size} /> : null}
       <Html

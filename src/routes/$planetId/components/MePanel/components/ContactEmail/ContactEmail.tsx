@@ -1,9 +1,9 @@
 import { CONTACT_EMAIL } from "#/utils/contact";
 
+import { useCopyText } from "../../../../hooks/useCopyText";
+import type { CopyStatus } from "../../../../types";
 import { UNDERLINED_LINK_CLASS_NAME } from "../../../../utils/underlinedLink";
-import { useCopyText } from "./hooks/useCopyText";
 import { messages } from "./messages";
-import type { CopyStatus } from "./types";
 
 function getStatusCopy(status: CopyStatus) {
   switch (status) {

@@ -8,5 +8,5 @@ export async function renderAt(path: string) {
 
   await act(() => router.load());
 
-  return render(<RouterProvider router={router} />, { container: document });
+  return { ...render(<RouterProvider router={router} />, { container: document }), router };
 }

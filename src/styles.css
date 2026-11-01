@@ -13,6 +13,8 @@
   --color-rule: var(--rule);
   --color-sun: var(--sun);
   --color-accent: var(--accent);
+  /* Code blocks sit a shade below the page. */
+  --color-code: color-mix(in oklab, var(--background) 85%, black);
 
   --color-terracotta: var(--terracotta);
   --color-sage: var(--sage);
@@ -47,12 +49,22 @@
   --text-planet--line-height: 1;
   --text-planet-sm: 2.5rem;
   --text-planet-sm--line-height: 1;
+  --text-code: 0.84375rem;
+  --text-code--line-height: 1.7;
 
   --tracking-label: 0.02em;
   --tracking-kicker: 0.08em;
   --tracking-planet: -0.04em;
 
   --ease-space: cubic-bezier(0.33, 1, 0.68, 1);
+
+  --animate-music-bar: music-bar 900ms var(--ease-space) infinite alternate;
+
+  @keyframes music-bar {
+    to {
+      height: 1rem;
+    }
+  }
 }
 
 @layer base {

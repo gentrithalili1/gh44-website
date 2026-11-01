@@ -21,9 +21,12 @@ export function PlanetLabel({ planet, state, onHoverChange }: PlanetLabelProps) 
   }
 
   return (
+    // On phones the scene moves a label (`--label-nudge-x`, `--label-nudge-y`) when it would
+    // touch another.
     <div
       data-state={state}
-      className="flex -translate-x-1/2 flex-col items-center pt-2 text-center transition-opacity duration-400 data-[state=current]:opacity-0 data-[state=faded]:opacity-0 focus-within:opacity-100"
+      data-planet-label={planet.id}
+      className="flex translate-x-[calc(var(--label-nudge-x,0px)-50%)] translate-y-(--label-nudge-y,0px) flex-col items-center pt-2 text-center transition-opacity duration-400 data-[state=current]:opacity-0 data-[state=faded]:opacity-0 focus-within:opacity-100"
     >
       <Link
         to="/$planetId"
