@@ -8,10 +8,10 @@ Floki's voice: [Piper](https://github.com/OHF-Voice/piper1-gpl) text to speech b
 
 ## Environment variables on the site
 
-| Variable | Value |
-| --- | --- |
+| Variable             | Value                                                                 |
+| -------------------- | --------------------------------------------------------------------- |
 | `FLOKI_GROQ_API_KEY` | Groq API key ([console.groq.com/keys](https://console.groq.com/keys)) |
-| `FLOKI_TTS_URL` | This service's internal URL, for example `http://floki-voice:5000` |
+| `FLOKI_TTS_URL`      | This service's internal URL, for example `http://floki-voice:5000`    |
 
 Without `FLOKI_GROQ_API_KEY`, Floki answers "comms down". Without `FLOKI_TTS_URL`, he answers in text only.
 
