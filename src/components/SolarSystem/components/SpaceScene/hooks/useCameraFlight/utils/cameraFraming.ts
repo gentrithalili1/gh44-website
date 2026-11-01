@@ -35,9 +35,11 @@ export type CameraFocus =
   | { kind: "planet"; planetId: string }
   | { kind: "ship" };
 
-// With the cockpit open, pixels per system unit on any screen: the ship close, and enough of
-// its neighbourhood through the windshield that a planet or two is usually in view.
+// With the cockpit open, pixels per system unit on any screen, and how far off straight down the
+// camera looks: from just behind the ship, in toward the sun, so a planet or two is usually in
+// view through the windshield.
 const SHIP_ZOOM = 3;
+const SHIP_POLAR = 1.05;
 
 // The share of a phone's height the bottom sheet leaves free.
 const PHONE_FREE_HEIGHT = 1 - SHEET_HEIGHT;
@@ -208,6 +210,17 @@ export function getDistanceLimits(viewport: Viewport) {
   };
 }
 
+type Offset = { x: number; y: number; z: number };
+
+// The angle a camera looks from, given where it sits relative to its point: the inverse of
+// `getCameraPlacement`.
+export function getCameraAngle(offset: Offset): CameraAngle {
+  return {
+    polar: Math.acos(offset.y / Math.hypot(offset.x, offset.y, offset.z)),
+    azimuth: Math.atan2(offset.x, offset.z),
+  };
+}
+
 type GetCameraPlacementParams = { pose: CameraPose; angle: CameraAngle; viewport: Viewport };
 
 // Where the perspective camera goes for a pose seen from an angle, and the view offset that
@@ -240,6 +253,11 @@ export function getShipCameraPose({ viewport, shipPosition }: GetShipCameraPoseP
     zoom: SHIP_ZOOM,
     offset: { x: 0, y: viewport.height * COCKPIT_SHIP_Y - viewport.height / 2 },
   };
+}
+
+// The angle the cockpit looks from: behind the ship, in toward the sun across the system.
+export function getShipCameraAngle(shipPosition: Point): CameraAngle {
+  return { polar: SHIP_POLAR, azimuth: Math.atan2(shipPosition.x, shipPosition.y) };
 }
 
 type GetCameraFocusParams = {

@@ -1,12 +1,16 @@
 import { PerspectiveCamera, Vector3 } from "three";
 import { describe, expect, it } from "vitest";
 
-import { findPlanet } from "#/utils/planets";
+import { getOrbitAngle } from "#/components/SolarSystem/utils/motion";
+import { getShipAngle, getShipPose } from "#/components/SolarSystem/utils/ship";
+import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
+import { findPlanet, SOLAR_SYSTEM } from "#/utils/planets";
 
 import {
   CAMERA_FOV,
   type CameraAngle,
   type CameraPose,
+  getCameraAngle,
   getCameraDistance,
   getCameraFocus,
   getCameraPlacement,
@@ -14,6 +18,7 @@ import {
   getHomePose,
   getPlanetPose,
   getPlanetReach,
+  getShipCameraAngle,
   getShipCameraPose,
   HOME_ANGLE,
   mixAngles,
@@ -164,6 +169,23 @@ describe("getDistanceLimits", () => {
   });
 });
 
+describe("getCameraAngle", () => {
+  it("reads back the angle a placement looks from", () => {
+    const angle = { polar: 1.1, azimuth: -2.3 };
+    const placement = getCameraPlacement({
+      pose: { x: 40, y: -70, zoom: 2, offset: { x: -300, y: 20 } },
+      angle,
+      viewport: DESKTOP,
+    });
+    const [x, y, z] = placement.position;
+    const [targetX, targetY, targetZ] = placement.target;
+
+    const readBack = getCameraAngle({ x: x - targetX, y: y - targetY, z: z - targetZ });
+    expect(readBack.polar).toBeCloseTo(angle.polar);
+    expect(readBack.azimuth).toBeCloseTo(angle.azimuth);
+  });
+});
+
 describe("getShipCameraPose", () => {
   const ship = { x: -180, y: -160 };
 
@@ -180,6 +202,68 @@ describe("getShipCameraPose", () => {
   it("zooms to 3 pixels a unit on any screen: close on the ship, wide enough for planets nearby", () => {
     for (const viewport of [DESKTOP, PHONE]) {
       expect(getShipCameraPose({ viewport, shipPosition: ship }).zoom).toBe(3);
+    }
+  });
+});
+
+describe("getShipCameraAngle", () => {
+  // The cockpit's windshield: the screen above its console, which is shorter on phones.
+  function getWindshield(viewport: typeof DESKTOP) {
+    return { left: 0.05, right: 0.95, top: 0.06, bottom: viewport.width < 720 ? 0.68 : 0.53 };
+  }
+
+  type CountParams = { viewport: typeof DESKTOP; shipTime: number; planetTime: number };
+
+  function countPlanetsInView({ viewport, shipTime, planetTime }: CountParams) {
+    const ship = getShipPose(getShipAngle(shipTime));
+    const pose = getShipCameraPose({ viewport, shipPosition: ship });
+    const angle = getShipCameraAngle(ship);
+    const windshield = getWindshield(viewport);
+
+    return SOLAR_SYSTEM.filter((planet) => {
+      const onScreen = project({
+        pose,
+        angle,
+        viewport,
+        point: getOrbitPosition({
+          radius: planet.orbit.radius,
+          phase: getOrbitAngle({ planet, time: planetTime }),
+        }),
+      });
+      return (
+        onScreen.x > viewport.width * windshield.left &&
+        onScreen.x < viewport.width * windshield.right &&
+        onScreen.y > viewport.height * windshield.top &&
+        onScreen.y < viewport.height * windshield.bottom
+      );
+    }).length;
+  }
+
+  it("looks from behind the ship in toward the sun, straight ahead of it", () => {
+    const ship = getShipPose(1);
+    const pose = getShipCameraPose({ viewport: DESKTOP, shipPosition: ship });
+
+    const sun = project({
+      pose,
+      angle: getShipCameraAngle(ship),
+      viewport: DESKTOP,
+      point: { x: 0, y: 0 },
+    });
+    expect(sun.x).toBeCloseTo(720);
+    expect(sun.y).toBeLessThan(900 * 0.86);
+  });
+
+  it("usually shows a planet or two through the windshield, on desktop and phones", () => {
+    for (const viewport of [DESKTOP, PHONE, { width: 360, height: 740 }]) {
+      // Ten laps of the ship, the planets anywhere on their orbits when the cockpit opens.
+      const counts = Array.from({ length: 200 }, (_, step) =>
+        countPlanetsInView({ viewport, shipTime: step * 3.5, planetTime: step * 37.3 }),
+      );
+
+      expect(counts.filter((count) => count >= 1).length / counts.length).toBeGreaterThan(0.85);
+      const average = counts.reduce((sum, count) => sum + count, 0) / counts.length;
+      expect(average).toBeGreaterThan(1);
+      expect(average).toBeLessThan(3);
     }
   });
 });

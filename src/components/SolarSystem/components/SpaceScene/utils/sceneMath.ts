@@ -11,6 +11,9 @@ export const FADE_LAMBDA = 6;
 export const MAX_FRAME_STEP = 0.05;
 // Opacity of everything that steps back while a planet is open.
 export const FADED_OPACITY = 0.08;
+// Opacity of the planets through the cockpit's windshield: stepped back, but still there to see,
+// mostly their night sides as the cockpit looks in toward the sun.
+export const WINDSHIELD_OPACITY = 0.45;
 
 // A press that moved further than this many pixels was a drag to orbit the camera, not a click.
 const DRAG_TOLERANCE_PX = 4;

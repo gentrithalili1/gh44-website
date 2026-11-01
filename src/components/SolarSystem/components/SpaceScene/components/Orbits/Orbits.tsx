@@ -1,31 +1,39 @@
-import { useFrame, useThree } from "@react-three/fiber";
-import { useRef } from "react";
-import { DoubleSide, type Group } from "three";
+import { useFrame } from "@react-three/fiber";
+import { useRef, useState } from "react";
+import type { Group } from "three";
 
-import { SYSTEM_SIZE } from "#/components/SolarSystem/utils/space";
+import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
 import { SPACE_COLORS } from "#/utils/palette";
 import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { setGroupOpacity } from "../../utils/groupOpacity";
-import { damp, FADED_OPACITY } from "../../utils/sceneMath";
+import { damp, FADED_OPACITY, toPlanePosition } from "../../utils/sceneMath";
 
 const ORBIT_SEGMENTS = 256;
-// About a pixel wide from home on any screen.
-const ORBIT_WIDTH_PX = 1;
-// Lies flat on the orbit plane.
-const FLAT = -Math.PI / 2;
+
+// A planet's orbit, laid on the orbit plane.
+function getOrbitPositions(radius: number) {
+  return new Float32Array(
+    Array.from({ length: ORBIT_SEGMENTS }, (_, index) =>
+      toPlanePosition(getOrbitPosition({ radius, phase: (index / ORBIT_SEGMENTS) * Math.PI * 2 })),
+    ).flat(),
+  );
+}
 
 interface OrbitsProps {
   isPlanetOpen: boolean;
 }
 
-// One thin ring per planet, flat on the orbit plane.
+// One hairline per planet on the orbit plane; WebGL lines stay 1px at any distance.
 export function Orbits({ isPlanetOpen }: OrbitsProps) {
-  const size = useThree((state) => state.size);
+  const [orbits] = useState(() =>
+    SOLAR_SYSTEM.map((planet) => ({
+      id: planet.id,
+      positions: getOrbitPositions(planet.orbit.radius),
+    })),
+  );
   const groupRef = useRef<Group>(null);
   const opacityRef = useRef(1);
-
-  const halfWidth = (ORBIT_WIDTH_PX * SYSTEM_SIZE) / Math.min(size.width, size.height) / 2;
 
   useFrame((_, delta) => {
     opacityRef.current = damp({
@@ -37,23 +45,14 @@ export function Orbits({ isPlanetOpen }: OrbitsProps) {
   });
 
   return (
-    <group ref={groupRef} rotation-x={FLAT}>
-      {SOLAR_SYSTEM.map((planet) => (
-        <mesh key={planet.id}>
-          <ringGeometry
-            args={[
-              planet.orbit.radius - halfWidth,
-              planet.orbit.radius + halfWidth,
-              ORBIT_SEGMENTS,
-            ]}
-          />
-          <meshBasicMaterial
-            color={SPACE_COLORS.rule}
-            transparent
-            depthWrite={false}
-            side={DoubleSide}
-          />
-        </mesh>
+    <group ref={groupRef}>
+      {orbits.map(({ id, positions }) => (
+        <lineLoop key={id}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          </bufferGeometry>
+          <lineBasicMaterial color={SPACE_COLORS.rule} transparent depthWrite={false} />
+        </lineLoop>
       ))}
     </group>
   );

@@ -5,6 +5,7 @@ import { useContextBridge } from "its-fine";
 import { type RefObject, useRef, useState } from "react";
 import type { Group } from "three";
 
+import type { PlanetState } from "#/components/SolarSystem/types";
 import { getOrbitAngle } from "#/components/SolarSystem/utils/motion";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
 import { getRingBands, getUprightRing } from "#/components/SolarSystem/utils/rings";
@@ -17,6 +18,7 @@ import { setGroupOpacity } from "../../utils/groupOpacity";
 import {
   damp,
   FADED_OPACITY,
+  WINDSHIELD_OPACITY,
   getOrbitPace,
   isDragRelease,
   toPlanePosition,
@@ -34,6 +36,18 @@ const LABEL_HOVER = "label";
 
 // Labels stay under the panel and the back link.
 const LABEL_Z_INDEX_RANGE = [1, 0];
+
+function getPlanetOpacity({
+  state,
+  isCockpitOpen,
+}: {
+  state: PlanetState;
+  isCockpitOpen: boolean;
+}) {
+  if (isCockpitOpen) return WINDSHIELD_OPACITY;
+
+  return state === "faded" ? FADED_OPACITY : 1;
+}
 
 interface ScenePlanetProps {
   planet: SolarPlanet;
@@ -85,7 +99,7 @@ export function ScenePlanet({
     );
     opacityRef.current = damp({
       current: opacityRef.current,
-      target: state === "faded" ? FADED_OPACITY : 1,
+      target: getPlanetOpacity({ state, isCockpitOpen }),
       delta,
     });
     setGroupOpacity({ group, opacity: opacityRef.current });
@@ -161,8 +175,8 @@ export function ScenePlanet({
         <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
       ) : null}
       {/* The label hangs under the planet as seen: it turns to face the camera. */}
-      <Billboard>
-        {planet.kind === "site" ? (
+      {planet.kind === "site" ? (
+        <Billboard>
           <Html
             as="li"
             portal={{ current: labelList }}
@@ -174,8 +188,8 @@ export function ScenePlanet({
               <PlanetLabel planet={planet} state={state} onHoverChange={handleLabelHoverChange} />
             </ContextBridge>
           </Html>
-        ) : null}
-      </Billboard>
+        </Billboard>
+      ) : null}
     </group>
   );
 }

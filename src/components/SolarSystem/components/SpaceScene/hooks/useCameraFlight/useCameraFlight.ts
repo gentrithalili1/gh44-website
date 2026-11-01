@@ -12,12 +12,14 @@ import {
   type CameraAngle,
   type CameraFocus,
   type CameraPose,
+  getCameraAngle,
   getCameraDistance,
   getCameraFocus,
   getCameraPlacement,
   getCameraPose,
   getDistanceLimits,
   getPlanetPosition,
+  getShipCameraAngle,
   getShipCameraPose,
   HOME_ANGLE,
   mixAngles,
@@ -40,9 +42,8 @@ type Flight = {
   // What the flight is about (flown to, or left behind); it moves straight on screen.
   anchor: CameraFocus;
   from: CameraPose;
-  // The camera turns from its angle at take-off to this one.
+  // The camera's angle at take-off; it turns from there to the focus' own angle.
   fromAngle: CameraAngle;
-  toAngle: CameraAngle;
   // 0 at take-off, 1 on arrival; GSAP drives it.
   progress: number;
 };
@@ -77,15 +78,25 @@ function getFocusPosition({ focus, sceneState }: { focus: CameraFocus; sceneStat
   }
 }
 
+// The angle the camera turns to for a focus: a planet keeps the one the visitor had at take-off,
+// home turns back to the home angle, and the cockpit looks from behind the ship toward the sun.
+function getFocusAngle({ flight, sceneState }: { flight: Flight; sceneState: SceneState }) {
+  switch (flight.focus.kind) {
+    case "home":
+      return HOME_ANGLE;
+    case "planet":
+      return flight.fromAngle;
+    case "ship":
+      return getShipCameraAngle(sceneState.shipPose);
+    default: {
+      const unknownFocus: never = flight.focus;
+      return unknownFocus;
+    }
+  }
+}
+
 // Where the camera is looking from, relative to its point.
 const fromPoint = new Vector3();
-
-function getAngle(offset: Vector3): CameraAngle {
-  return {
-    polar: Math.acos(offset.y / offset.length()),
-    azimuth: Math.atan2(offset.x, offset.z),
-  };
-}
 
 type UseCameraFlightParams = {
   openPlanetId: string | undefined;
@@ -94,8 +105,8 @@ type UseCameraFlightParams = {
 };
 
 // Looks down on the system at an angle. Opening a planet flies in and frames it beside the panel
-// (or above the sheet), then follows it; the open cockpit flies in close to the ship and follows
-// it; closing flies home and turns back to the home angle. Between flights the visitor orbits
+// (or above the sheet), then follows it; the open cockpit flies in behind the ship, looking in
+// toward the sun, and follows it; closing flies home and turns back to the home angle. Between flights the visitor orbits
 // and zooms around what the camera follows. The first frame is already in place, so a deep link
 // starts framed.
 export function useCameraFlight({
@@ -118,7 +129,6 @@ export function useCameraFlight({
     anchor: focus,
     from: { x: 0, y: 0, zoom: 1, offset: { x: 0, y: 0 } },
     fromAngle: HOME_ANGLE,
-    toAngle: HOME_ANGLE,
     progress: 1,
   });
   // The pose and angle drawn last frame, and how far the visitor has zoomed from the framing.
@@ -137,8 +147,6 @@ export function useCameraFlight({
       flight.focus = focus;
       flight.from = poseRef.current ?? flight.from;
       flight.fromAngle = angleRef.current;
-      // A planet keeps the angle the visitor chose; home and the ship turn back to the home one.
-      flight.toAngle = focus.kind === "planet" ? angleRef.current : HOME_ANGLE;
       zoomScaleRef.current = 1;
       flight.progress = 0;
       gsap.to(flight, { progress: 1, duration, ease: FLIGHT_EASE, overwrite: true });
@@ -156,7 +164,7 @@ export function useCameraFlight({
     // Settled, the controls ran first this frame: take on the visitor's orbit and zoom.
     if (!isFlying && lastPose && controls) {
       fromPoint.copy(camera.position).sub(controls.target);
-      angleRef.current = getAngle(fromPoint);
+      angleRef.current = getCameraAngle(fromPoint);
       zoomScaleRef.current *=
         getCameraDistance({ viewport: size, zoom: lastPose.zoom }) / fromPoint.length();
     }
@@ -178,9 +186,12 @@ export function useCameraFlight({
       isFlying && anchor
         ? mixPoses({ from: flight.from, to: target, anchor, progress: flight.progress })
         : target;
+    const focusAngle = getFocusAngle({ flight, sceneState });
+    // Settled, the visitor steers, except in the cockpit, which keeps turning with the ship.
+    const settledAngle = flight.focus.kind === "ship" ? focusAngle : angleRef.current;
     const angle = isFlying
-      ? mixAngles({ from: flight.fromAngle, to: flight.toAngle, progress: flight.progress })
-      : angleRef.current;
+      ? mixAngles({ from: flight.fromAngle, to: focusAngle, progress: flight.progress })
+      : settledAngle;
     poseRef.current = pose;
     angleRef.current = angle;
     sceneState.cameraZoom = pose.zoom;
