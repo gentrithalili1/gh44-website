@@ -9,7 +9,6 @@ import { getOrbitAngle } from "#/components/SolarSystem/utils/motion";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
 import { getRingBands, getUprightRing } from "#/components/SolarSystem/utils/rings";
 import { getOrbitPosition, getPlanetState } from "#/components/SolarSystem/utils/space";
-import { PALETTE } from "#/utils/palette";
 import type { SolarPlanet } from "#/utils/planets";
 import type { ThemeToolId } from "#/utils/themeTools";
 
@@ -29,12 +28,10 @@ import { Rings } from "./components/Rings";
 import { Rocket } from "./components/Rocket";
 import { UprightRing } from "./components/UprightRing";
 import type { HoverChange } from "./types";
-import { getBodyStencilMark } from "./utils/bodyStencil";
 
 const BODY_HOVER = "body";
 const LABEL_HOVER = "label";
 
-const SPHERE_SEGMENTS = 48;
 // Labels stay under the panel and the back link.
 const LABEL_Z_INDEX_RANGE = [1, 0];
 
@@ -45,8 +42,6 @@ interface ScenePlanetProps {
   isCockpitOpen: boolean;
   sceneStateRef: RefObject<SceneState>;
   labelList: HTMLUListElement;
-  // Unique per planet: clips its spinning surface to its own body.
-  stencilRef: number;
 }
 
 // One planet on its orbit, carrying what says what it holds: surface, moons, satellites, rings
@@ -58,7 +53,6 @@ export function ScenePlanet({
   isCockpitOpen,
   sceneStateRef,
   labelList,
-  stencilRef,
 }: ScenePlanetProps) {
   // Hands the router to the label, which drei renders in its own React root.
   const ContextBridge = useContextBridge();
@@ -143,23 +137,16 @@ export function ScenePlanet({
 
   return (
     <group ref={groupRef}>
-      <mesh
+      <PlanetSurface
+        planet={planet}
+        sceneStateRef={sceneStateRef}
         onPointerOver={isSitePlanet ? handlePointerOver : undefined}
         onPointerOut={isSitePlanet ? handlePointerOut : undefined}
         onClick={isSitePlanet ? handleClick : undefined}
-      >
-        <sphereGeometry args={[planet.size, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
-        <meshLambertMaterial
-          {...getBodyStencilMark(stencilRef)}
-          color={PALETTE[planet.color].soft}
-        />
-      </mesh>
+      />
       {/* What the 2D scene drew around the planet faces the camera, until it moves to 3D. */}
       <Billboard>
         {uprightRing ? <UprightRing ring={uprightRing} /> : null}
-        <group position-z={planet.size}>
-          <PlanetSurface planet={planet} sceneStateRef={sceneStateRef} stencilRef={stencilRef} />
-        </group>
         <Orbiters
           orbiters={getOrbiters(planet)}
           isPlanetOpen={state === "current"}

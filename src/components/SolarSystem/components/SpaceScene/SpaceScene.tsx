@@ -64,8 +64,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         flat
         dpr={[1, maxDpr]}
         frameloop={isPageVisible ? "always" : "never"}
-        // The stencil clips each planet's spinning surface to its disc.
-        gl={{ alpha: true, antialias: true, stencil: true }}
+        gl={{ alpha: true, antialias: true }}
         camera={{ fov: CAMERA_FOV, near: 1, far: CAMERA_FAR }}
         onPointerMissed={handlePointerMissed}
         aria-hidden="true"
@@ -77,7 +76,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         <Sun isPlanetOpen={isSystemFaded} />
         <Orbits isPlanetOpen={isSystemFaded} />
         {labelList
-          ? SOLAR_SYSTEM.map((planet, index) => (
+          ? SOLAR_SYSTEM.map((planet) => (
               <ScenePlanet
                 key={planet.id}
                 planet={planet}
@@ -85,8 +84,6 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
                 isCockpitOpen={isCockpitOpen}
                 sceneStateRef={sceneStateRef}
                 labelList={labelList}
-                // 0 is the cleared stencil, so refs start at 1.
-                stencilRef={index + 1}
               />
             ))
           : null}
