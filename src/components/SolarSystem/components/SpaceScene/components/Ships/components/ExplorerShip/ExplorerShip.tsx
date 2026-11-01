@@ -148,8 +148,8 @@ interface ExplorerShipProps {
 // The gh44 explorer orbits the sun between Mars and Jupiter on the scene clock, nose first,
 // bobbing, its engine glowing and now and then puffing a trail. It holds still while hovered.
 // Clicking it opens the cockpit: the camera flies in and follows it, its engine flared. On
-// `go` it turns toward the planet and flies there, then the page opens. It steps back, and takes
-// no clicks, while a planet is open.
+// `go` it turns toward the planet and flies there, then the page opens. It steps back while a
+// planet is open, and still opens the cockpit from there, coming forward while hovered.
 export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps) {
   const explorer = useExplorer();
   const navigate = useNavigate();
@@ -180,7 +180,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
   // Over an open planet the cockpit still flies to the ship, so it comes forward for it.
   const isFaded = openPlanetId !== undefined && !isCockpitOpen && !isFlying;
   // The cockpit covers the ship, so a hover from before it opened no longer counts.
-  const isActive = isHovered && !isFaded && !isCockpitOpen;
+  const isActive = isHovered && !isCockpitOpen;
   useCursor(isActive);
 
   // `go`: a beat for the confirmation, the cockpit closes, the ship turns and flies, and the page
@@ -270,7 +270,8 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
 
     opacityRef.current = damp({
       current: opacityRef.current,
-      target: isFaded ? FADED_OPACITY : 1,
+      // Pointed at, a stepped-back ship comes forward: it opens the cockpit from any page.
+      target: isFaded && !isActive ? FADED_OPACITY : 1,
       delta,
     });
     const opacity = opacityRef.current * pose.fade;
@@ -334,7 +335,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
           <mesh
             onPointerOver={handlePointerOver}
             onPointerOut={handlePointerOut}
-            onClick={isFaded ? undefined : handleClick}
+            onClick={handleClick}
           >
             <sphereGeometry args={[HIT_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
             <meshBasicMaterial colorWrite={false} depthWrite={false} />
