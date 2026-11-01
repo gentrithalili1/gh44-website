@@ -12,11 +12,11 @@ import {
 } from "./CockpitTerminal.elements";
 import { TerminalFloki } from "./components/TerminalFloki";
 import {
+  type Floki,
   type FlokiFailureReason,
   type FlokiHearing,
   type FlokiOutcome,
-  useFloki,
-} from "./hooks/useFloki";
+} from "../../hooks/useFloki";
 import { type TerminalLine, useTerminal } from "./hooks/useTerminal";
 import { messages } from "./messages";
 import { getLineSegments } from "./utils/terminalLinks";
@@ -29,16 +29,15 @@ interface CockpitTerminalProps {
   isLocked: boolean;
   // A greeting cockpit leaves focus where it was: the command line waits for the visitor.
   shouldFocus: boolean;
+  // The cockpit's Floki, shared with his screen above the radar.
+  floki: Floki;
   onGo: (destination: Destination) => void;
 }
 
 // A zsh window in the gh44 Warp theme on the console's center screen. Every destination it prints
 // is a link: clicking one runs `go` for it.
-export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminalProps) {
+export function CockpitTerminal({ isLocked, shouldFocus, floki, onGo }: CockpitTerminalProps) {
   const terminal = useTerminal();
-  const floki = useFloki();
-  // Floki says hello out loud once, on the first tap of talk.
-  const [hasGreeted, setHasGreeted] = useState(false);
   // A conversation goes on, turn after turn, until it ends; a newer one replaces it.
   const [conversation, setConversation] = useState<"off" | "on">("off");
   const conversationIdRef = useRef(0);
@@ -151,10 +150,9 @@ export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminal
       return conversationId === conversationIdRef.current;
     }
     setConversation("on");
-    if (!hasGreeted) {
-      setHasGreeted(true);
-      // Stopped during the greeting: the mic stays closed.
-      if ((await floki.speak(messages.floki.spokenGreeting)) === "interrupted") return;
+    // Stopped during the greeting: the mic stays closed.
+    if (!floki.hasGreeted && (await floki.greet(messages.floki.spokenGreeting)) === "interrupted") {
+      return;
     }
     let quietTurns = 0;
     while (isCurrent()) {
@@ -305,7 +303,6 @@ export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminal
         canListen={floki.canListen}
         isLocked={isLocked}
         isConversing={conversation === "on"}
-        getLevel={floki.getLevel}
         onTalk={() => void handleTalk()}
       />
       {/* Reversed, so the newest line stays in view as lines arrive. A click anywhere in the

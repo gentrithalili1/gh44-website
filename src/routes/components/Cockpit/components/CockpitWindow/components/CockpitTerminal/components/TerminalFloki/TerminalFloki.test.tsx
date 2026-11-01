@@ -12,7 +12,6 @@ describe("TerminalFloki", () => {
         canListen
         isLocked={false}
         isConversing={false}
-        getLevel={() => 0}
         onTalk={vi.fn()}
       />,
     );
@@ -29,7 +28,6 @@ describe("TerminalFloki", () => {
         canListen
         isLocked={false}
         isConversing={false}
-        getLevel={() => 0}
         onTalk={onTalk}
       />,
     );
@@ -42,14 +40,7 @@ describe("TerminalFloki", () => {
 
   it("offers to stop floki while he listens", () => {
     render(
-      <TerminalFloki
-        status="listening"
-        canListen
-        isLocked={false}
-        isConversing
-        getLevel={() => 0}
-        onTalk={vi.fn()}
-      />,
+      <TerminalFloki status="listening" canListen isLocked={false} isConversing onTalk={vi.fn()} />,
     );
 
     expect(screen.getByRole("button", { name: "stop floki" })).toHaveAttribute(
@@ -65,7 +56,6 @@ describe("TerminalFloki", () => {
         canListen={false}
         isLocked={false}
         isConversing={false}
-        getLevel={() => 0}
         onTalk={vi.fn()}
       />,
     );

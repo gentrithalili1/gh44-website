@@ -47,6 +47,8 @@ async function requestAnswer({
 // Floki, the explorer's onboard computer: carries out plain orders at once, takes a question,
 // keeps the conversation while the cockpit is open, and returns what he says and where to fly.
 // The component prints, speaks and flies.
+export type Floki = ReturnType<typeof useFloki>;
+
 export function useFloki() {
   const signal = useFlokiSignal();
   const voice = useFlokiVoice({ playVoice: signal.playVoice });
@@ -54,6 +56,8 @@ export function useFloki() {
   const [requestStatus, setRequestStatus] = useState<"idle" | "thinking">("idle");
   const [turns, setTurns] = useState<readonly FlokiTurn[]>([]);
   const [humor, setHumor] = useState(DEFAULT_HUMOR);
+  // Floki says hello out loud once a cockpit visit: the welcome, or the first tap of talk.
+  const [greeting, setGreeting] = useState<"pending" | "done">("pending");
   // Bumped by stop, so an answer still on its way is dropped.
   const questionIdRef = useRef(0);
 
@@ -128,6 +132,16 @@ export function useFloki() {
     return voice.speak(text);
   }
 
+  // Says hello, once. A greeting the browser blocked (no click or key yet) can be tried again.
+  async function greet(text: string) {
+    if (greeting === "done") return "spoken";
+    setGreeting("done");
+    const speech = await speak(text);
+    if (speech === "blocked") setGreeting("pending");
+
+    return speech;
+  }
+
   // Cuts Floki off and drops the answer he is thinking about, for when the visitor takes the
   // controls themselves.
   function stop() {
@@ -143,6 +157,8 @@ export function useFloki() {
     listen,
     stopListening: listening.stop,
     speak,
+    hasGreeted: greeting === "done",
+    greet,
     stopSpeaking: voice.stop,
     stop,
     getLevel: signal.getLevel,

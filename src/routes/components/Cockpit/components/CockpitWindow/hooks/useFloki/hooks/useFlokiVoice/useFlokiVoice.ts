@@ -5,8 +5,9 @@ import { speakFloki } from "./speakFloki";
 import type { Playback, PlayVoice } from "./types";
 
 // What happened to a line: it played to the end, a new line, stop or closing the cockpit cut it
-// off, or it could not be voiced.
-export type FlokiSpeech = "spoken" | "interrupted" | "silent";
+// off, the browser blocked sound before the visitor's first click or key, or it could not be
+// voiced.
+export type FlokiSpeech = "spoken" | "interrupted" | "blocked" | "silent";
 
 async function requestSpeech(text: string): Promise<SpeakFlokiOutcome> {
   try {
@@ -20,20 +21,23 @@ async function requestSpeech(text: string): Promise<SpeakFlokiOutcome> {
 // A plain audio element: the fallback when the audio graph can't play the line.
 function playElement(audioUrl: string): Playback {
   const audio = new Audio(audioUrl);
-  let finish = () => {};
-  const done = new Promise<void>((resolve) => {
+  let finish: (result: "ended" | "blocked") => void = () => {};
+  const done = new Promise<"ended" | "blocked">((resolve) => {
     finish = resolve;
-    audio.addEventListener("ended", () => resolve());
-    audio.addEventListener("error", () => resolve());
+    audio.addEventListener("ended", () => resolve("ended"));
+    audio.addEventListener("error", () => resolve("ended"));
   });
-  // Refused (no gesture) or broken audio: the line counts as done.
-  audio.play().catch(() => finish());
+  audio.play().catch((error: unknown) => {
+    // No click or key press yet: blocked. Broken audio: the line counts as done.
+    const isBlocked = error instanceof DOMException && error.name === "NotAllowedError";
+    finish(isBlocked ? "blocked" : "ended");
+  });
 
   return {
     done,
     stop: () => {
       audio.pause();
-      finish();
+      finish("ended");
     },
   };
 }
@@ -91,12 +95,12 @@ export function useFlokiVoice({ playVoice }: UseFlokiVoiceParams = {}) {
       return "interrupted";
     }
     playbackRef.current = playback;
-    await playback.done;
+    const result = await playback.done;
     if (!isCurrent()) return "interrupted";
     playbackRef.current = undefined;
     setIsSpeaking(false);
 
-    return "spoken";
+    return result === "blocked" ? "blocked" : "spoken";
   }
 
   return { isSpeaking, speak, stop };

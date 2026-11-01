@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createRateLimit, FLOKI_TIMEOUT_MS } from "../../flokiLimits";
 import type { SpeakFlokiOutcome } from "../../types";
 import { FLOKI_MAX_REPLY_LENGTH } from "../../utils/flokiPrompt";
+import { getSpokenText } from "./utils/spokenText";
 
 // Floki speaks his own lines and a few short ones of the terminal's, never more than a reply.
 const MAX_TEXT_LENGTH = FLOKI_MAX_REPLY_LENGTH;
@@ -31,7 +32,7 @@ export const speakFloki = createServerFn({ method: "POST" })
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: AbortSignal.timeout(FLOKI_TIMEOUT_MS),
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: getSpokenText(text) }),
       });
       if (!response.ok) {
         console.error(`Floki: the voice answered ${response.status}`);

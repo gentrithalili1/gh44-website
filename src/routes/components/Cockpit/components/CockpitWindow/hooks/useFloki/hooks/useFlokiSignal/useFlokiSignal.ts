@@ -73,9 +73,9 @@ export function useFlokiSignal() {
       source.connect(signal.analyser);
       source.connect(signal.context.destination);
       let finish = () => {};
-      const done = new Promise<void>((resolve) => {
-        finish = resolve;
-        source.addEventListener("ended", () => resolve());
+      const done = new Promise<"ended">((resolve) => {
+        finish = () => resolve("ended");
+        source.addEventListener("ended", finish);
       });
       source.start();
 

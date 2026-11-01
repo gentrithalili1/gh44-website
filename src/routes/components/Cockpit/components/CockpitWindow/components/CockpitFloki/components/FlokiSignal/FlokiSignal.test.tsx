@@ -16,11 +16,11 @@ afterEach(() => {
 });
 
 describe("FlokiSignal", () => {
-  it("is four slabs of six cells", () => {
+  it("is a grille of five slabs of five cells", () => {
     const { container } = render(<FlokiSignal status="idle" getLevel={() => 0} />);
 
-    expect(getSlabs(container).children).toHaveLength(4);
-    expect(getSlabs(container).firstElementChild?.children).toHaveLength(6);
+    expect(getSlabs(container).children).toHaveLength(5);
+    expect(getSlabs(container).firstElementChild?.children).toHaveLength(5);
   });
 
   it("follows the signal while floki speaks", async () => {

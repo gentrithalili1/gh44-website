@@ -11,10 +11,13 @@ import {
   ConsoleScreen,
   IndicatorLights,
 } from "./CockpitWindow.elements";
+import { CockpitFloki } from "./components/CockpitFloki";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
 import { CockpitReadout } from "./components/CockpitReadout";
 import { CockpitTerminal } from "./components/CockpitTerminal";
+import { useFloki } from "./hooks/useFloki";
+import { useFlokiWelcome } from "./hooks/useFlokiWelcome";
 import { messages } from "./messages";
 
 const FOCUSABLE_SELECTOR = "button:not(:disabled), input, a[href]:not([aria-disabled='true'])";
@@ -70,6 +73,9 @@ export function CockpitWindow({
   const dialogRef = useRef<HTMLDivElement>(null);
   // What had focus when the cockpit opened, read on the first render before the input takes it.
   const [returnFocusTo] = useState(() => document.activeElement);
+  // The ship's computer: the terminal talks to him, his screen shows him.
+  const floki = useFloki();
+  useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
 
   // The page behind takes focus again only once the cockpit is no longer open over it.
   function handleClose() {
@@ -152,8 +158,12 @@ export function CockpitWindow({
         </button>
       </header>
       <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
-        <div className="mx-auto grid max-w-[96rem] gap-4 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)_auto] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-10 md:pb-6">
+        {/* On phones Floki's screen sits beside the radio, and the radar stays off. */}
+        <div className="mx-auto grid max-w-[96rem] grid-cols-[5.5rem_minmax(0,1fr)] gap-3 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)_auto] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-10 md:pb-6">
           <div className="hidden min-h-0 flex-col gap-4 pb-[clamp(2.5rem,4vw,3.5rem)] md:row-span-3 md:flex">
+            <ConsoleScreen className="h-[52%] p-2">
+              <CockpitFloki status={floki.status} getLevel={floki.getLevel} />
+            </ConsoleScreen>
             <ConsoleScreen className="flex-1">
               <CockpitRadar />
             </ConsoleScreen>
@@ -162,11 +172,19 @@ export function CockpitWindow({
           <ConsoleScreen className="hidden md:col-start-3 md:row-start-1 md:block">
             <CockpitReadout />
           </ConsoleScreen>
+          <ConsoleScreen className="aspect-square self-start p-1.5 md:hidden">
+            <CockpitFloki status={floki.status} getLevel={floki.getLevel} />
+          </ConsoleScreen>
           <ConsoleScreen className="md:col-start-3 md:row-start-2 md:flex md:flex-col">
             <CockpitRadio />
           </ConsoleScreen>
-          <div className="flex min-h-0 flex-col md:col-start-2 md:row-span-3 md:row-start-1">
-            <CockpitTerminal isLocked={isLocked} shouldFocus={!isGreeting} onGo={onGo} />
+          <div className="col-span-2 flex min-h-0 flex-col md:col-span-1 md:col-start-2 md:row-span-3 md:row-start-1">
+            <CockpitTerminal
+              isLocked={isLocked}
+              shouldFocus={!isGreeting}
+              floki={floki}
+              onGo={onGo}
+            />
           </div>
           <div className="hidden md:col-start-3 md:row-start-3 md:block">
             <IndicatorLights isMirrored />

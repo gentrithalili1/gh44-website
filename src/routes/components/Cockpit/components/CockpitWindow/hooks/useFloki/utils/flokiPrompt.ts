@@ -2,7 +2,7 @@ import { DESTINATIONS } from "#/utils/destinations";
 import { PLANETS } from "#/utils/planets";
 import { isCurrentRole, ROLES } from "#/utils/roles";
 
-import { messages } from "../../../messages";
+import { messages } from "../../../components/CockpitTerminal/messages";
 
 // Floki's answers stay short enough to say in a breath.
 export const FLOKI_MAX_REPLY_LENGTH = 280;
