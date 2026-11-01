@@ -1,9 +1,10 @@
-import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import { PANEL_STYLE } from "#/utils/panel";
 import type { Planet, PlanetId } from "#/utils/planets";
 
+import { BackToOrbitLink } from "../components/BackToOrbitLink";
 import { BrainPanel } from "./components/BrainPanel";
 import { ConfirmPanel } from "./components/ConfirmPanel";
 import { MePanel } from "./components/MePanel";
@@ -32,13 +33,7 @@ export function PlanetPage() {
 
   return (
     <>
-      {/* Beside the music button when the root layout shows one, vertically centered on it. */}
-      <Link
-        to="/"
-        className="fixed top-4 left-4 z-30 text-label text-muted transition-colors group-has-[[data-music-button]]/root:top-7 group-has-[[data-music-button]]/root:left-24 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-muted md:top-8 md:left-10 md:group-has-[[data-music-button]]/root:top-11 md:group-has-[[data-music-button]]/root:left-30"
-      >
-        <span aria-hidden="true">{messages.backArrow}</span> {messages.backToOrbit}
-      </Link>
+      <BackToOrbitLink />
       <main
         style={PANEL_STYLE}
         className="fixed inset-x-0 bottom-0 z-20 h-(--sheet-height) overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(var(--panel-width),100%)] md:border-t-0 md:bg-transparent md:px-12 md:pt-24 md:pb-12"

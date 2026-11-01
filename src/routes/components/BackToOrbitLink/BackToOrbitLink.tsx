@@ -1,0 +1,16 @@
+import { Link } from "@tanstack/react-router";
+
+import { messages } from "./messages";
+
+// The way home, fixed top left: beside the music button on its center line, or in its own spot
+// when there is no button.
+export function BackToOrbitLink() {
+  return (
+    <Link
+      to="/"
+      className="fixed top-4 left-4 z-30 text-label text-muted transition-colors group-has-[[data-music-button]]/root:top-4 group-has-[[data-music-button]]/root:left-24 group-has-[[data-music-button]]/root:leading-11 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-muted md:top-8 md:left-10 md:group-has-[[data-music-button]]/root:top-4 md:group-has-[[data-music-button]]/root:left-30"
+    >
+      <span aria-hidden="true">{messages.backArrow}</span> {messages.backToOrbit}
+    </Link>
+  );
+}

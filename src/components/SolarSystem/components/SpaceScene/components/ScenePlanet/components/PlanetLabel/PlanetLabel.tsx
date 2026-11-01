@@ -21,12 +21,12 @@ export function PlanetLabel({ planet, state, onHoverChange }: PlanetLabelProps) 
   }
 
   return (
-    // On phones the scene moves a label (`--label-nudge-x`, `--label-nudge-y`) when it would
+    // The scene moves a label (`--label-nudge-x`, `--label-nudge-y`) when it would
     // touch another.
     <div
       data-state={state}
       data-planet-label={planet.id}
-      className="flex translate-x-[calc(var(--label-nudge-x,0px)-50%)] translate-y-(--label-nudge-y,0px) flex-col items-center pt-2 text-center transition-opacity duration-400 data-[state=current]:opacity-0 data-[state=faded]:opacity-0 focus-within:opacity-100"
+      className="flex translate-x-[calc(var(--label-nudge-x,0px)-50%)] translate-y-(--label-nudge-y,0px) flex-col items-center pt-1 text-center transition-opacity duration-400 data-[state=current]:opacity-0 data-[state=faded]:opacity-0 focus-within:opacity-100"
     >
       <Link
         to="/$planetId"
@@ -38,10 +38,6 @@ export function PlanetLabel({ planet, state, onHoverChange }: PlanetLabelProps) 
       >
         {planet.name}
       </Link>
-      {/* Phones show names only: the inner planets sit close. */}
-      <span className="hidden text-label-sub whitespace-nowrap text-faint md:block">
-        {planet.sub}
-      </span>
     </div>
   );
 }

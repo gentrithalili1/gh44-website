@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { findPlanet } from "#/utils/planets";
+import { DECORATIVE_PLANETS, findPlanet } from "#/utils/planets";
 
-import { getRingBands } from "./rings";
+import { getRingBands, getUprightRing } from "./rings";
 
 describe("getRingBands", () => {
   it("gives Saturn 7 bands, one per app, each in its app color", () => {
@@ -29,5 +29,27 @@ describe("getRingBands", () => {
     bands.slice(1).forEach((band, index) => {
       expect(band.innerRadius).toBeGreaterThan(bands[index]?.outerRadius ?? Infinity);
     });
+  });
+});
+
+describe("getUprightRing", () => {
+  it("stands Uranus' one thin ring almost upright, reaching past the planet", () => {
+    const uranus = DECORATIVE_PLANETS.find((planet) => planet.id === "uranus");
+    if (!uranus) throw new Error("No Uranus");
+    const ring = getUprightRing(uranus);
+    if (!ring) throw new Error("No ring");
+
+    expect(getRingBands(uranus)).toEqual([]);
+    expect(ring.innerRadius).toBeGreaterThan(uranus.size);
+    expect(ring.outerRadius - ring.innerRadius).toBeLessThan(uranus.size * 0.2);
+    expect(ring.squash).toBeLessThan(0.5);
+    expect(Math.abs(ring.lean)).toBeLessThan(Math.PI / 8);
+  });
+
+  it("gives no other planet an upright ring", () => {
+    const saturn = findPlanet("gh44-theme");
+    if (!saturn) throw new Error("No Saturn");
+
+    expect(getUprightRing(saturn)).toBeUndefined();
   });
 });

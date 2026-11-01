@@ -32,7 +32,7 @@ The site is built by the engineer it describes, with his own theme (gh44-theme) 
 - Redesign in progress: the current UI (logo, header menu, theme toggle button, per-section accents, multilingual greeting, page fade) is being replaced. Keep the stack, hosting, SEO setup and the copy-on-click email behavior.
 - The home screen is a solar system. Around the sun, each section is a real planet, in real order outward:
   - Earth + Moon = me (`/me`): personal identity and connection with the outside world. Name, title, contact; the moon opens a Gmail compose.
-  - Mars + satellites = confirm() (`/confirm`): verification features and integrations. The npm package, install, usage and a live demo.
+  - Mars + satellites = gh44-confirm (`/confirm`): verification features and integrations. The npm package, install, usage and a live demo.
   - Jupiter + moons = work (`/work`): companies, projects and professional milestones. One moon per company, the current one highlighted.
   - Saturn + rings = gh44-theme (`/gh44-theme`): one theming ecosystem supporting multiple applications. One ring band per app.
   - Neptune + satellites = gh44-brain (`/gh44-brain`): AI agents, skills and automated workflows. One satellite per agent.

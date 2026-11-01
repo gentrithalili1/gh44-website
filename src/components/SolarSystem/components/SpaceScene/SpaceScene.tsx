@@ -2,11 +2,12 @@ import { Canvas } from "@react-three/fiber";
 import { useRef, useState } from "react";
 
 import { messages } from "#/components/SolarSystem/messages";
-import { PLANETS } from "#/utils/planets";
+import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { LabelNudges } from "./components/LabelNudges";
 import { Orbits } from "./components/Orbits";
 import { SceneCamera } from "./components/SceneCamera";
+import { SceneClock } from "./components/SceneClock";
 import { ScenePlanet } from "./components/ScenePlanet";
 import { Ships } from "./components/Ships";
 import { Stars } from "./components/Stars";
@@ -24,13 +25,13 @@ interface SpaceSceneProps {
   openPlanetId: string | undefined;
 }
 
-// The living system: a WebGL canvas drawn flat from straight above, with each planet's label
-// as a real link in the "planets" list on top of it.
+// The living system: a WebGL canvas drawn flat from straight above, with each site planet's
+// label as a real link in the "planets" list on top of it. Decorative planets have no label.
 export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isPageVisible = usePageVisible();
   // The labels render into this list once it exists.
   const [labelList, setLabelList] = useState<HTMLUListElement | null>(null);
-  const sceneStateRef = useRef<SceneState>({ planetAngles: new Map() });
+  const sceneStateRef = useRef<SceneState>({ frameStep: 0, planetAngles: new Map() });
 
   const isPlanetOpen = openPlanetId !== undefined;
   const maxDpr = window.innerWidth < PHONE_MAX_WIDTH ? PHONE_MAX_DPR : DESKTOP_MAX_DPR;
@@ -43,22 +44,26 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         flat
         dpr={[1, maxDpr]}
         frameloop={isPageVisible ? "always" : "never"}
-        gl={{ alpha: true, antialias: true }}
+        // The stencil clips each planet's spinning surface to its disc.
+        gl={{ alpha: true, antialias: true, stencil: true }}
         camera={{ position: [0, 0, CAMERA_HEIGHT], near: 1, far: CAMERA_FAR }}
         aria-hidden="true"
       >
+        <SceneClock sceneStateRef={sceneStateRef} />
         <SceneCamera openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
         <Stars openPlanetId={openPlanetId} />
         <Sun isPlanetOpen={isPlanetOpen} />
         <Orbits isPlanetOpen={isPlanetOpen} />
         {labelList
-          ? PLANETS.map((planet) => (
+          ? SOLAR_SYSTEM.map((planet, index) => (
               <ScenePlanet
                 key={planet.id}
                 planet={planet}
                 openPlanetId={openPlanetId}
                 sceneStateRef={sceneStateRef}
                 labelList={labelList}
+                // 0 is the cleared stencil, so refs start at 1.
+                stencilRef={index + 1}
               />
             ))
           : null}

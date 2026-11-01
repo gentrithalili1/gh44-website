@@ -17,7 +17,7 @@ const PROJECTS = [
   },
   {
     path: "/confirm",
-    name: "confirm()",
+    name: "gh44-confirm",
     lede: "react confirmation dialogs you can await. resolve means yes.",
     repo: "https://github.com/gentrithalili1/react-promise-confirmation-dialog",
   },

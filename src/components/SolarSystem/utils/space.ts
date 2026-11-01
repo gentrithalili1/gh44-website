@@ -1,7 +1,7 @@
 import type { PlanetState } from "../types";
 
 // The system spans this many units across the shorter side of the screen.
-export const SYSTEM_SIZE = 980;
+export const SYSTEM_SIZE = 1040;
 export const SUN_RADIUS = 56;
 export const SUN_GLOW_RADIUS = 150;
 
@@ -14,14 +14,6 @@ type Orbit = { radius: number; phase: number };
 
 export function getOrbitPosition({ radius, phase }: Orbit) {
   return { x: Math.cos(phase) * radius, y: Math.sin(phase) * radius };
-}
-
-// Earth's angular speed (radians per second) at its orbit radius; outer planets move slower.
-const EARTH_SPEED = 0.15;
-const EARTH_ORBIT_RADIUS = 105;
-
-export function getOrbitSpeed(radius: number) {
-  return (EARTH_SPEED * EARTH_ORBIT_RADIUS) / radius;
 }
 
 type GetTiltedPointParams = { radius: number; angle: number };

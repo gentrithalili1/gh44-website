@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { PLANETS } from "#/utils/planets";
+import { getPlanetReach } from "#/components/SolarSystem/components/SpaceScene/hooks/useCameraFlight/utils/cameraFraming";
+import { SOLAR_SYSTEM } from "#/utils/planets";
 
-import { getOrbitPosition, getOrbitSpeed, getTiltedPoint } from "./space";
+import { getOrbitPosition, getTiltedPoint, SUN_RADIUS, SYSTEM_SIZE } from "./space";
 
 describe("getOrbitPosition", () => {
   it("puts a planet on its orbit at the given angle, y growing downward", () => {
@@ -10,19 +11,6 @@ describe("getOrbitPosition", () => {
 
     expect(position.x).toBeCloseTo(0);
     expect(position.y).toBeCloseTo(100);
-  });
-});
-
-describe("getOrbitSpeed", () => {
-  it("moves Earth one full orbit in about 42 seconds", () => {
-    expect((2 * Math.PI) / getOrbitSpeed(105)).toBeCloseTo(41.9, 1);
-  });
-
-  it("moves every planet slower than the one inside it", () => {
-    const speeds = PLANETS.map((planet) => getOrbitSpeed(planet.orbit.radius));
-
-    expect(speeds).toEqual([...speeds].sort((a, b) => b - a));
-    expect(new Set(speeds).size).toBe(PLANETS.length);
   });
 });
 
@@ -46,5 +34,43 @@ describe("getTiltedPoint", () => {
     const point = getTiltedPoint({ radius: 10, angle: 1 });
 
     expect(Math.hypot(point.x, point.y, point.depth)).toBeCloseTo(10);
+  });
+});
+
+describe("SOLAR_SYSTEM", () => {
+  it("holds all eight planets in real order, outward from the sun", () => {
+    expect(SOLAR_SYSTEM.map((planet) => planet.realPlanet)).toEqual([
+      "mercury",
+      "venus",
+      "earth",
+      "mars",
+      "jupiter",
+      "saturn",
+      "uranus",
+      "neptune",
+    ]);
+    const radii = SOLAR_SYSTEM.map((planet) => planet.orbit.radius);
+    expect(radii).toEqual([...radii].sort((a, b) => a - b));
+  });
+
+  it("paints each planet in its gh44 palette color, like the illustrated system", () => {
+    expect(SOLAR_SYSTEM.map((planet) => [planet.realPlanet, planet.color])).toEqual([
+      ["mercury", "terracotta"],
+      ["venus", "sand"],
+      ["earth", "blue"],
+      ["mars", "terracotta"],
+      ["jupiter", "ochre"],
+      ["saturn", "sand"],
+      ["uranus", "seafoam"],
+      ["neptune", "blue"],
+    ]);
+  });
+
+  it("fits every planet and what orbits it between the sun and the screen's edge", () => {
+    for (const planet of SOLAR_SYSTEM) {
+      const reach = getPlanetReach(planet);
+      expect(planet.orbit.radius - reach).toBeGreaterThan(SUN_RADIUS);
+      expect(planet.orbit.radius + reach).toBeLessThanOrEqual(SYSTEM_SIZE / 2);
+    }
   });
 });
