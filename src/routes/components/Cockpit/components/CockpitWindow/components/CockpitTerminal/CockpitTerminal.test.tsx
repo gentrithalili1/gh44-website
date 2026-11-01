@@ -23,14 +23,14 @@ async function typeCommand(command: string) {
 
 describe("CockpitTerminal", () => {
   it("greets the visitor as floki", async () => {
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     expect(getOutput().getByText(/floki online/)).toBeInTheDocument();
   });
 
   it("prints floki's answer to a question", async () => {
     stubFloki({ replies: [{ say: "gh44-brain is how Gentrit works with Claude Code." }] });
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await typeCommand("floki what is gh44-brain");
 
@@ -42,7 +42,7 @@ describe("CockpitTerminal", () => {
   it("flies where floki sets course", async () => {
     stubFloki({ replies: [{ say: "Course set for work.", go: "work" }] });
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await typeCommand("floki i want to see where he worked");
 
@@ -55,7 +55,7 @@ describe("CockpitTerminal", () => {
   it("flies at once on a plain order, without asking the model", async () => {
     const { fetchStub } = stubFloki({ replies: [{ say: "unused" }] });
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await typeCommand("floki take me to saturn");
 
@@ -68,7 +68,7 @@ describe("CockpitTerminal", () => {
 
   it("answers with the humor setting the visitor picked", async () => {
     const { fetchStub } = stubFloki({ replies: [{ say: "Gentrit. Frontend. Kosovo." }] });
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await typeCommand("floki set humor to 10%");
     await typeCommand("floki who is gentrit");
@@ -83,7 +83,7 @@ describe("CockpitTerminal", () => {
       replies: [{ say: "Course set for work.", go: "work" }],
     });
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await typeCommand("floki i want to see where he worked");
 
@@ -95,7 +95,7 @@ describe("CockpitTerminal", () => {
   it("still answers and flies when the voice is down", async () => {
     stubFloki({ replies: [{ say: "Course set for work.", go: "work" }], hasVoice: false });
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await typeCommand("floki i want to see where he worked");
 
@@ -109,7 +109,7 @@ describe("CockpitTerminal", () => {
       shouldFinishSpeaking: false,
     });
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await typeCommand("floki i want to see where he worked");
     await waitFor(() => expect(players[0]?.play).toHaveBeenCalled());
@@ -125,7 +125,7 @@ describe("CockpitTerminal", () => {
     const { fetchStub } = stubFloki({ replies: [{ say: "unused" }] });
     stubSpeechRecognition([{ text: "take me to work" }]);
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await user.click(screen.getByRole("button", { name: "talk to floki" }));
 
@@ -147,7 +147,7 @@ describe("CockpitTerminal", () => {
       { error: "no-speech" },
       { error: "no-speech" },
     ]);
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await user.click(screen.getByRole("button", { name: "talk to floki" }));
 
@@ -165,7 +165,7 @@ describe("CockpitTerminal", () => {
     const user = userEvent.setup();
     stubFloki({ replies: [{ say: "Gentrit built me." }], shouldFinishSpeaking: false });
     const recognizers = stubSpeechRecognition([{ text: "who built you" }]);
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await user.click(screen.getByRole("button", { name: "talk to floki" }));
     await user.click(await screen.findByRole("button", { name: "stop floki" }));
@@ -179,7 +179,7 @@ describe("CockpitTerminal", () => {
     const user = userEvent.setup();
     stubFloki({ replies: [{ say: "unused" }] });
     stubSpeechRecognition([{ error: "not-allowed" }]);
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await user.click(screen.getByRole("button", { name: "talk to floki" }));
 
@@ -187,7 +187,7 @@ describe("CockpitTerminal", () => {
   });
 
   it("has no talk button where the browser cannot hear", async () => {
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     expect(screen.queryByRole("button", { name: "talk to floki" })).not.toBeInTheDocument();
   });
@@ -198,7 +198,7 @@ describe("CockpitTerminal", () => {
       shouldFinishSpeaking: false,
     });
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await typeCommand("floki i want to see where he worked");
     await waitFor(() => expect(players[0]?.play).toHaveBeenCalled());
@@ -216,7 +216,7 @@ describe("CockpitTerminal", () => {
     });
     const onGo = vi.fn();
     const { unmount } = await renderInRouter({
-      ui: <CockpitTerminal isLocked={false} onGo={onGo} />,
+      ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} />,
     });
 
     await typeCommand("floki i want to see where he worked");
@@ -231,7 +231,7 @@ describe("CockpitTerminal", () => {
     const user = userEvent.setup();
     stubFloki({ replies: [{ say: "unused" }], shouldFinishSpeaking: false });
     const recognizers = stubSpeechRecognition([{ text: "take me to work" }]);
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await user.click(screen.getByRole("button", { name: "talk to floki" }));
     await user.click(await screen.findByRole("button", { name: "stop floki" }));
@@ -242,7 +242,7 @@ describe("CockpitTerminal", () => {
 
   it("says when floki's comms are down", async () => {
     stubFloki({ replies: [{ status: 503 }] });
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await typeCommand("floki hello");
 
@@ -251,7 +251,7 @@ describe("CockpitTerminal", () => {
 
   it("says when floki is cooling down", async () => {
     stubFloki({ replies: [{ status: 429 }] });
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     await typeCommand("floki hello");
 
