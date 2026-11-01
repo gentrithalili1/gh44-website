@@ -1,5 +1,6 @@
 import type { FlokiStatus } from "../../hooks/useFloki";
-import { FlokiSignal, MicIcon } from "./TerminalFloki.elements";
+import { FlokiSignal } from "./components/FlokiSignal";
+import { MicIcon } from "./TerminalFloki.elements";
 import { messages } from "./messages";
 
 interface TerminalFlokiProps {
@@ -7,12 +8,20 @@ interface TerminalFlokiProps {
   // The browser can hear the visitor; without it they type `floki <question>`.
   canListen: boolean;
   isLocked: boolean;
+  // How loud the mic or Floki's voice is right now, from 0 to 1.
+  getLevel: () => number;
   onTalk: () => void;
 }
 
 // Floki at the top of the terminal: his signal, what he is doing, and the button to talk to him.
 // The mic only opens on that button.
-export function TerminalFloki({ status, canListen, isLocked, onTalk }: TerminalFlokiProps) {
+export function TerminalFloki({
+  status,
+  canListen,
+  isLocked,
+  getLevel,
+  onTalk,
+}: TerminalFlokiProps) {
   const isActive = status === "listening" || status === "speaking";
 
   return (
@@ -20,7 +29,7 @@ export function TerminalFloki({ status, canListen, isLocked, onTalk }: TerminalF
       aria-label={messages.label}
       className="flex shrink-0 items-center gap-3 border-b border-border-subtle px-3 py-2 md:px-4"
     >
-      <FlokiSignal status={status} />
+      <FlokiSignal status={status} getLevel={getLevel} />
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="flex items-baseline gap-2 text-xs">
           <span className="text-lavender">{messages.name}</span>

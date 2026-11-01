@@ -39,8 +39,13 @@ function play({
   });
 }
 
+type UseFlokiVoiceParams = {
+  // Called with each line's audio before it plays, to draw it.
+  onPlay?: (audio: HTMLAudioElement) => void;
+};
+
 // Floki's voice: speaks one line at a time. A new line, or stop, cuts off the one playing.
-export function useFlokiVoice() {
+export function useFlokiVoice({ onPlay }: UseFlokiVoiceParams = {}) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const playbackRef = useRef<Playback | null>(null);
   // Bumped by every new line and every stop, so a line that arrives late stays silent.
@@ -70,9 +75,11 @@ export function useFlokiVoice() {
     if (lineId !== lineIdRef.current) return "interrupted";
     if (outcome.status === "failed") return "silent";
 
+    const audio = new Audio(outcome.audioUrl);
+    onPlay?.(audio);
     setIsSpeaking(true);
     await play({
-      audio: new Audio(outcome.audioUrl),
+      audio,
       onStart: (playback) => {
         playbackRef.current = playback;
       },

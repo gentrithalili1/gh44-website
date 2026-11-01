@@ -254,6 +254,7 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
         status={floki.status}
         canListen={floki.canListen}
         isLocked={isLocked}
+        getLevel={floki.getLevel}
         onTalk={() => void handleTalk()}
       />
       {/* Reversed, so the newest line stays in view as lines arrive. A click anywhere in the
