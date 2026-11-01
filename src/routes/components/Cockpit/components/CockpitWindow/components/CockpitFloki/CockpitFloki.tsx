@@ -31,19 +31,19 @@ export function CockpitFloki({
   return (
     <section
       aria-label={messages.label}
-      className="flex h-full min-h-0 flex-col gap-1.5 md:flex-row md:items-center md:gap-4"
+      className="flex flex-col gap-1.5 md:h-full md:min-h-0 md:flex-row md:items-center md:gap-3"
     >
-      <div aria-hidden="true" className="flex justify-center md:h-full">
+      <div aria-hidden="true" className="shrink-0 md:flex md:h-full md:justify-center">
         <FlokiHead status={status} grille={<FlokiSignal status={status} getLevel={getLevel} />} />
       </div>
-      <div className="flex min-w-0 flex-col gap-2 md:flex-1">
-        <p className="sr-only text-xs md:not-sr-only md:flex md:items-baseline md:gap-2">
+      <div className="flex min-w-0 flex-col gap-1.5 md:flex-1">
+        <p className="sr-only text-xs md:not-sr-only md:flex md:flex-col">
           <span className="text-lavender">{messages.name}</span>
           <span role="status" className="truncate text-muted">
             {messages.status[status]}
           </span>
         </p>
-        <p className="hidden text-[0.6875rem] text-faint md:block">
+        <p className="hidden text-[0.625rem] leading-snug text-faint md:line-clamp-2">
           {canListen ? messages.privacy : messages.typeInstead}
         </p>
         {canListen ? (

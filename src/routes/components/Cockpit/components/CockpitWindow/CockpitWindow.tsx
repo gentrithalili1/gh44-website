@@ -166,7 +166,7 @@ export function CockpitWindow({
         {/* Desktop: Floki's screen over the radar, the terminal in the middle, the readout over
             the radio. Phones: Floki beside the radio, the terminal under them, no radar. */}
         <div className="mx-auto grid max-w-[96rem] grid-cols-[6rem_minmax(0,1fr)] gap-3 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-10 md:pb-6">
-          <ConsoleScreen className="p-2 md:col-start-1 md:row-start-1 md:h-44 md:p-3">
+          <ConsoleScreen className="p-2 md:col-start-1 md:row-start-1 md:h-32 md:p-2.5">
             <CockpitFloki
               status={floki.status}
               getLevel={floki.getLevel}
