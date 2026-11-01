@@ -7,7 +7,6 @@ import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 
 import {
   AstronautIcon,
-  CockpitSeat,
   CockpitWindshield,
   ConsoleScreen,
   IndicatorLights,
@@ -52,7 +51,7 @@ interface CockpitWindowProps {
 
 // Inside the gh44 explorer, full screen: an arched windshield with two struts looks out on the
 // live system, over a graphite console with the terminal on its center screen, a radar and a
-// readout on its side screens, rows of indicator lights and two seats.
+// readout on its side screens, and rows of indicator lights.
 export function CockpitWindow({
   reveal,
   isClosing,
@@ -161,8 +160,6 @@ export function CockpitWindow({
             <IndicatorLights isMirrored />
           </div>
         </div>
-        <CockpitSeat side="left" />
-        <CockpitSeat side="right" />
       </div>
     </div>
   );
