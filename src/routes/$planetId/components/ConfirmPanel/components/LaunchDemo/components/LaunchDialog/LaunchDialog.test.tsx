@@ -7,7 +7,7 @@ import { renderAt } from "#/test/renderAt";
 describe("LaunchDialog", () => {
   it("starts on abort, the safe choice", async () => {
     const user = userEvent.setup();
-    await renderAt("/confirm");
+    await renderAt("/gh44-confirm");
 
     await user.click(screen.getByRole("button", { name: "launch rocket?" }));
 
@@ -16,7 +16,7 @@ describe("LaunchDialog", () => {
 
   it("aborts on Esc and stays on the planet", async () => {
     const user = userEvent.setup();
-    await renderAt("/confirm");
+    await renderAt("/gh44-confirm");
 
     await user.click(screen.getByRole("button", { name: "launch rocket?" }));
     await user.keyboard("{Escape}");
@@ -30,7 +30,7 @@ describe("LaunchDialog", () => {
 
   it("keeps Tab inside the dialog", async () => {
     const user = userEvent.setup();
-    await renderAt("/confirm");
+    await renderAt("/gh44-confirm");
 
     await user.click(screen.getByRole("button", { name: "launch rocket?" }));
     await user.tab();

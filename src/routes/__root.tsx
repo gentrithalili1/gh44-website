@@ -3,12 +3,16 @@ import { createRootRoute, HeadContent, Outlet, Scripts, useParams } from "@tanst
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import { SolarSystem } from "#/components/SolarSystem";
+import { ExplorerProvider } from "#/hooks/useExplorer";
 import { SPACE_COLORS } from "#/utils/palette";
 import { findPlanet } from "#/utils/planets";
 
 import appCss from "../styles.css?url";
+import { Cockpit } from "./components/Cockpit";
 import { MusicButton } from "./components/MusicButton";
 import { NotFound } from "./components/NotFound";
+import { PageLayer } from "./components/PageLayer";
+import { MusicProvider } from "./hooks/useMusic";
 import { messages } from "./messages";
 import { getPlanetStyle } from "./utils/planetStyle";
 
@@ -72,9 +76,16 @@ function RootLayout() {
       style={getPlanetStyle(planet)}
       className="group/root fixed inset-0 bg-background transition-colors duration-900 ease-space"
     >
-      <SolarSystem openPlanetId={planet?.id} />
-      <Outlet />
-      <MusicButton />
+      <MusicProvider>
+        <ExplorerProvider>
+          <SolarSystem openPlanetId={planet?.id} />
+          <PageLayer>
+            <Outlet />
+            <MusicButton />
+          </PageLayer>
+          <Cockpit />
+        </ExplorerProvider>
+      </MusicProvider>
     </div>
   );
 }

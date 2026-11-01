@@ -7,6 +7,7 @@ import {
   ROCKET_LENGTH,
   SYSTEM_SIZE,
 } from "#/components/SolarSystem/utils/space";
+import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 import { PANEL_WIDTH, SHEET_HEIGHT } from "#/utils/panel";
 import { findPlanet, type PlanetBody, PLANETS } from "#/utils/planets";
 
@@ -16,6 +17,16 @@ type Viewport = { width: number; height: number };
 
 // Where the camera looks (system units, `y` down) and how many pixels one unit spans.
 export type CameraPose = { x: number; y: number; zoom: number };
+
+// What the camera frames: the whole system, an open planet, or the ship with its cockpit open.
+export type CameraFocus =
+  | { kind: "home" }
+  | { kind: "planet"; planetId: string }
+  | { kind: "ship" };
+
+// With the cockpit open, pixels per system unit on any screen: the ship close, and enough of
+// its neighbourhood through the windshield that a planet or two is usually in view.
+const SHIP_ZOOM = 3;
 
 // The share of a phone's height the bottom sheet leaves free.
 const PHONE_FREE_HEIGHT = 1 - SHEET_HEIGHT;
@@ -129,4 +140,36 @@ export function mixPoses({ from, to, anchor, progress }: MixPosesParams): Camera
   };
 
   return { x: anchor.x - screen.x / zoom, y: anchor.y - screen.y / zoom, zoom };
+}
+
+type GetShipCameraPoseParams = { viewport: Viewport; shipPosition: Point };
+
+// Close in on the ship, low on the screen and centered: the cockpit's console covers it, and the
+// windshield above looks out on the space around it.
+export function getShipCameraPose({ viewport, shipPosition }: GetShipCameraPoseParams): CameraPose {
+  return {
+    x: shipPosition.x,
+    y: shipPosition.y + (viewport.height / 2 - viewport.height * COCKPIT_SHIP_Y) / SHIP_ZOOM,
+    zoom: SHIP_ZOOM,
+  };
+}
+
+type GetCameraFocusParams = {
+  openPlanetId: string | undefined;
+  isCockpitOpen: boolean;
+  // Where a launched ship is headed, from `go` until the page opens.
+  flightPlanetId: string | undefined;
+};
+
+// The open cockpit holds the camera on the ship. Once it closes on a launch, the camera heads for
+// the destination ahead of the page, whose own flight then carries on.
+export function getCameraFocus({
+  openPlanetId,
+  isCockpitOpen,
+  flightPlanetId,
+}: GetCameraFocusParams): CameraFocus {
+  if (isCockpitOpen) return { kind: "ship" };
+  const planetId = flightPlanetId ?? openPlanetId;
+
+  return planetId === undefined ? { kind: "home" } : { kind: "planet", planetId };
 }

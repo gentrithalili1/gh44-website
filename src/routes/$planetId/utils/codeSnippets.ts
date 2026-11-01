@@ -54,12 +54,12 @@ export const CODE_SNIPPETS = {
     code: "npx shadcn@latest add https://raw.githubusercontent.com/gentrithalili1/gh44-theme/main/shadcn/r/gh44.json",
   },
   confirmInstall: {
-    planetId: "confirm",
+    planetId: "gh44-confirm",
     lang: "shellscript",
     code: "npm i react-promise-confirmation-dialog",
   },
   confirmProvider: {
-    planetId: "confirm",
+    planetId: "gh44-confirm",
     lang: "tsx",
     code: `import { PromiseConfirmationContextProvider } from "react-promise-confirmation-dialog";
 
@@ -72,7 +72,7 @@ function Index() {
 }`,
   },
   confirmUsage: {
-    planetId: "confirm",
+    planetId: "gh44-confirm",
     lang: "tsx",
     code: `import { usePromiseConfirmation } from "react-promise-confirmation-dialog";
 

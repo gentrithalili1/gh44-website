@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { findPlanet } from "#/utils/planets";
 
-import { getHomePose, getPlanetPose, getPlanetReach, mixPoses } from "./cameraFraming";
+import {
+  getCameraFocus,
+  getHomePose,
+  getPlanetPose,
+  getPlanetReach,
+  getShipCameraPose,
+  mixPoses,
+} from "./cameraFraming";
 
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
@@ -69,10 +76,59 @@ describe("getPlanetPose", () => {
   });
 });
 
+describe("getShipCameraPose", () => {
+  const ship = { x: -180, y: -160 };
+
+  it("flies in close, the ship low and centered, behind even a phone's shorter console", () => {
+    for (const viewport of [DESKTOP, PHONE]) {
+      const pose = getShipCameraPose({ viewport, shipPosition: ship });
+
+      const onScreen = project({ pose, point: ship, viewport });
+      expect(onScreen.x).toBeCloseTo(viewport.width / 2);
+      expect(onScreen.y).toBeCloseTo(viewport.height * 0.86);
+    }
+  });
+
+  it("zooms to 3 pixels a unit on any screen: close on the ship, wide enough for planets nearby", () => {
+    for (const viewport of [DESKTOP, PHONE]) {
+      expect(getShipCameraPose({ viewport, shipPosition: ship }).zoom).toBe(3);
+    }
+  });
+});
+
+describe("getCameraFocus", () => {
+  const AT_HOME = { openPlanetId: undefined, isCockpitOpen: false, flightPlanetId: undefined };
+
+  it("looks at the whole system at home, and at the open planet on its page", () => {
+    expect(getCameraFocus(AT_HOME)).toEqual({ kind: "home" });
+    expect(getCameraFocus({ ...AT_HOME, openPlanetId: "work" })).toEqual({
+      kind: "planet",
+      planetId: "work",
+    });
+  });
+
+  it("looks at the ship while the cockpit is open, even over a planet's page", () => {
+    expect(getCameraFocus({ ...AT_HOME, isCockpitOpen: true })).toEqual({ kind: "ship" });
+    expect(getCameraFocus({ ...AT_HOME, openPlanetId: "me", isCockpitOpen: true })).toEqual({
+      kind: "ship",
+    });
+  });
+
+  it("heads for the destination once the cockpit closes on a launch", () => {
+    expect(getCameraFocus({ ...AT_HOME, isCockpitOpen: true, flightPlanetId: "work" })).toEqual({
+      kind: "ship",
+    });
+    expect(getCameraFocus({ ...AT_HOME, flightPlanetId: "work" })).toEqual({
+      kind: "planet",
+      planetId: "work",
+    });
+  });
+});
+
 describe("getPlanetReach", () => {
   it("reaches as far as the outermost moon, satellite, ring or rocket", () => {
     const reaches = Object.fromEntries(
-      ["me", "confirm", "work", "gh44-theme", "gh44-brain"].map((id) => {
+      ["me", "gh44-confirm", "work", "gh44-theme", "gh44-brain"].map((id) => {
         const planet = findPlanet(id);
         if (!planet) throw new Error(`No planet ${id}`);
         return [id, getPlanetReach(planet)];
@@ -83,7 +139,7 @@ describe("getPlanetReach", () => {
       // The moon: orbit 24 plus its radius 3.
       me: 27,
       // The rocket: 20 out from the surface, plus its 3-unit nose.
-      confirm: 33,
+      "gh44-confirm": 33,
       // The outermost company moon: orbit 73 plus radius 2.3.
       work: expect.closeTo(75.3, 5),
       // The outermost ring band: 2.15 planet radii.

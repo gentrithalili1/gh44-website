@@ -17,7 +17,7 @@ interface ConfirmPanelProps {
 
 // react-promise-confirmation-dialog: a live demo of the package, then how to install and use it.
 export function ConfirmPanel({ code }: ConfirmPanelProps) {
-  const codeTabs = getPlanetSnippetIds("confirm").map((snippetId) => ({
+  const codeTabs = getPlanetSnippetIds("gh44-confirm").map((snippetId) => ({
     id: snippetId,
     label: messages.codeTabs[snippetId],
     code: CODE_SNIPPETS[snippetId].code,
@@ -31,7 +31,7 @@ export function ConfirmPanel({ code }: ConfirmPanelProps) {
       </PromiseConfirmationContextProvider>
       <div id={DIALOG_ROOT_ID} />
       <CodeBlock label={messages.codeLabel} tabs={codeTabs} />
-      <ProjectSource projectId="confirm" />
+      <ProjectSource projectId="gh44-confirm" />
     </>
   );
 }

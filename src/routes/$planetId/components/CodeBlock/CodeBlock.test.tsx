@@ -40,7 +40,7 @@ describe("CodeBlock", () => {
 
   it("switches tabs with the arrow keys", async () => {
     const user = userEvent.setup();
-    await renderAt("/confirm");
+    await renderAt("/gh44-confirm");
 
     await user.click(screen.getByRole("tab", { name: "npm" }));
     await user.keyboard("{ArrowRight}");

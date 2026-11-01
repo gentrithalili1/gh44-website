@@ -6,11 +6,13 @@ import { renderAt } from "#/test/renderAt";
 // Real solar-system order, outward from the sun.
 const PLANET_LINKS = [
   { name: "me", href: "/me" },
-  { name: "gh44-confirm", href: "/confirm" },
+  { name: "gh44-confirm", href: "/gh44-confirm" },
   { name: "work", href: "/work" },
   { name: "gh44-theme", href: "/gh44-theme" },
   { name: "gh44-brain", href: "/gh44-brain" },
 ];
+
+const SHIP = { name: "gh44 explorer" } as const;
 
 describe("StaticSystem", () => {
   it("links every planet to its page, in real order", async () => {
@@ -43,7 +45,8 @@ describe("StaticSystem", () => {
   it("keeps the sun decorative: nothing to press or read", async () => {
     await renderAt("/");
 
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    // The ship is the only thing in the system to press.
+    expect(screen.getAllByRole("button")).toEqual([screen.getByRole("button", SHIP)]);
     expect(screen.queryByText(/sun/)).not.toBeInTheDocument();
   });
 

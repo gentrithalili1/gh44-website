@@ -35,6 +35,8 @@ const LABEL_Z_INDEX_RANGE = [1, 0];
 interface ScenePlanetProps {
   planet: SolarPlanet;
   openPlanetId: string | undefined;
+  // The open cockpit steps every planet back.
+  isCockpitOpen: boolean;
   sceneStateRef: RefObject<SceneState>;
   labelList: HTMLUListElement;
   // Unique per planet: clips its spinning surface to its own body.
@@ -47,6 +49,7 @@ interface ScenePlanetProps {
 export function ScenePlanet({
   planet,
   openPlanetId,
+  isCockpitOpen,
   sceneStateRef,
   labelList,
   stencilRef,
@@ -61,7 +64,7 @@ export function ScenePlanet({
   const [hoverSources, setHoverSources] = useState<ReadonlySet<string>>(() => new Set());
   const opacityRef = useRef(1);
 
-  const state = getPlanetState({ planetId: planet.id, openPlanetId });
+  const state = isCockpitOpen ? "faded" : getPlanetState({ planetId: planet.id, openPlanetId });
   const ringBands = getRingBands(planet);
   const uprightRing = getUprightRing(planet);
   const isSitePlanet = planet.kind === "site";

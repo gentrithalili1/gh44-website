@@ -1,9 +1,10 @@
 import { useFrame } from "@react-three/fiber";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Vector2 } from "three";
 
 import { SYSTEM_SIZE } from "#/components/SolarSystem/utils/space";
 
+import { damp } from "../../utils/sceneMath";
 import { ShootingStars } from "./components/ShootingStars";
 import { createStarField } from "./utils/starField";
 import { STAR_FRAGMENT_SHADER, STAR_VERTEX_SHADER } from "./utils/starShaders";
@@ -14,14 +15,19 @@ const PARALLAX = 0.02;
 // Zoomed in past this many times, stars draw a little larger.
 const ZOOMED_IN = 1.5;
 const ZOOMED_IN_SIZE = 1.2;
+// While the ship cruises with the cockpit open, the stars stream past this much faster: space
+// slides by the windshield instead of standing still.
+const CRUISE_PARALLAX = 0.35;
+const CRUISE_LAMBDA = 2;
 
 interface StarsProps {
   openPlanetId: string | undefined;
+  isCruising: boolean;
 }
 
 // Three layers of twinkling stars behind the system. They drift with the camera at their depth
 // and take the open planet's color, easing there and back.
-export function Stars({ openPlanetId }: StarsProps) {
+export function Stars({ openPlanetId, isCruising }: StarsProps) {
   const [field] = useState(() =>
     createStarField({ width: window.innerWidth, height: window.innerHeight }),
   );
@@ -40,16 +46,32 @@ export function Stars({ openPlanetId }: StarsProps) {
     },
   }));
 
+  // How much of the cruise drift applies (eases in and out), the drift it has added up in screen
+  // pixels, and where the camera was last frame.
+  const cruiseRef = useRef({ level: 0, x: 0, y: 0, cameraX: 0, cameraY: 0 });
+
   const targetTint = getStarTint(openPlanetId);
 
   useFrame(({ camera, size, viewport, clock }, delta) => {
     const fitZoom = Math.min(size.width, size.height) / SYSTEM_SIZE;
     stepStarTint({ tint: material.uniforms.uColor.value, target: targetTint, delta });
     material.uniforms.uViewport.value.set(size.width, size.height);
+    const cruise = cruiseRef.current;
+    cruise.level = damp({
+      current: cruise.level,
+      target: isCruising ? 1 : 0,
+      delta,
+      lambda: CRUISE_LAMBDA,
+    });
+    const cruiseDrift = cruise.level * CRUISE_PARALLAX * camera.zoom;
+    cruise.x += (camera.position.x - cruise.cameraX) * cruiseDrift;
+    cruise.y -= (camera.position.y - cruise.cameraY) * cruiseDrift;
+    cruise.cameraX = camera.position.x;
+    cruise.cameraY = camera.position.y;
     // The camera's position in screen pixels; `y` grows downward on screen.
     material.uniforms.uOffset.value.set(
-      camera.position.x * camera.zoom * PARALLAX,
-      -camera.position.y * camera.zoom * PARALLAX,
+      camera.position.x * camera.zoom * PARALLAX + cruise.x,
+      -camera.position.y * camera.zoom * PARALLAX + cruise.y,
     );
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uPixelRatio.value = viewport.dpr;

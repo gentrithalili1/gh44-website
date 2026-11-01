@@ -1,7 +1,7 @@
-import { useState, useSyncExternalStore } from "react";
+import { createContext, use, useState, useSyncExternalStore } from "react";
 
-// Served from public/audio/, which git ignores: the track is not in the repository.
-const TRACK_PATH = "/audio/stay.mp3";
+import { getTrackIndex, type Track, TRACKS } from "./utils/tracks";
+
 const VOLUME = 0.7;
 const FADE_IN_MS = 1600;
 const FADE_OUT_MS = 600;
@@ -9,14 +9,16 @@ const FADE_OUT_MS = 600;
 // "checking" until the browser has read the track; "unavailable" when it is missing.
 type MusicStatus = "checking" | "ready" | "playing" | "unavailable";
 
+type MusicState = { status: MusicStatus; trackIndex: number };
+
 type FadeParams = { audio: HTMLAudioElement; to: number; durationMs: number; onDone?: () => void };
 
 // What starts playback once a browser that blocks autoplay sees the visitor act. `click` covers
 // touch screens, where a tap only counts as a gesture once it ends.
 const GESTURE_EVENTS = ["pointerdown", "keydown", "click"] as const;
 
-// MusicButton marks itself with this attribute.
-const MUSIC_BUTTON_SELECTOR = "[data-music-button]";
+// The music button and the cockpit's radio mark their buttons with this attribute.
+const MUSIC_CONTROL_SELECTOR = "[data-music-control]";
 
 function isAutoplayBlocked(error: unknown) {
   return error instanceof DOMException && error.name === "NotAllowedError";
@@ -25,8 +27,8 @@ function isAutoplayBlocked(error: unknown) {
 // The audio element lives in this store, outside render; it loads on first subscribe, so only
 // in the browser. It starts by itself once the track is ready, or on the visitor's first
 // gesture when the browser blocks autoplay, until the visitor stops it.
-function createMusicPlayer() {
-  let status: MusicStatus = "checking";
+function createMusicPlayer(tracks: readonly Track[]) {
+  let state: MusicState = { status: "checking", trackIndex: 0 };
   let audio: HTMLAudioElement | undefined;
   let fadeFrame = 0;
   let isStarting = false;
@@ -34,9 +36,13 @@ function createMusicPlayer() {
   let hasStopped = false;
   const listeners = new Set<() => void>();
 
-  function setStatus(next: MusicStatus) {
-    status = next;
+  function setState(next: Partial<MusicState>) {
+    state = { ...state, ...next };
     listeners.forEach((listener) => listener());
+  }
+
+  function setStatus(status: MusicStatus) {
+    setState({ status });
   }
 
   function fade({ audio: player, to, durationMs, onDone }: FadeParams) {
@@ -56,20 +62,21 @@ function createMusicPlayer() {
   function load() {
     if (audio) return;
     audio = new Audio();
-    audio.loop = true;
     audio.preload = "metadata";
     audio.addEventListener("loadedmetadata", () => {
-      if (status !== "checking") return;
+      if (state.status !== "checking") return;
       setStatus("ready");
       void start();
     });
+    // A track that ends hands over to the next one, round the list.
+    audio.addEventListener("ended", () => skip(1));
     audio.addEventListener("error", () => setStatus("unavailable"));
-    audio.src = TRACK_PATH;
+    audio.src = tracks[state.trackIndex]?.path ?? "";
   }
 
   function handleGesture(event: Event) {
-    // A press on the music button is the button's to handle: it plays on its own click.
-    if (event.target instanceof Element && event.target.closest(MUSIC_BUTTON_SELECTOR)) return;
+    // A press on a music control is the control's to handle: it plays on its own click.
+    if (event.target instanceof Element && event.target.closest(MUSIC_CONTROL_SELECTOR)) return;
     stopWaitingForGesture();
     void start();
   }
@@ -83,7 +90,7 @@ function createMusicPlayer() {
   }
 
   async function start() {
-    if (!audio || status !== "ready" || isStarting || hasStopped) return;
+    if (!audio || state.status !== "ready" || isStarting || hasStopped) return;
     isStarting = true;
     audio.volume = 0;
     try {
@@ -109,12 +116,25 @@ function createMusicPlayer() {
   }
 
   function stop() {
-    if (!audio || status !== "playing") return;
+    if (!audio || state.status !== "playing") return;
     const player = audio;
     hasStopped = true;
     stopWaitingForGesture();
     setStatus("ready");
     fade({ audio: player, to: 0, durationMs: FADE_OUT_MS, onDone: () => player.pause() });
+  }
+
+  // Next or previous: a playing radio plays the new track at once; a quiet one only picks it.
+  // With a single track it starts that one over.
+  function skip(step: 1 | -1) {
+    if (!audio || state.status === "checking" || state.status === "unavailable") return;
+    const trackIndex = getTrackIndex({ index: state.trackIndex, step, count: tracks.length });
+    if (trackIndex === state.trackIndex) audio.currentTime = 0;
+    else audio.src = tracks[trackIndex]?.path ?? "";
+    setState({ trackIndex });
+    if (state.status === "playing") {
+      void audio.play().catch(() => setStatus("unavailable"));
+    }
   }
 
   function subscribe(listener: () => void) {
@@ -123,18 +143,55 @@ function createMusicPlayer() {
     return () => listeners.delete(listener);
   }
 
-  return { play, stop, subscribe, getSnapshot: () => status };
+  return {
+    play,
+    stop,
+    next: () => skip(1),
+    previous: () => skip(-1),
+    subscribe,
+    getSnapshot: () => state,
+  };
 }
 
-function getServerSnapshot(): MusicStatus {
-  return "checking";
+type MusicPlayer = ReturnType<typeof createMusicPlayer>;
+
+const SERVER_STATE: MusicState = { status: "checking", trackIndex: 0 };
+
+function getServerSnapshot() {
+  return SERVER_STATE;
 }
 
-// S.T.A.Y. from Interstellar: plays on load, or on the first gesture when the browser blocks
-// autoplay, and the visitor can stop it any time. It fades each way.
+const MusicContext = createContext<{ player: MusicPlayer; tracks: readonly Track[] } | null>(null);
+
+interface MusicProviderProps {
+  // What the radio plays; the site's own list by default.
+  tracks?: readonly Track[];
+  children: React.ReactNode;
+}
+
+// One player for the whole site: the music button and the cockpit's radio both control it.
+export function MusicProvider({ tracks = TRACKS, children }: MusicProviderProps) {
+  const [player] = useState(() => createMusicPlayer(tracks));
+
+  return <MusicContext value={{ player, tracks }}>{children}</MusicContext>;
+}
+
+// The radio: its tracks in turn, from s.t.a.y. It plays on load, or on the first gesture when
+// the browser blocks autoplay, and the visitor can stop it any time; a stop holds for the visit.
+// It fades each way.
 export function useMusic() {
-  const [player] = useState(createMusicPlayer);
-  const status = useSyncExternalStore(player.subscribe, player.getSnapshot, getServerSnapshot);
+  const music = use(MusicContext);
+  if (!music) throw new Error("useMusic needs a MusicProvider above it");
+  const { player, tracks } = music;
+  const state = useSyncExternalStore(player.subscribe, player.getSnapshot, getServerSnapshot);
 
-  return { status, play: player.play, stop: player.stop };
+  return {
+    status: state.status,
+    track: tracks[state.trackIndex] ?? TRACKS[0],
+    hasManyTracks: tracks.length > 1,
+    play: player.play,
+    stop: player.stop,
+    next: player.next,
+    previous: player.previous,
+  };
 }

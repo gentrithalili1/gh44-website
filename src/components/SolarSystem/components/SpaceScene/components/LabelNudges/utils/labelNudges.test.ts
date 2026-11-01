@@ -30,7 +30,7 @@ function getTouchingPairs(boxes: LabelBox[]) {
 
 // Label sizes as Chrome draws them on a 360 wide phone.
 const ME = { id: "me", width: 17, height: 29 };
-const CONFIRM = { id: "confirm", width: 78, height: 29 };
+const CONFIRM = { id: "gh44-confirm", width: 78, height: 29 };
 const WORK = { id: "work", width: 35, height: 29 };
 const THEME = { id: "gh44-theme", width: 87, height: 29 };
 const BRAIN = { id: "gh44-brain", width: 87, height: 29 };

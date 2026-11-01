@@ -16,7 +16,7 @@ const PROJECTS = [
     repo: "https://github.com/gentrithalili1/gh44-theme",
   },
   {
-    path: "/confirm",
+    path: "/gh44-confirm",
     name: "gh44-confirm",
     lede: "react confirmation dialogs you can await. resolve means yes.",
     repo: "https://github.com/gentrithalili1/react-promise-confirmation-dialog",
@@ -95,6 +95,12 @@ describe("PlanetPage", () => {
 
   it("shows the 404 for a planet that does not exist", async () => {
     await renderAt("/pluto");
+
+    expect(screen.getByRole("heading", { level: 1, name: "404" })).toBeInTheDocument();
+  });
+
+  it("shows the 404 on the old confirm route", async () => {
+    await renderAt("/confirm");
 
     expect(screen.getByRole("heading", { level: 1, name: "404" })).toBeInTheDocument();
   });

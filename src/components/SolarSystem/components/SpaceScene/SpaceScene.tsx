@@ -2,6 +2,8 @@ import { Canvas } from "@react-three/fiber";
 import { useRef, useState } from "react";
 
 import { messages } from "#/components/SolarSystem/messages";
+import { getShipPose, SHIP_ORBIT } from "#/components/SolarSystem/utils/ship";
+import { useExplorer } from "#/hooks/useExplorer";
 import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { LabelNudges } from "./components/LabelNudges";
@@ -31,9 +33,16 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isPageVisible = usePageVisible();
   // The labels render into this list once it exists.
   const [labelList, setLabelList] = useState<HTMLUListElement | null>(null);
-  const sceneStateRef = useRef<SceneState>({ frameStep: 0, planetAngles: new Map() });
+  const explorer = useExplorer();
+  const sceneStateRef = useRef<SceneState>({
+    frameStep: 0,
+    planetAngles: new Map(),
+    shipPose: getShipPose(SHIP_ORBIT.phase),
+  });
 
-  const isPlanetOpen = openPlanetId !== undefined;
+  // The open cockpit steps the system back, like an open planet.
+  const isCockpitOpen = explorer.cockpit.status === "open";
+  const isSystemFaded = openPlanetId !== undefined || isCockpitOpen;
   const maxDpr = window.innerWidth < PHONE_MAX_WIDTH ? PHONE_MAX_DPR : DESKTOP_MAX_DPR;
 
   return (
@@ -51,15 +60,16 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
       >
         <SceneClock sceneStateRef={sceneStateRef} />
         <SceneCamera openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
-        <Stars openPlanetId={openPlanetId} />
-        <Sun isPlanetOpen={isPlanetOpen} />
-        <Orbits isPlanetOpen={isPlanetOpen} />
+        <Stars openPlanetId={openPlanetId} isCruising={isCockpitOpen} />
+        <Sun isPlanetOpen={isSystemFaded} />
+        <Orbits isPlanetOpen={isSystemFaded} />
         {labelList
           ? SOLAR_SYSTEM.map((planet, index) => (
               <ScenePlanet
                 key={planet.id}
                 planet={planet}
                 openPlanetId={openPlanetId}
+                isCockpitOpen={isCockpitOpen}
                 sceneStateRef={sceneStateRef}
                 labelList={labelList}
                 // 0 is the cleared stencil, so refs start at 1.
@@ -74,7 +84,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
             sceneStateRef={sceneStateRef}
           />
         ) : null}
-        <Ships />
+        <Ships openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
       </Canvas>
       <nav aria-label={messages.planetsLabel} className="pointer-events-none absolute inset-0">
         <ul ref={setLabelList} />

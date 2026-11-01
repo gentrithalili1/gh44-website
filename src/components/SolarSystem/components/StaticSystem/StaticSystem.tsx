@@ -11,6 +11,7 @@ import {
 import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { SolarSystemPlanet } from "./components/SolarSystemPlanet";
+import { StaticShip } from "./components/StaticShip";
 
 const VIEW_BOX = `${-SYSTEM_SIZE / 2} ${-SYSTEM_SIZE / 2} ${SYSTEM_SIZE} ${SYSTEM_SIZE}`;
 
@@ -75,6 +76,7 @@ export function StaticSystem({ openPlanetId }: StaticSystemProps) {
           />
         ))}
       </svg>
+      <StaticShip isPlanetOpen={isPlanetOpen} />
       <nav aria-label={messages.planetsLabel}>
         <ul>
           {sitePlanets.map(({ planet, position, state }) => (
