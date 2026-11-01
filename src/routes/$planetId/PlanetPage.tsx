@@ -1,6 +1,7 @@
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
+import { PANEL_STYLE } from "#/utils/panel";
 import type { Planet, PlanetId } from "#/utils/planets";
 
 import { MePanel } from "./components/MePanel";
@@ -31,7 +32,10 @@ export function PlanetPage() {
       >
         <span aria-hidden="true">{messages.backArrow}</span> {messages.backToOrbit}
       </Link>
-      <main className="fixed inset-x-0 bottom-0 z-20 h-[62%] overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(35rem,100%)] md:border-t-0 md:bg-transparent md:px-12 md:pt-24 md:pb-12">
+      <main
+        style={PANEL_STYLE}
+        className="fixed inset-x-0 bottom-0 z-20 h-(--sheet-height) overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(var(--panel-width),100%)] md:border-t-0 md:bg-transparent md:px-12 md:pt-24 md:pb-12"
+      >
         <p className="text-kicker tracking-kicker text-accent">
           {messages.kicker} · {getKicker(planet)}
         </p>
