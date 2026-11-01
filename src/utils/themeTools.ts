@@ -1,6 +1,6 @@
 import type { PaletteColor } from "./palette";
 
-// The apps gh44-theme covers; each one is a moon of the gh44-theme planet.
+// The apps gh44-theme covers; each one is a ring band of the gh44-theme planet (Saturn).
 export const THEME_TOOLS = [
   { id: "zed", name: "zed", color: "blue" },
   { id: "warp", name: "warp", color: "terracotta" },

@@ -1,0 +1,1 @@
+export { StaticSystem } from "./StaticSystem";

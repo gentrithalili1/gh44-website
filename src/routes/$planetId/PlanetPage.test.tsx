@@ -57,6 +57,10 @@ describe("PlanetPage", () => {
         .map((link) => ({ name: link.textContent, href: link.getAttribute("href") })),
     ).toEqual([
       {
+        name: "write in gmail (opens in new tab)",
+        href: "https://mail.google.com/mail/?view=cm&to=gentrithalili11@gmail.com&su=hi%20gentrit",
+      },
+      {
         name: "gentrithalili1, github (opens in new tab)",
         href: "https://github.com/gentrithalili1/",
       },

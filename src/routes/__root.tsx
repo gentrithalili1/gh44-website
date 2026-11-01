@@ -1,17 +1,11 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import {
-  createRootRoute,
-  HeadContent,
-  Outlet,
-  ScriptOnce,
-  Scripts,
-  useParams,
-} from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Scripts, useParams } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import { SolarSystem } from "#/components/SolarSystem";
+import { SPACE_COLORS } from "#/utils/palette";
+import { PANEL_STYLE } from "#/utils/panel";
 import { findPlanet } from "#/utils/planets";
-import { THEME_SCRIPT } from "#/utils/theme";
 
 import appCss from "../styles.css?url";
 import { messages } from "./messages";
@@ -22,6 +16,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: SPACE_COLORS.background },
       { title: messages.siteTitle },
     ],
     links: [
@@ -36,10 +31,8 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    // The theme script sets the `dark` class before hydration.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
-        <ScriptOnce>{THEME_SCRIPT}</ScriptOnce>
         <HeadContent />
       </head>
       <body>
@@ -80,7 +73,10 @@ function RootLayout() {
 
 function NotFound() {
   return (
-    <main className="fixed inset-x-0 bottom-0 z-20 h-[62%] overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(35rem,100%)] md:border-t-0 md:border-l md:px-12 md:pt-24 md:pb-12">
+    <main
+      style={PANEL_STYLE}
+      className="fixed inset-x-0 bottom-0 z-20 h-(--sheet-height) overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(var(--panel-width),100%)] md:border-t-0 md:border-l md:px-12 md:pt-24 md:pb-12"
+    >
       <h1 className="mb-1.5 text-planet-sm font-bold tracking-planet md:text-planet">
         {messages.notFoundHeading}
       </h1>

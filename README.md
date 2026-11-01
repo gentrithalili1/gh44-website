@@ -27,7 +27,7 @@ pnpm build && pnpm start
 
 ## Theme
 
-The gh44-theme palette (`palette/tokens.json` in gh44-theme) as Tailwind tokens in `src/styles.css`, with Lilex as the only font. Light and dark follow the system until the visitor clicks the sun; the choice is saved in `localStorage`.
+The gh44-theme dark palette (`palette/tokens.json` in gh44-theme) as Tailwind tokens in `src/styles.css`, mirrored in `src/utils/palette.ts` for the 3D scene, with Lilex as the only font. The site is dark only.
 
 ## Planets
 
