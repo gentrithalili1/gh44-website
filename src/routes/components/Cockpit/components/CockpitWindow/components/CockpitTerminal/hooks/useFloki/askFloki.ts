@@ -1,25 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestIP } from "@tanstack/react-start/server";
 
 import type { AskFlokiInput, AskFlokiOutcome, FlokiTurn } from "./types";
 import { getFlokiPrompt } from "./utils/flokiPrompt";
 import { getCompletionText, parseFlokiReply } from "./utils/flokiReply";
-import { takeRequest } from "./utils/rateLimit";
+import { createRateLimit, FLOKI_TIMEOUT_MS } from "./flokiLimits";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "qwen/qwen3.8-27b";
 // Floki answers at once: no reasoning tokens before the reply.
 const REASONING_EFFORT = "none";
-const TIMEOUT_MS = 15_000;
 const MAX_TOKENS = 200;
 const TEMPERATURE = 0.6;
 // What one request may carry: the last turns of the conversation, each a short line.
 const MAX_TURNS = 20;
-const MAX_TURN_LENGTH = 300;
+export const MAX_TURN_LENGTH = 300;
 const TOO_MANY_REQUESTS = 429;
 
-// Recent request times per visitor IP. In memory: it resets when the server restarts.
-const requestTimes = new Map<string, readonly number[]>();
+const isAllowed = createRateLimit();
 
 function isTurn(value: unknown): value is FlokiTurn {
   if (typeof value !== "object" || value === null) return false;
@@ -44,29 +41,18 @@ function validateInput(input: unknown): AskFlokiInput {
   const checkedTurns: unknown[] = turns;
   if (!checkedTurns.every(isTurn)) throw new Error("Expected valid turns");
   if (checkedTurns.at(-1)?.role !== "visitor") throw new Error("The visitor speaks last");
-  if (typeof humor !== "number" || humor < 0 || humor > 100) {
+  if (typeof humor !== "number" || !Number.isFinite(humor) || humor < 0 || humor > 100) {
     throw new Error("Expected humor from 0 to 100");
   }
 
   return { turns: checkedTurns, humor: Math.round(humor) };
 }
 
-function getVisitorIp() {
-  return getRequestIP({ xForwardedFor: true }) ?? "unknown";
-}
-
-function isAllowed(ip: string) {
-  const result = takeRequest({ times: requestTimes.get(ip) ?? [], now: Date.now() });
-  requestTimes.set(ip, result.times);
-
-  return result.isAllowed;
-}
-
 async function requestCompletion({ turns, humor, apiKey }: AskFlokiInput & { apiKey: string }) {
   const response = await fetch(GROQ_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    signal: AbortSignal.timeout(FLOKI_TIMEOUT_MS),
     body: JSON.stringify({
       model: GROQ_MODEL,
       temperature: TEMPERATURE,
@@ -93,7 +79,7 @@ export const askFloki = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<AskFlokiOutcome> => {
     const apiKey = process.env.FLOKI_GROQ_API_KEY;
     if (!apiKey) return { status: "failed", reason: "unavailable" };
-    if (!isAllowed(getVisitorIp())) return { status: "failed", reason: "rateLimited" };
+    if (!isAllowed()) return { status: "failed", reason: "rateLimited" };
 
     try {
       const response = await requestCompletion({ ...data, apiKey });

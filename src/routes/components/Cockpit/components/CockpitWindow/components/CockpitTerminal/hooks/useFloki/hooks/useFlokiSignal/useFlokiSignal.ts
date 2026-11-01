@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+import type { Playback } from "../useFlokiVoice";
 import { getSignalLevel } from "./utils/signalLevel";
 
 const FFT_SIZE = 512;
@@ -22,8 +23,12 @@ export function useFlokiSignal() {
   useEffect(() => {
     return () => {
       const signal = signalRef.current;
+      signalRef.current = undefined;
+      isMicWantedRef.current = false;
       signal?.mic?.stream.getTracks().forEach((track) => track.stop());
-      void signal?.context.close();
+      signal?.context.close().catch(() => {
+        // Already closed: nothing left to release.
+      });
     };
   }, []);
 
@@ -46,17 +51,46 @@ export function useFlokiSignal() {
   // Starts the audio graph. Call it straight from a click or key press: browsers only let audio
   // start from one.
   function prepare() {
-    void getSignal()?.context.resume();
+    getSignal()
+      ?.context.resume()
+      .catch(() => {
+        // Refused or closed: lines then play on their own audio element.
+      });
   }
 
-  // Routes one of Floki's lines through the analyser on its way to the speakers. A graph that
-  // never started would mute him, so then the line plays on its own, undrawn.
-  function connectVoice(audio: HTMLAudioElement) {
+  // Plays one of Floki's lines through the analyser on its way to the speakers. The graph was
+  // started by a tap or key press, so Safari lets it play after the network round trip. A graph
+  // that never started gives undefined, and the line plays on its own audio element.
+  async function playVoice(audioUrl: string): Promise<Playback | undefined> {
     const signal = signalRef.current;
-    if (signal?.context.state !== "running") return;
-    const source = signal.context.createMediaElementSource(audio);
-    source.connect(signal.analyser);
-    source.connect(signal.context.destination);
+    if (signal?.context.state !== "running") return undefined;
+    try {
+      const base64 = audioUrl.slice(audioUrl.indexOf(",") + 1);
+      const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+      const buffer = await signal.context.decodeAudioData(bytes.buffer);
+      const source = signal.context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(signal.analyser);
+      source.connect(signal.context.destination);
+      let finish = () => {};
+      const done = new Promise<void>((resolve) => {
+        finish = resolve;
+        source.addEventListener("ended", () => resolve());
+      });
+      source.start();
+
+      return {
+        done,
+        stop: () => {
+          source.removeEventListener("ended", finish);
+          source.disconnect();
+          finish();
+        },
+      };
+    } catch {
+      // Audio the graph can't decode: it plays on its own audio element instead.
+      return undefined;
+    }
   }
 
   function closeMic() {
@@ -96,5 +130,5 @@ export function useFlokiSignal() {
     return getSignalLevel(signal.samples);
   }
 
-  return { prepare, connectVoice, openMic, closeMic, getLevel };
+  return { prepare, playVoice, openMic, closeMic, getLevel };
 }

@@ -155,6 +155,54 @@ describe("CockpitTerminal", () => {
     expect(screen.queryByRole("button", { name: "talk to floki" })).not.toBeInTheDocument();
   });
 
+  it("doesn't fly when the visitor takes the controls while floki speaks", async () => {
+    const { players } = stubFloki({
+      replies: [{ say: "Course set for work.", go: "work" }],
+      shouldFinishSpeaking: false,
+    });
+    const onGo = vi.fn();
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+
+    await typeCommand("floki i want to see where he worked");
+    await waitFor(() => expect(players[0]?.play).toHaveBeenCalled());
+    await typeCommand("go me");
+
+    await waitFor(() => expect(players[0]?.pause).toHaveBeenCalled());
+    expect(onGo).toHaveBeenCalledTimes(1);
+    expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/me" }));
+  });
+
+  it("neither speaks nor flies once the cockpit closes while floki thinks", async () => {
+    const { players } = stubFloki({
+      replies: [{ say: "Course set for work.", go: "work" }],
+      answerDelay: 30,
+    });
+    const onGo = vi.fn();
+    const { unmount } = await renderInRouter({
+      ui: <CockpitTerminal isLocked={false} onGo={onGo} />,
+    });
+
+    await typeCommand("floki i want to see where he worked");
+    unmount();
+    await new Promise((resolve) => setTimeout(resolve, 60));
+
+    expect(players).toEqual([]);
+    expect(onGo).not.toHaveBeenCalled();
+  });
+
+  it("keeps the mic closed when the greeting is stopped", async () => {
+    const user = userEvent.setup();
+    stubFloki({ replies: [{ say: "unused" }], shouldFinishSpeaking: false });
+    const recognizers = stubSpeechRecognition([{ text: "take me to work" }]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(await screen.findByRole("button", { name: "stop floki" }));
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(recognizers).toEqual([]);
+  });
+
   it("says when floki's comms are down", async () => {
     stubFloki({ replies: [{ status: 503 }] });
     await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });

@@ -1,16 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestIP } from "@tanstack/react-start/server";
 
-import type { SpeakFlokiOutcome } from "./types";
-import { FLOKI_MAX_REPLY_LENGTH } from "./utils/flokiPrompt";
-import { takeRequest } from "./utils/rateLimit";
+import { createRateLimit, FLOKI_TIMEOUT_MS } from "../../flokiLimits";
+import type { SpeakFlokiOutcome } from "../../types";
+import { FLOKI_MAX_REPLY_LENGTH } from "../../utils/flokiPrompt";
 
-const TIMEOUT_MS = 15_000;
 // Floki speaks his own lines and a few short ones of the terminal's, never more than a reply.
 const MAX_TEXT_LENGTH = FLOKI_MAX_REPLY_LENGTH;
 
-// Recent request times per visitor IP. In memory: it resets when the server restarts.
-const requestTimes = new Map<string, readonly number[]>();
+const isAllowed = createRateLimit();
 
 function validateText(input: unknown) {
   if (typeof input !== "string") throw new Error("Expected text");
@@ -18,14 +15,6 @@ function validateText(input: unknown) {
   if (text === "" || text.length > MAX_TEXT_LENGTH) throw new Error("Expected a short line");
 
   return text;
-}
-
-function isAllowed() {
-  const ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
-  const result = takeRequest({ times: requestTimes.get(ip) ?? [], now: Date.now() });
-  requestTimes.set(ip, result.times);
-
-  return result.isAllowed;
 }
 
 // Turns one of Floki's lines into speech with Piper (floki-voice), on the server, which reaches
@@ -41,7 +30,7 @@ export const speakFloki = createServerFn({ method: "POST" })
       const response = await fetch(new URL("/synthesize", voiceUrl), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(FLOKI_TIMEOUT_MS),
         body: JSON.stringify({ text }),
       });
       if (!response.ok) {

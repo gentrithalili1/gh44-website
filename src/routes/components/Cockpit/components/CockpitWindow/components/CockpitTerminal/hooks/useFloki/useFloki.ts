@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { DESTINATIONS, type Destination } from "#/utils/destinations";
 
-import { askFloki } from "./askFloki";
-import { useFlokiListening } from "./hooks/useFlokiListening";
+import { askFloki, MAX_TURN_LENGTH } from "./askFloki";
+import { type FlokiHearing, useFlokiListening } from "./hooks/useFlokiListening";
 import { useFlokiSignal } from "./hooks/useFlokiSignal";
 import { useFlokiVoice } from "./hooks/useFlokiVoice";
 import type { AskFlokiOutcome, FlokiTurn } from "./types";
@@ -25,6 +25,8 @@ export type FlokiOutcome =
   // A plain order, carried out without asking the model.
   | { status: "navigating"; destination: Destination }
   | { status: "humorSet"; humor: number }
+  // Stopped while he was thinking: nothing to say or do.
+  | { status: "cancelled" }
   | { status: "failed"; reason: FlokiFailureReason };
 
 async function requestAnswer({
@@ -47,11 +49,13 @@ async function requestAnswer({
 // The component prints, speaks and flies.
 export function useFloki() {
   const signal = useFlokiSignal();
-  const voice = useFlokiVoice({ onPlay: signal.connectVoice });
+  const voice = useFlokiVoice({ playVoice: signal.playVoice });
   const listening = useFlokiListening();
   const [requestStatus, setRequestStatus] = useState<"idle" | "thinking">("idle");
   const [turns, setTurns] = useState<readonly FlokiTurn[]>([]);
   const [humor, setHumor] = useState(DEFAULT_HUMOR);
+  // Bumped by stop, so an answer still on its way is dropped.
+  const questionIdRef = useRef(0);
 
   async function ask(question: string): Promise<FlokiOutcome> {
     if (requestStatus === "thinking") return { status: "failed", reason: "busy" };
@@ -74,12 +78,17 @@ export function useFloki() {
     }
     const questionCount = turns.filter(({ role }) => role === "visitor").length;
     if (questionCount >= MAX_QUESTIONS) return { status: "failed", reason: "questionLimit" };
-    const visitorTurn = { role: "visitor", text: question.trim() } as const;
+    const visitorTurn = {
+      role: "visitor",
+      text: question.trim().slice(0, MAX_TURN_LENGTH),
+    } as const;
     setRequestStatus("thinking");
+    const questionId = questionIdRef.current;
     const outcome = await requestAnswer({
       turns: [...turns.slice(-HISTORY_TURNS), visitorTurn],
       humor,
     });
+    if (questionId !== questionIdRef.current) return { status: "cancelled" };
     setRequestStatus("idle");
     if (outcome.status === "failed") return outcome;
 
@@ -100,8 +109,10 @@ export function useFloki() {
     return "idle";
   }
 
-  // Opens the mic for one sentence; it cuts Floki off first.
-  async function listen() {
+  // Opens the mic for one sentence; it cuts Floki off first. Only one turn at a time: the one
+  // that opened the mic closes it.
+  async function listen(): Promise<FlokiHearing> {
+    if (listening.status === "listening") return { status: "failed" };
     signal.prepare();
     voice.stop();
     void signal.openMic();
@@ -117,6 +128,14 @@ export function useFloki() {
     return voice.speak(text);
   }
 
+  // Cuts Floki off and drops the answer he is thinking about, for when the visitor takes the
+  // controls themselves.
+  function stop() {
+    questionIdRef.current += 1;
+    setRequestStatus("idle");
+    voice.stop();
+  }
+
   return {
     status: getStatus(),
     canListen: listening.status !== "unsupported",
@@ -125,6 +144,7 @@ export function useFloki() {
     stopListening: listening.stop,
     speak,
     stopSpeaking: voice.stop,
+    stop,
     getLevel: signal.getLevel,
   };
 }

@@ -45,7 +45,8 @@ describe("useFlokiVoice", () => {
     act(() => {
       speaking = result.current.speak("A long story about Jupiter.");
     });
-    await vi.waitFor(() => expect(result.current.isSpeaking).toBe(true));
+    await vi.waitFor(() => expect(players[0]?.play).toHaveBeenCalled());
+    expect(result.current.isSpeaking).toBe(true);
     act(() => result.current.stop());
 
     await expect(speaking).resolves.toBe("interrupted");

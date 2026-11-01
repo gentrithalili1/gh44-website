@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-import { speakFloki } from "../../speakFloki";
 import type { SpeakFlokiOutcome } from "../../types";
+import { speakFloki } from "./speakFloki";
+import type { Playback, PlayVoice } from "./types";
 
-// What happened to a line: it played to the end, a new line or stop cut it off, or it could not
-// be voiced.
+// What happened to a line: it played to the end, a new line, stop or closing the cockpit cut it
+// off, or it could not be voiced.
 export type FlokiSpeech = "spoken" | "interrupted" | "silent";
-
-type Playback = { audio: HTMLAudioElement; finish: () => void };
 
 async function requestSpeech(text: string): Promise<SpeakFlokiOutcome> {
   try {
@@ -18,74 +17,83 @@ async function requestSpeech(text: string): Promise<SpeakFlokiOutcome> {
   }
 }
 
-function play({
-  audio,
-  onStart,
-}: {
-  audio: HTMLAudioElement;
-  onStart: (playback: Playback) => void;
-}) {
-  return new Promise<void>((resolve) => {
-    function finish() {
-      audio.removeEventListener("ended", finish);
-      audio.removeEventListener("error", finish);
-      resolve();
-    }
-    audio.addEventListener("ended", finish);
-    audio.addEventListener("error", finish);
-    onStart({ audio, finish });
-    // Refused (no gesture yet) or broken audio: the line counts as done.
-    audio.play().catch(finish);
+// A plain audio element: the fallback when the audio graph can't play the line.
+function playElement(audioUrl: string): Playback {
+  const audio = new Audio(audioUrl);
+  let finish = () => {};
+  const done = new Promise<void>((resolve) => {
+    finish = resolve;
+    audio.addEventListener("ended", () => resolve());
+    audio.addEventListener("error", () => resolve());
   });
+  // Refused (no gesture) or broken audio: the line counts as done.
+  audio.play().catch(() => finish());
+
+  return {
+    done,
+    stop: () => {
+      audio.pause();
+      finish();
+    },
+  };
 }
 
 type UseFlokiVoiceParams = {
-  // Called with each line's audio before it plays, to draw it.
-  onPlay?: (audio: HTMLAudioElement) => void;
+  // Plays a line through the audio graph, which a tap or key press already started, so Safari
+  // lets it play after the network round trip.
+  playVoice?: PlayVoice;
 };
 
-// Floki's voice: speaks one line at a time. A new line, or stop, cuts off the one playing.
-export function useFlokiVoice({ onPlay }: UseFlokiVoiceParams = {}) {
+// Floki's voice: speaks one line at a time. A new line, stop, or closing the cockpit cuts off
+// the one playing, including one still on its way from the server.
+export function useFlokiVoice({ playVoice }: UseFlokiVoiceParams = {}) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const playbackRef = useRef<Playback | null>(null);
-  // Bumped by every new line and every stop, so a line that arrives late stays silent.
+  const playbackRef = useRef<Playback | undefined>(undefined);
+  // Bumped by every new line, every stop and closing the cockpit, so a line that is cut off
+  // never plays.
   const lineIdRef = useRef(0);
+  const isMountedRef = useRef(false);
 
-  // Closing the cockpit silences him.
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       lineIdRef.current += 1;
-      playbackRef.current?.audio.pause();
+      playbackRef.current?.stop();
     };
   }, []);
 
   function stop() {
     lineIdRef.current += 1;
+    playbackRef.current?.stop();
+    playbackRef.current = undefined;
     setIsSpeaking(false);
-    const playback = playbackRef.current;
-    if (!playback) return;
-    playback.audio.pause();
-    playback.finish();
   }
 
   async function speak(text: string): Promise<FlokiSpeech> {
     stop();
+    if (!isMountedRef.current) return "interrupted";
     const lineId = lineIdRef.current;
-    const outcome = await requestSpeech(text);
-    if (lineId !== lineIdRef.current) return "interrupted";
-    if (outcome.status === "failed") return "silent";
-
-    const audio = new Audio(outcome.audioUrl);
-    onPlay?.(audio);
+    function isCurrent() {
+      return lineId === lineIdRef.current;
+    }
+    // Speaking from the moment the line is asked for, so a tap meanwhile stops it.
     setIsSpeaking(true);
-    await play({
-      audio,
-      onStart: (playback) => {
-        playbackRef.current = playback;
-      },
-    });
-    if (lineId !== lineIdRef.current) return "interrupted";
-    playbackRef.current = null;
+    const outcome = await requestSpeech(text);
+    if (!isCurrent()) return "interrupted";
+    if (outcome.status === "failed") {
+      setIsSpeaking(false);
+      return "silent";
+    }
+    const playback = (await playVoice?.(outcome.audioUrl)) ?? playElement(outcome.audioUrl);
+    if (!isCurrent()) {
+      playback.stop();
+      return "interrupted";
+    }
+    playbackRef.current = playback;
+    await playback.done;
+    if (!isCurrent()) return "interrupted";
+    playbackRef.current = undefined;
     setIsSpeaking(false);
 
     return "spoken";

@@ -51,6 +51,8 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
         return messages.floki.courseSet(outcome.destination.name);
       case "humorSet":
         return messages.floki.humorSet(outcome.humor);
+      case "cancelled":
+        return undefined;
       case "failed":
         return getFlokiFailure(outcome.reason);
       default: {
@@ -81,9 +83,10 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
   async function handleAsk(question: string) {
     const outcome = await floki.ask(question);
     const line = getFlokiLine(outcome);
+    if (line === undefined) return;
     terminal.print([{ kind: "floki", text: line }]);
     if (outcome.status === "failed") return;
-    // Cut off by a newer question: that one decides where to go.
+    // Cut off by a newer question, a typed go or closing the cockpit: that decides instead.
     if ((await floki.speak(line)) === "interrupted") return;
     const destination =
       outcome.status === "answered" || outcome.status === "navigating"
@@ -121,7 +124,8 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
     }
     if (!hasGreeted) {
       setHasGreeted(true);
-      await floki.speak(messages.floki.spokenGreeting);
+      // Stopped during the greeting: the mic stays closed.
+      if ((await floki.speak(messages.floki.spokenGreeting)) === "interrupted") return;
     }
     const hearing = await floki.listen();
     if (hearing.status === "heard") {
@@ -141,6 +145,8 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
       case "clear":
         return;
       case "go":
+        // The visitor takes the controls: Floki's pending answer can't fly anywhere else.
+        floki.stop();
         onGo(result.destination);
         return;
       case "ask":

@@ -9,6 +9,8 @@ type StubFlokiParams = {
   hasVoice?: boolean;
   // Whether Floki's lines play to the end by themselves; off to cut one off in a test.
   shouldFinishSpeaking?: boolean;
+  // How long the model takes to answer, in ms.
+  answerDelay?: number;
 };
 
 const VOICE_URL = "http://floki-voice.test";
@@ -22,6 +24,7 @@ export function stubFloki({
   replies,
   hasVoice = true,
   shouldFinishSpeaking = true,
+  answerDelay = 0,
 }: StubFlokiParams) {
   vi.stubEnv("FLOKI_GROQ_API_KEY", "test-key");
   vi.stubEnv("FLOKI_TTS_URL", VOICE_URL);
@@ -33,6 +36,7 @@ export function stubFloki({
     }
     const reply = replies[Math.min(replyIndex, replies.length - 1)];
     replyIndex += 1;
+    if (answerDelay > 0) await new Promise((resolve) => setTimeout(resolve, answerDelay));
     if (reply && "status" in reply) return new Response("{}", { status: reply.status });
 
     return Response.json({

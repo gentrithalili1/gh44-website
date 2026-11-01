@@ -1,12 +1,14 @@
 import type { Ref } from "react";
 
+import type { FlokiStatus } from "../../../../hooks/useFloki";
+
 // How far up each of the four slabs reaches at full signal, so they never move as one.
 const SLAB_REACH = [0.7, 1, 0.85, 0.55] as const;
 const CELLS_PER_SLAB = 6;
 
 interface FlokiSlabsProps {
   ref: Ref<HTMLSpanElement>;
-  status: string;
+  status: FlokiStatus;
 }
 
 // Floki's body, like TARS: four slabs side by side, each a column of cells that light from the
