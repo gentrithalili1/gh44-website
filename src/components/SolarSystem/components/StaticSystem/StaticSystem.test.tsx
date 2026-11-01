@@ -22,8 +22,22 @@ describe("StaticSystem", () => {
         .getAllByRole("link")
         .map((link) => ({ name: link.textContent, href: link.getAttribute("href") })),
     ).toEqual(PLANET_LINKS);
-    expect(within(planets).getByText("8 moons · 2016 → now")).toBeInTheDocument();
-    expect(within(planets).getByText("one theme, 7 tools")).toBeInTheDocument();
+    // Names only: the subtitle lives in the open planet's panel.
+    expect(within(planets).queryByText("8 moons · 2016 → now")).not.toBeInTheDocument();
+    expect(within(planets).queryByText("one theme, 7 tools")).not.toBeInTheDocument();
+  });
+
+  it("draws all 8 planets on their orbits, and gives Mercury, Venus and Uranus no name, link or page", async () => {
+    await renderAt("/");
+
+    // The drawing is hidden from assistive tech, so it is found by test ids.
+    expect(screen.getAllByTestId("planet-body")).toHaveLength(8);
+    expect(screen.getAllByTestId("planet-orbit")).toHaveLength(8);
+
+    for (const name of ["mercury", "venus", "uranus"]) {
+      expect(screen.queryByText(name)).not.toBeInTheDocument();
+      expect(screen.queryByRole("link", { name })).not.toBeInTheDocument();
+    }
   });
 
   it("keeps the sun decorative: nothing to press or read", async () => {

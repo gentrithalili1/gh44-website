@@ -4,7 +4,7 @@ import { Vector2 } from "three";
 
 import { SYSTEM_SIZE } from "#/components/SolarSystem/utils/space";
 
-import { ShootingStar } from "./components/ShootingStar";
+import { ShootingStars } from "./components/ShootingStars";
 import { createStarField } from "./utils/starField";
 import { STAR_FRAGMENT_SHADER, STAR_VERTEX_SHADER } from "./utils/starShaders";
 import { getStarTint, stepStarTint } from "./utils/starTint";
@@ -25,29 +25,35 @@ export function Stars({ openPlanetId }: StarsProps) {
   const [field] = useState(() =>
     createStarField({ width: window.innerWidth, height: window.innerHeight }),
   );
-  const [uniforms] = useState(() => ({
-    uViewport: { value: new Vector2(1, 1) },
-    uOffset: { value: new Vector2(0, 0) },
-    uTime: { value: 0 },
-    uPixelRatio: { value: 1 },
-    uSizeBoost: { value: 1 },
-    uColor: { value: getStarTint(openPlanetId) },
+  // Passed through the constructor, so the material keeps this uniforms object: the `uniforms`
+  // prop copies each uniform, and reassigned values would never reach it.
+  const [material] = useState(() => ({
+    vertexShader: STAR_VERTEX_SHADER,
+    fragmentShader: STAR_FRAGMENT_SHADER,
+    uniforms: {
+      uViewport: { value: new Vector2(1, 1) },
+      uOffset: { value: new Vector2(0, 0) },
+      uTime: { value: 0 },
+      uPixelRatio: { value: 1 },
+      uSizeBoost: { value: 1 },
+      uColor: { value: getStarTint(openPlanetId) },
+    },
   }));
 
   const targetTint = getStarTint(openPlanetId);
 
   useFrame(({ camera, size, viewport, clock }, delta) => {
     const fitZoom = Math.min(size.width, size.height) / SYSTEM_SIZE;
-    stepStarTint({ tint: uniforms.uColor.value, target: targetTint, delta });
-    uniforms.uViewport.value.set(size.width, size.height);
+    stepStarTint({ tint: material.uniforms.uColor.value, target: targetTint, delta });
+    material.uniforms.uViewport.value.set(size.width, size.height);
     // The camera's position in screen pixels; `y` grows downward on screen.
-    uniforms.uOffset.value.set(
+    material.uniforms.uOffset.value.set(
       camera.position.x * camera.zoom * PARALLAX,
       -camera.position.y * camera.zoom * PARALLAX,
     );
-    uniforms.uTime.value = clock.elapsedTime;
-    uniforms.uPixelRatio.value = viewport.dpr;
-    uniforms.uSizeBoost.value = camera.zoom > fitZoom * ZOOMED_IN ? ZOOMED_IN_SIZE : 1;
+    material.uniforms.uTime.value = clock.elapsedTime;
+    material.uniforms.uPixelRatio.value = viewport.dpr;
+    material.uniforms.uSizeBoost.value = camera.zoom > fitZoom * ZOOMED_IN ? ZOOMED_IN_SIZE : 1;
   });
 
   return (
@@ -60,16 +66,9 @@ export function Stars({ openPlanetId }: StarsProps) {
           <bufferAttribute attach="attributes-aPhase" args={[field.phases, 1]} />
           <bufferAttribute attach="attributes-aSpeed" args={[field.speeds, 1]} />
         </bufferGeometry>
-        <shaderMaterial
-          vertexShader={STAR_VERTEX_SHADER}
-          fragmentShader={STAR_FRAGMENT_SHADER}
-          uniforms={uniforms}
-          transparent
-          depthTest={false}
-          depthWrite={false}
-        />
+        <shaderMaterial args={[material]} transparent depthTest={false} depthWrite={false} />
       </points>
-      <ShootingStar tint={uniforms.uColor.value} />
+      <ShootingStars tint={material.uniforms.uColor.value} />
     </>
   );
 }

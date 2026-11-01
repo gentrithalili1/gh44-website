@@ -1,6 +1,6 @@
 import type { Point } from "#/components/SolarSystem/types";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
-import { getRingBands } from "#/components/SolarSystem/utils/rings";
+import { getRingBands, getUprightRing } from "#/components/SolarSystem/utils/rings";
 import {
   getOrbitPosition,
   ROCKET_GAP,
@@ -8,7 +8,7 @@ import {
   SYSTEM_SIZE,
 } from "#/components/SolarSystem/utils/space";
 import { PANEL_WIDTH, SHEET_HEIGHT } from "#/utils/panel";
-import { findPlanet, type Planet, PLANETS } from "#/utils/planets";
+import { findPlanet, type PlanetBody, PLANETS } from "#/utils/planets";
 
 import { PHONE_MAX_WIDTH } from "../../../utils/sceneMath";
 
@@ -72,12 +72,13 @@ export function getPlanetPose({
 }
 
 // How far from its center a planet's moons, satellites, rings or rocket go.
-export function getPlanetReach(planet: Planet) {
+export function getPlanetReach(planet: PlanetBody) {
   const orbiterReaches = getOrbiters(planet).map((orbiter) => orbiter.orbitRadius + orbiter.radius);
   const ringReaches = getRingBands(planet).map((band) => band.outerRadius);
+  const uprightRingReach = getUprightRing(planet)?.outerRadius ?? 0;
   const rocketReach = planet.features.hasRocket ? planet.size + ROCKET_GAP + ROCKET_LENGTH : 0;
 
-  return Math.max(planet.size, rocketReach, ...orbiterReaches, ...ringReaches);
+  return Math.max(planet.size, rocketReach, uprightRingReach, ...orbiterReaches, ...ringReaches);
 }
 
 const PLANET_REACHES = new Map(PLANETS.map((planet) => [planet.id, getPlanetReach(planet)]));

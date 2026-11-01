@@ -44,13 +44,26 @@ describe("getOrbiters", () => {
     ]);
   });
 
-  it("gives Neptune one satellite per gh44-brain agent", () => {
-    expect(getOrbiters(getPlanet("gh44-brain")).map(({ kind, label }) => [kind, label])).toEqual([
-      ["satellite", "implementer"],
-      ["satellite", "researcher"],
-      ["satellite", "verifier"],
-      ["satellite", "reviewer"],
+  it("gives Neptune one gray rock moon per gh44-brain agent, each its own size", () => {
+    const rocks = getOrbiters(getPlanet("gh44-brain"));
+
+    expect(rocks.map(({ kind, label, color }) => [kind, label, color])).toEqual([
+      ["rock", "implementer", "neutral"],
+      ["rock", "researcher", "neutral"],
+      ["rock", "verifier", "neutral"],
+      ["rock", "reviewer", "neutral"],
     ]);
+    expect(new Set(rocks.map((rock) => rock.radius)).size).toBe(4);
+  });
+
+  it("scars every rock with a few darker craters that stay on it", () => {
+    for (const rock of getOrbiters(getPlanet("gh44-brain"))) {
+      if (rock.kind !== "rock") throw new Error("Neptune's moons are rocks");
+      expect(rock.craters.length).toBeGreaterThanOrEqual(2);
+      for (const crater of rock.craters) {
+        expect(Math.hypot(crater.x, crater.y) + crater.radius).toBeLessThan(rock.radius);
+      }
+    }
   });
 
   it("gives Saturn no moons: its rings stand for the apps", () => {

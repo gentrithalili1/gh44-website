@@ -2,28 +2,28 @@ import { useFrame } from "@react-three/fiber";
 import { type RefObject, useRef, useState } from "react";
 import type { Group } from "three";
 
-import { getSpinOffset, getSpinWidth } from "#/components/SolarSystem/utils/motion";
+import { getSpinCopyOffsets, getSpinWidth } from "#/components/SolarSystem/utils/motion";
 import { getSurfaceShapes } from "#/components/SolarSystem/utils/surface";
-import type { Planet } from "#/utils/planets";
+import type { PlanetBody } from "#/utils/planets";
 
 import type { SceneState } from "../../../../types";
 import { createSurfaceOutline } from "../../utils/sceneGeometry";
 import { PlanetSurfaceMesh } from "./PlanetSurface.elements";
 
 interface PlanetSurfaceProps {
-  planet: Planet;
+  planet: PlanetBody;
   sceneStateRef: RefObject<SceneState>;
   // The planet's own stencil ref: its features show only on its body.
   stencilRef: number;
 }
 
 // What is drawn on a planet's disc. Bands stay still; land and storms slide across as the planet
-// turns, wrapping around like a globe seen from above. The second copy trails one disc width
-// behind the first, so a feature leaving one edge comes back in at the other.
+// turns, wrapping around like a globe seen from above: two copies, never both on the disc.
 export function PlanetSurface({ planet, sceneStateRef, stencilRef }: PlanetSurfaceProps) {
   const [shapes] = useState(() =>
     getSurfaceShapes(planet).map((shape) => ({ shape, outline: createSurfaceOutline(shape) })),
   );
+  const [spinWidth] = useState(() => getSpinWidth(planet));
   const leadRef = useRef<Group>(null);
   const trailRef = useRef<Group>(null);
   // Seconds of spin. It runs on the scene clock alone: hovering or opening the planet stops its
@@ -38,9 +38,13 @@ export function PlanetSurface({ planet, sceneStateRef, stencilRef }: PlanetSurfa
     const trail = trailRef.current;
     if (!lead || !trail) return;
     spinTimeRef.current += sceneStateRef.current.frameStep;
-    const offset = getSpinOffset({ planet, time: spinTimeRef.current });
-    lead.position.x = offset;
-    trail.position.x = offset - getSpinWidth(planet);
+    const [leadOffset, trailOffset] = getSpinCopyOffsets({
+      planet,
+      time: spinTimeRef.current,
+      spinWidth,
+    });
+    lead.position.x = leadOffset;
+    trail.position.x = trailOffset;
   });
 
   function renderMeshes(entries: typeof shapes) {

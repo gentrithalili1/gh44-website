@@ -17,7 +17,15 @@ describe("NotFound", () => {
     ).toBeInTheDocument();
   });
 
-  it("goes back to orbit", async () => {
+  it("offers one way back, at the top like a planet page", async () => {
+    await renderAt("/pluto");
+
+    const backLinks = screen.getAllByRole("link", { name: "back to orbit" });
+    expect(backLinks).toHaveLength(1);
+    expect(backLinks[0]).toHaveAttribute("href", "/");
+  });
+
+  it("goes back to orbit from the top link", async () => {
     const user = userEvent.setup();
     await renderAt("/does-not-exist");
 

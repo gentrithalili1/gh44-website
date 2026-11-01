@@ -7,10 +7,10 @@ import type { Group } from "three";
 
 import { getOrbitAngle } from "#/components/SolarSystem/utils/motion";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
-import { getRingBands } from "#/components/SolarSystem/utils/rings";
+import { getRingBands, getUprightRing } from "#/components/SolarSystem/utils/rings";
 import { getOrbitPosition, getPlanetState } from "#/components/SolarSystem/utils/space";
 import { PALETTE } from "#/utils/palette";
-import type { Planet } from "#/utils/planets";
+import type { SolarPlanet } from "#/utils/planets";
 import type { ThemeToolId } from "#/utils/themeTools";
 
 import type { SceneState } from "../../types";
@@ -21,6 +21,7 @@ import { PlanetLabel } from "./components/PlanetLabel";
 import { PlanetSurface } from "./components/PlanetSurface";
 import { Rings } from "./components/Rings";
 import { Rocket } from "./components/Rocket";
+import { UprightRing } from "./components/UprightRing";
 import type { HoverChange } from "./types";
 import { getBodyStencilMark } from "./utils/bodyStencil";
 
@@ -32,7 +33,7 @@ const CIRCLE_SEGMENTS = 64;
 const LABEL_Z_INDEX_RANGE = [1, 0];
 
 interface ScenePlanetProps {
-  planet: Planet;
+  planet: SolarPlanet;
   openPlanetId: string | undefined;
   sceneStateRef: RefObject<SceneState>;
   labelList: HTMLUListElement;
@@ -41,8 +42,8 @@ interface ScenePlanetProps {
 }
 
 // One planet on its orbit, carrying what says what it holds: surface, moons, satellites, rings
-// or the rocket. It moves every frame, holds still while hovered or open, and opens its page on
-// click.
+// or the rocket. It moves every frame. A site planet holds still while hovered or open, and opens
+// its page on click; a decorative one only passes by, with no label.
 export function ScenePlanet({
   planet,
   openPlanetId,
@@ -62,6 +63,8 @@ export function ScenePlanet({
 
   const state = getPlanetState({ planetId: planet.id, openPlanetId });
   const ringBands = getRingBands(planet);
+  const uprightRing = getUprightRing(planet);
+  const isSitePlanet = planet.kind === "site";
   const isHovered = hoverSources.size > 0;
   // An open gh44-theme still takes ring band clicks: each opens its app's tab.
   const isRingBandHovered = ringBands.some((band) => hoverSources.has(band.id));
@@ -108,12 +111,12 @@ export function ScenePlanet({
   }
 
   function handleOpen() {
-    if (state !== "idle") return;
+    if (state !== "idle" || planet.kind !== "site") return;
     void navigate({ to: "/$planetId", params: { planetId: planet.id } });
   }
 
   function handleRingBandClick(app: ThemeToolId) {
-    if (state === "faded") return;
+    if (state === "faded" || planet.kind !== "site") return;
     // On the open planet a band switches tabs, like the tabs themselves: no new history entry.
     void navigate({
       to: "/$planetId",
@@ -130,7 +133,12 @@ export function ScenePlanet({
 
   return (
     <group ref={groupRef}>
-      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
+      {uprightRing ? <UprightRing ring={uprightRing} /> : null}
+      <mesh
+        onPointerOver={isSitePlanet ? handlePointerOver : undefined}
+        onPointerOut={isSitePlanet ? handlePointerOut : undefined}
+        onClick={isSitePlanet ? handleClick : undefined}
+      >
         <circleGeometry args={[planet.size, CIRCLE_SEGMENTS]} />
         <meshBasicMaterial {...getBodyStencilMark(stencilRef)} color={PALETTE[planet.color].soft} />
       </mesh>
@@ -150,17 +158,19 @@ export function ScenePlanet({
       {planet.features.hasRocket ? (
         <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
       ) : null}
-      <Html
-        as="li"
-        portal={{ current: labelList }}
-        position={[0, -planet.size, 0]}
-        zIndexRange={LABEL_Z_INDEX_RANGE}
-        pointerEvents="none"
-      >
-        <ContextBridge>
-          <PlanetLabel planet={planet} state={state} onHoverChange={handleLabelHoverChange} />
-        </ContextBridge>
-      </Html>
+      {planet.kind === "site" ? (
+        <Html
+          as="li"
+          portal={{ current: labelList }}
+          position={[0, -planet.size, 0]}
+          zIndexRange={LABEL_Z_INDEX_RANGE}
+          pointerEvents="none"
+        >
+          <ContextBridge>
+            <PlanetLabel planet={planet} state={state} onHoverChange={handleLabelHoverChange} />
+          </ContextBridge>
+        </Html>
+      ) : null}
     </group>
   );
 }

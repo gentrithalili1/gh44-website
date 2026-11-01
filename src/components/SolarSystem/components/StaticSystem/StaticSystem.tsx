@@ -8,26 +8,29 @@ import {
   SUN_RADIUS,
   SYSTEM_SIZE,
 } from "#/components/SolarSystem/utils/space";
-import { PLANETS } from "#/utils/planets";
+import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { SolarSystemPlanet } from "./components/SolarSystemPlanet";
 
 const VIEW_BOX = `${-SYSTEM_SIZE / 2} ${-SYSTEM_SIZE / 2} ${SYSTEM_SIZE} ${SYSTEM_SIZE}`;
 
-// A still frame of the system: the SVG draws it, the HTML on top holds the planet links at a
-// readable size. Both share one unit, so the labels sit under their planets. The sun is gh44:
-// everything revolves around it, and it only decorates.
+// A still frame of the system: the SVG draws it, the HTML on top holds the site planets' links at
+// a readable size. Both share one unit, so the labels sit under their planets. Decorative planets
+// have no label. The sun is gh44: everything revolves around it, and it only decorates.
 interface StaticSystemProps {
   openPlanetId: string | undefined;
 }
 
 export function StaticSystem({ openPlanetId }: StaticSystemProps) {
   const isPlanetOpen = openPlanetId !== undefined;
-  const planets = PLANETS.map((planet) => ({
+  const planets = SOLAR_SYSTEM.map((planet) => ({
     planet,
     position: getOrbitPosition(planet.orbit),
     state: getPlanetState({ planetId: planet.id, openPlanetId }),
   }));
+  const sitePlanets = planets.flatMap(({ planet, ...rest }) =>
+    planet.kind === "site" ? [{ planet, ...rest }] : [],
+  );
 
   return (
     <div
@@ -50,8 +53,9 @@ export function StaticSystem({ openPlanetId }: StaticSystemProps) {
           data-state={isPlanetOpen ? "faded" : "idle"}
           className="transition-opacity duration-600 ease-space data-[state=faded]:opacity-8"
         >
-          {PLANETS.map((planet) => (
+          {SOLAR_SYSTEM.map((planet) => (
             <circle
+              data-testid="planet-orbit"
               key={planet.id}
               r={planet.orbit.radius}
               vectorEffect="non-scaling-stroke"
@@ -73,7 +77,7 @@ export function StaticSystem({ openPlanetId }: StaticSystemProps) {
       </svg>
       <nav aria-label={messages.planetsLabel}>
         <ul>
-          {planets.map(({ planet, position, state }) => (
+          {sitePlanets.map(({ planet, position, state }) => (
             <li
               key={planet.id}
               data-state={state}
@@ -84,16 +88,12 @@ export function StaticSystem({ openPlanetId }: StaticSystemProps) {
                 to="/$planetId"
                 params={{ planetId: planet.id }}
                 data-state={state}
-                className="flex flex-col items-center gap-2 text-label tracking-label whitespace-nowrap text-muted transition-colors hover:text-foreground focus-visible:outline-none aria-[current=page]:text-foreground"
+                className="flex flex-col items-center gap-1 text-label tracking-label whitespace-nowrap text-muted transition-colors hover:text-foreground focus-visible:outline-none aria-[current=page]:text-foreground"
               >
                 {/* Covers the planet, so the planet itself opens its page. */}
                 <span className="size-[calc(var(--size)*2*var(--space-unit))] rounded-full group-has-focus-visible:outline-2 group-has-focus-visible:outline-offset-4 group-has-focus-visible:outline-foreground" />
                 {planet.name}
               </Link>
-              {/* Phones show names only: the inner planets sit close. */}
-              <span className="hidden text-label-sub whitespace-nowrap text-faint md:block">
-                {planet.sub}
-              </span>
             </li>
           ))}
         </ul>

@@ -1,7 +1,7 @@
 import type { Shape } from "three";
 
-import type { Shade } from "#/components/SolarSystem/types";
-import { PALETTE, type PaletteColor } from "#/utils/palette";
+import type { Shade, SurfaceColor } from "#/components/SolarSystem/types";
+import { getSurfaceHex } from "#/components/SolarSystem/utils/surfaceColor";
 
 import { getBodyStencilClip } from "../../utils/bodyStencil";
 
@@ -10,7 +10,7 @@ const SURFACE_DEPTH = 0.5;
 
 interface PlanetSurfaceMeshProps {
   outline: Shape;
-  color: PaletteColor;
+  color: SurfaceColor;
   shade: Shade;
   opacity: number;
   stencilRef: number;
@@ -28,7 +28,7 @@ export function PlanetSurfaceMesh({
       <shapeGeometry args={[outline]} />
       <meshBasicMaterial
         {...getBodyStencilClip(stencilRef)}
-        color={PALETTE[color][shade]}
+        color={getSurfaceHex({ color, shade })}
         transparent
         opacity={opacity}
         userData={{ baseOpacity: opacity }}

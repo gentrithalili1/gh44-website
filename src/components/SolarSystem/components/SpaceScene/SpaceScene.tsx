@@ -2,7 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { useRef, useState } from "react";
 
 import { messages } from "#/components/SolarSystem/messages";
-import { PLANETS } from "#/utils/planets";
+import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { LabelNudges } from "./components/LabelNudges";
 import { Orbits } from "./components/Orbits";
@@ -25,8 +25,8 @@ interface SpaceSceneProps {
   openPlanetId: string | undefined;
 }
 
-// The living system: a WebGL canvas drawn flat from straight above, with each planet's label
-// as a real link in the "planets" list on top of it.
+// The living system: a WebGL canvas drawn flat from straight above, with each site planet's
+// label as a real link in the "planets" list on top of it. Decorative planets have no label.
 export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isPageVisible = usePageVisible();
   // The labels render into this list once it exists.
@@ -55,7 +55,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         <Sun isPlanetOpen={isPlanetOpen} />
         <Orbits isPlanetOpen={isPlanetOpen} />
         {labelList
-          ? PLANETS.map((planet, index) => (
+          ? SOLAR_SYSTEM.map((planet, index) => (
               <ScenePlanet
                 key={planet.id}
                 planet={planet}

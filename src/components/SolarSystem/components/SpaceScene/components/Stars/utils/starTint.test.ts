@@ -11,10 +11,10 @@ describe("getStarTint", () => {
   });
 
   it("tints the stars in the open planet's soft color", () => {
-    // gh44-brain is Neptune, lavender #bba8d9.
+    // gh44-brain is Neptune, blue #9fb7cc.
     const tint = getStarTint("gh44-brain");
 
-    expect([tint.r * 255, tint.g * 255, tint.b * 255]).toEqual([187, 168, 217]);
+    expect([tint.r * 255, tint.g * 255, tint.b * 255]).toEqual([159, 183, 204]);
   });
 });
 
