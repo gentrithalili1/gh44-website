@@ -54,3 +54,38 @@ export function TerminalCursor({ children }: TerminalCursorProps) {
     </span>
   );
 }
+
+type IndicatorLight = { id: string; color: string; blink?: string };
+
+// Tiny lights in the palette's hues along the top of the terminal; a few blink slowly, out of
+// step.
+const LIGHTS = [
+  { id: "l1", color: "bg-sage" },
+  { id: "l2", color: "bg-sage" },
+  { id: "l3", color: "bg-sage", blink: "animate-light-blink [animation-delay:-0.6s]" },
+  { id: "l4", color: "bg-fg-faint" },
+  { id: "l5", color: "bg-ochre" },
+  { id: "l6", color: "bg-fg-faint" },
+  { id: "l7", color: "bg-blue" },
+  { id: "l8", color: "bg-lavender", blink: "animate-light-blink [animation-delay:-2.1s]" },
+  { id: "l9", color: "bg-terracotta" },
+  { id: "l10", color: "bg-fg-faint" },
+  { id: "l11", color: "bg-ochre", blink: "animate-light-blink [animation-delay:-1.3s]" },
+  { id: "l12", color: "bg-sage" },
+] as const satisfies readonly IndicatorLight[];
+
+export function TerminalLights() {
+  return (
+    <span
+      aria-hidden="true"
+      className="flex shrink-0 items-center gap-1.5 border-b border-border-subtle px-3 py-2 md:px-4"
+    >
+      {LIGHTS.map((light: IndicatorLight) => (
+        <span
+          key={light.id}
+          className={`size-1.5 rounded-full opacity-80 ${light.color} ${light.blink ?? ""}`}
+        />
+      ))}
+    </span>
+  );
+}

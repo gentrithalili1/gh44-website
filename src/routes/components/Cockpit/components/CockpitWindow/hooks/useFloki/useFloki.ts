@@ -108,8 +108,8 @@ export function useFloki() {
 
   function getStatus(): FlokiStatus {
     if (listening.status === "listening") return "listening";
-    if (requestStatus === "thinking") return "thinking";
-    if (voice.isSpeaking) return "speaking";
+    if (requestStatus === "thinking" || voice.status === "preparing") return "thinking";
+    if (voice.status === "speaking") return "speaking";
     return "idle";
   }
 

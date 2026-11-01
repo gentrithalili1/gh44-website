@@ -60,60 +60,6 @@ export function CockpitWindshield() {
   );
 }
 
-type IndicatorLight = { id: string; color: string; blink?: string };
-
-// Tiny lights in the palette's hues; a few blink slowly, out of step.
-const LIGHT_ROWS = [
-  {
-    id: "upper",
-    lights: [
-      { id: "u1", color: "bg-sage" },
-      { id: "u2", color: "bg-sage" },
-      { id: "u3", color: "bg-sage", blink: "animate-light-blink [animation-delay:-0.6s]" },
-      { id: "u4", color: "bg-fg-faint" },
-      { id: "u5", color: "bg-ochre" },
-      { id: "u6", color: "bg-fg-faint" },
-      { id: "u7", color: "bg-blue" },
-      { id: "u8", color: "bg-blue" },
-    ],
-  },
-  {
-    id: "lower",
-    lights: [
-      { id: "l1", color: "bg-terracotta" },
-      { id: "l2", color: "bg-fg-faint" },
-      { id: "l3", color: "bg-fg-faint" },
-      { id: "l4", color: "bg-lavender", blink: "animate-light-blink [animation-delay:-2.1s]" },
-      { id: "l5", color: "bg-sage" },
-      { id: "l6", color: "bg-sage" },
-      { id: "l7", color: "bg-fg-faint" },
-      { id: "l8", color: "bg-ochre", blink: "animate-light-blink [animation-delay:-1.3s]" },
-    ],
-  },
-] as const satisfies readonly { id: string; lights: readonly IndicatorLight[] }[];
-
-interface IndicatorLightsProps {
-  // The right panel's lights run the other way, so the two sides don't match.
-  isMirrored?: boolean;
-}
-
-export function IndicatorLights({ isMirrored = false }: IndicatorLightsProps) {
-  return (
-    <span aria-hidden="true" className="flex flex-col gap-1.5">
-      {LIGHT_ROWS.map((row) => (
-        <span key={row.id} className={`flex gap-1.5 ${isMirrored ? "flex-row-reverse" : ""}`}>
-          {row.lights.map((light: IndicatorLight) => (
-            <span
-              key={light.id}
-              className={`size-1.5 rounded-full opacity-80 ${light.color} ${light.blink ?? ""}`}
-            />
-          ))}
-        </span>
-      ))}
-    </span>
-  );
-}
-
 interface ConsoleScreenProps {
   // Where the screen sits in the console.
   className?: string;

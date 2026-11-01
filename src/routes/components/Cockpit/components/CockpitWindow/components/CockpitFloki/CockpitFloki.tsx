@@ -1,5 +1,5 @@
 import type { FlokiStatus } from "../../hooks/useFloki";
-import { FlokiHead } from "./CockpitFloki.elements";
+import { FlokiHead, MicIcon } from "./CockpitFloki.elements";
 import { FlokiSignal } from "./components/FlokiSignal";
 import { messages } from "./messages";
 
@@ -7,19 +7,60 @@ interface CockpitFlokiProps {
   status: FlokiStatus;
   // How loud the mic or Floki's voice is right now, from 0 to 1.
   getLevel: () => number;
+  // The browser can hear the visitor; without it they type `floki <question>`.
+  canListen: boolean;
+  // Talk was tapped and Floki keeps listening after each answer until it ends.
+  isConversing: boolean;
+  isLocked: boolean;
+  onTalk: () => void;
 }
 
 // Floki's own screen: the ship's robotic German shepherd, his signal lighting the grille in his
-// muzzle. It only shows him; the terminal's strip says what he is doing to screen readers.
-export function CockpitFloki({ status, getLevel }: CockpitFlokiProps) {
+// muzzle, what he is doing, and the button to talk to him. The mic only opens on that button.
+// On phones it shrinks to his head and the button.
+export function CockpitFloki({
+  status,
+  getLevel,
+  canListen,
+  isConversing,
+  isLocked,
+  onTalk,
+}: CockpitFlokiProps) {
+  const isActive = isConversing || status === "listening" || status === "speaking";
+
   return (
-    <div aria-hidden="true" className="flex h-full min-h-0 flex-col items-center gap-1">
-      <div className="flex min-h-0 w-full flex-1 justify-center">
+    <section
+      aria-label={messages.label}
+      className="flex h-full min-h-0 flex-col gap-1.5 md:flex-row md:items-center md:gap-4"
+    >
+      <div aria-hidden="true" className="flex justify-center md:h-full">
         <FlokiHead status={status} grille={<FlokiSignal status={status} getLevel={getLevel} />} />
       </div>
-      <p className="hidden text-[0.6875rem] text-muted md:block">
-        <span className="text-lavender">{messages.name}</span> · {messages.status[status]}
-      </p>
-    </div>
+      <div className="flex min-w-0 flex-col gap-2 md:flex-1">
+        <p className="sr-only text-xs md:not-sr-only md:flex md:items-baseline md:gap-2">
+          <span className="text-lavender">{messages.name}</span>
+          <span role="status" className="truncate text-muted">
+            {messages.status[status]}
+          </span>
+        </p>
+        <p className="hidden text-[0.6875rem] text-faint md:block">
+          {canListen ? messages.privacy : messages.typeInstead}
+        </p>
+        {canListen ? (
+          <button
+            type="button"
+            aria-label={isActive ? messages.stopLabel : messages.talkLabel}
+            aria-pressed={isConversing}
+            disabled={isLocked}
+            onClick={onTalk}
+            data-floki-talk
+            className="flex h-8 items-center justify-center gap-1.5 self-stretch rounded-full border border-rule bg-bg-subtle px-3 text-xs text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40 aria-pressed:border-lavender aria-pressed:text-lavender md:self-start md:pl-2.5"
+          >
+            <MicIcon />
+            {isActive ? messages.stop : messages.talk}
+          </button>
+        ) : null}
+      </div>
+    </section>
   );
 }

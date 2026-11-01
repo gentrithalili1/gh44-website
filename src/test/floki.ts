@@ -57,10 +57,11 @@ export function stubFloki({
       if (shouldFinishSpeaking) queueMicrotask(() => this.dispatchEvent(new Event("ended")));
     });
 
-    constructor(src: string) {
+    constructor(src = "") {
       super();
       this.src = src;
-      players.push(this);
+      // Only Floki's lines: other players on the page (the radio) are not his.
+      if (src.startsWith("data:audio")) players.push(this);
     }
   }
   vi.stubGlobal("Audio", FakeVoiceAudio);

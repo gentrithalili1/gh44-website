@@ -36,4 +36,17 @@ describe("useFlokiWelcome", () => {
 
     expect(greet).not.toHaveBeenCalled();
   });
+
+  it("leaves a first tap on talk to talk, which greets on its own", () => {
+    const { floki, greet } = getFloki();
+    renderHook(() => useFlokiWelcome({ floki, isGreeting: true, text: "Welcome aboard." }));
+    const talk = document.createElement("button");
+    talk.dataset.flokiTalk = "";
+    document.body.append(talk);
+
+    talk.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+
+    expect(greet).toHaveBeenCalledTimes(1);
+    talk.remove();
+  });
 });

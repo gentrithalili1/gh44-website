@@ -1,19 +1,56 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
+import { describe, expect, it, vi } from "vitest";
 
 import { CockpitFloki } from "./CockpitFloki";
 
-describe("CockpitFloki", () => {
-  it("shows what floki is doing, with his signal in the grille", () => {
-    const { container } = render(<CockpitFloki status="speaking" getLevel={() => 0} />);
+function renderFloki(props: Partial<ComponentProps<typeof CockpitFloki>> = {}) {
+  return render(
+    <CockpitFloki
+      status="idle"
+      getLevel={() => 0}
+      canListen
+      isConversing={false}
+      isLocked={false}
+      onTalk={vi.fn()}
+      {...props}
+    />,
+  );
+}
 
-    expect(screen.getByText("speaking", { exact: false })).toBeInTheDocument();
-    expect(container.querySelector("[data-status=speaking] svg")).toBeInTheDocument();
+describe("CockpitFloki", () => {
+  it("shows what floki is doing, with his head and signal", () => {
+    const { container } = renderFloki({ status: "thinking" });
+
+    expect(screen.getByRole("status")).toHaveTextContent("thinking…");
+    expect(container.querySelector("[data-status=thinking] svg")).toBeInTheDocument();
   });
 
-  it("stays out of the accessibility tree: the terminal speaks for him", () => {
-    const { container } = render(<CockpitFloki status="idle" getLevel={() => 0} />);
+  it("talks to floki on the button", async () => {
+    const user = userEvent.setup();
+    const onTalk = vi.fn();
+    renderFloki({ onTalk });
 
-    expect(container.firstElementChild).toHaveAttribute("aria-hidden", "true");
+    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+
+    expect(onTalk).toHaveBeenCalled();
+    expect(screen.getByText("your browser transcribes what you say.")).toBeInTheDocument();
+  });
+
+  it("offers to stop floki during a conversation", () => {
+    renderFloki({ status: "listening", isConversing: true });
+
+    expect(screen.getByRole("button", { name: "stop floki" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("asks to type where the browser cannot hear", () => {
+    renderFloki({ canListen: false });
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByText("no mic here. type floki <question>.")).toBeInTheDocument();
   });
 });

@@ -21,7 +21,7 @@ describe("useFlokiVoice", () => {
 
     expect(speech).toBe("spoken");
     expect(players[0]?.src).toMatch(/^data:audio\/wav;base64,/);
-    expect(result.current.isSpeaking).toBe(false);
+    expect(result.current.status).toBe("quiet");
   });
 
   it("stays silent when the voice is down", async () => {
@@ -46,12 +46,12 @@ describe("useFlokiVoice", () => {
       speaking = result.current.speak("A long story about Jupiter.");
     });
     await vi.waitFor(() => expect(players[0]?.play).toHaveBeenCalled());
-    expect(result.current.isSpeaking).toBe(true);
+    expect(result.current.status).toBe("speaking");
     act(() => result.current.stop());
 
     await expect(speaking).resolves.toBe("interrupted");
     expect(players[0]?.pause).toHaveBeenCalled();
-    expect(result.current.isSpeaking).toBe(false);
+    expect(result.current.status).toBe("quiet");
   });
 
   it("goes quiet when the cockpit closes", async () => {

@@ -3,9 +3,12 @@ import { useState } from "react";
 
 import { useExploration } from "#/hooks/useExploration";
 
-import { getWelcomeLines, runCommand } from "../../utils/terminalCommands";
+import {
+  getWelcomeLines,
+  runCommand,
+} from "../../components/CockpitTerminal/utils/terminalCommands";
 
-import { messages } from "../../messages";
+import { messages } from "../../components/CockpitTerminal/messages";
 
 // A line on the screen: a command echoed at the prompt, what a command printed, or what the
 // visitor and Floki said to each other.
@@ -44,6 +47,8 @@ function addLines({
     nextLineId: screen.nextLineId + lines.length,
   };
 }
+
+export type Terminal = ReturnType<typeof useTerminal>;
 
 // The cockpit's terminal: what it shows, what is typed, and the commands typed before.
 export function useTerminal() {
