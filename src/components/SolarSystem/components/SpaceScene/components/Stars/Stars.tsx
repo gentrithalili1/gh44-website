@@ -65,8 +65,8 @@ export function Stars({ openPlanetId, isCruising, sceneStateRef }: StarsProps) {
   });
 
   return (
-    <>
-      <points ref={skyRef} frustumCulled={false} renderOrder={-1}>
+    <group ref={skyRef}>
+      <points frustumCulled={false} renderOrder={-1}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[field.positions, 3]} />
           <bufferAttribute attach="attributes-aDepth" args={[field.depths, 1]} />
@@ -77,6 +77,6 @@ export function Stars({ openPlanetId, isCruising, sceneStateRef }: StarsProps) {
         <shaderMaterial args={[material]} transparent depthTest={false} depthWrite={false} />
       </points>
       <ShootingStars tint={material.uniforms.uColor.value} />
-    </>
+    </group>
   );
 }
