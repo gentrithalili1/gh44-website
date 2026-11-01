@@ -182,11 +182,18 @@ export function useCameraFlight({
           });
     const target = { ...framing, zoom: framing.zoom * zoomScaleRef.current };
     const anchor = getFocusPosition({ focus: flight.anchor, sceneState });
+    const focusAngle = getFocusAngle({ flight, sceneState });
     const pose =
       isFlying && anchor
-        ? mixPoses({ from: flight.from, to: target, anchor, progress: flight.progress })
+        ? mixPoses({
+            from: flight.from,
+            to: target,
+            anchor,
+            progress: flight.progress,
+            fromAngle: flight.fromAngle,
+            toAngle: focusAngle,
+          })
         : target;
-    const focusAngle = getFocusAngle({ flight, sceneState });
     // Settled, the visitor steers, except in the cockpit, which keeps turning with the ship.
     const settledAngle = flight.focus.kind === "ship" ? focusAngle : angleRef.current;
     const angle = isFlying

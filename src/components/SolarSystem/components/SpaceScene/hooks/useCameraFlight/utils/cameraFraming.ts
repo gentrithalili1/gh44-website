@@ -138,41 +138,75 @@ export function getCameraPose({ viewport, planetId, planetAngle }: GetCameraPose
   });
 }
 
-type MixPosesParams = { from: CameraPose; to: CameraPose; anchor: Point; progress: number };
+type MixPosesParams = {
+  from: CameraPose;
+  to: CameraPose;
+  anchor: Point;
+  progress: number;
+  // The camera's angle at each end: it turns between them on the way.
+  fromAngle: CameraAngle;
+  toAngle: CameraAngle;
+};
 
 function mix({ from, to, progress }: { from: number; to: number; progress: number }) {
   return from + (to - from) * progress;
 }
 
+// From a step on the orbit plane to the pixels it spans on screen, per unit of zoom, seen from an
+// angle: across turns with the azimuth, and toward the viewer foreshortens with the polar angle.
+function toScreen({ step, angle }: { step: Point; angle: CameraAngle }): Point {
+  const sin = Math.sin(angle.azimuth);
+  const cos = Math.cos(angle.azimuth);
+
+  return {
+    x: step.x * cos - step.y * sin,
+    y: (step.x * sin + step.y * cos) * Math.cos(angle.polar),
+  };
+}
+
+// The inverse of `toScreen`.
+function toPlane({ screen, angle }: { screen: Point; angle: CameraAngle }): Point {
+  const sin = Math.sin(angle.azimuth);
+  const cos = Math.cos(angle.azimuth);
+  const toward = screen.y / Math.cos(angle.polar);
+
+  return { x: screen.x * cos + toward * sin, y: -screen.x * sin + toward * cos };
+}
+
+type GetAnchorOnScreenParams = { pose: CameraPose; anchor: Point; angle: CameraAngle };
+
+// Where the anchor sits on screen, in pixels from the center.
+function getAnchorOnScreen({ pose, anchor, angle }: GetAnchorOnScreenParams): Point {
+  const step = toScreen({ step: { x: anchor.x - pose.x, y: anchor.y - pose.y }, angle });
+
+  return { x: step.x * pose.zoom + pose.offset.x, y: step.y * pose.zoom + pose.offset.y };
+}
+
 // A point of the flight between two poses. Zoom blends on a log scale, so every zoom step feels
 // the same; the anchor (the planet flown to or from) moves along a straight line on screen
-// instead of drifting.
-export function mixPoses({ from, to, anchor, progress }: MixPosesParams): CameraPose {
+// instead of drifting, from any angle and while the camera turns.
+export function mixPoses({
+  from,
+  to,
+  anchor,
+  progress,
+  fromAngle,
+  toAngle,
+}: MixPosesParams): CameraPose {
   const zoom = from.zoom * (to.zoom / from.zoom) ** progress;
   const offset = {
     x: mix({ from: from.offset.x, to: to.offset.x, progress }),
     y: mix({ from: from.offset.y, to: to.offset.y, progress }),
   };
-  // Where the anchor sits on screen, from the center.
-  const screenFrom = {
-    x: (anchor.x - from.x) * from.zoom + from.offset.x,
-    y: (anchor.y - from.y) * from.zoom + from.offset.y,
-  };
-  const screenTo = {
-    x: (anchor.x - to.x) * to.zoom + to.offset.x,
-    y: (anchor.y - to.y) * to.zoom + to.offset.y,
-  };
+  const screenFrom = getAnchorOnScreen({ pose: from, anchor, angle: fromAngle });
+  const screenTo = getAnchorOnScreen({ pose: to, anchor, angle: toAngle });
   const screen = {
-    x: mix({ from: screenFrom.x, to: screenTo.x, progress }),
-    y: mix({ from: screenFrom.y, to: screenTo.y, progress }),
+    x: (mix({ from: screenFrom.x, to: screenTo.x, progress }) - offset.x) / zoom,
+    y: (mix({ from: screenFrom.y, to: screenTo.y, progress }) - offset.y) / zoom,
   };
+  const step = toPlane({ screen, angle: mixAngles({ from: fromAngle, to: toAngle, progress }) });
 
-  return {
-    x: anchor.x - (screen.x - offset.x) / zoom,
-    y: anchor.y - (screen.y - offset.y) / zoom,
-    zoom,
-    offset,
-  };
+  return { x: anchor.x - step.x, y: anchor.y - step.y, zoom, offset };
 }
 
 const FULL_TURN = Math.PI * 2;

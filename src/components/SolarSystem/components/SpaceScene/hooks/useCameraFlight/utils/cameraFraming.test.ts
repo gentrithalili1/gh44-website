@@ -326,21 +326,57 @@ describe("mixPoses", () => {
   const from = { x: 0, y: 0, zoom: 1, offset: { x: 0, y: 0 } };
   const to = { x: 100, y: 0, zoom: 4, offset: { x: -360, y: 0 } };
   const anchor = { x: 100, y: 0 };
+  // Straight down, where the screen and the plane line up.
+  const TOP_DOWN = { polar: 0, azimuth: 0 };
+  const angles = { fromAngle: TOP_DOWN, toAngle: TOP_DOWN };
 
   it("starts at the first pose and lands on the second", () => {
-    expect(mixPoses({ from, to, anchor, progress: 0 })).toEqual(from);
-    expect(mixPoses({ from, to, anchor, progress: 1 })).toEqual(to);
+    expect(mixPoses({ from, to, anchor, progress: 0, ...angles })).toEqual(from);
+    expect(mixPoses({ from, to, anchor, progress: 1, ...angles })).toEqual(to);
   });
 
   it("zooms on a log scale and moves the anchor straight across the screen", () => {
     // Halfway: zoom 2 (between 1 and 4 on a log scale); the anchor sits halfway between 100px
     // right of center and 360px left of it: 130px left.
-    const pose = mixPoses({ from, to, anchor, progress: 0.5 });
+    const pose = mixPoses({ from, to, anchor, progress: 0.5, ...angles });
 
     expect(pose.zoom).toBeCloseTo(2);
     expect(pose.offset.x).toBeCloseTo(-180);
     expect((anchor.x - pose.x) * pose.zoom + pose.offset.x).toBeCloseTo(-130);
     expect(pose.y).toBeCloseTo(0);
+  });
+
+  it("moves the planet left behind straight on screen, flying home from round the back", () => {
+    // Orbited behind the open planet, low; closing it flies home and turns to the home angle.
+    const orbited = { polar: 1, azimuth: 2.8 };
+    const planet = { x: 200, y: -120 };
+    const start = getPlanetPose({ viewport: DESKTOP, planetPosition: planet, reach: 40 });
+    const end = getHomePose(DESKTOP);
+    const onScreen = (progress: number) => {
+      const pose = mixPoses({
+        from: start,
+        to: end,
+        anchor: planet,
+        progress,
+        fromAngle: orbited,
+        toAngle: HOME_ANGLE,
+      });
+      const angle = mixAngles({ from: orbited, to: HOME_ANGLE, progress });
+      return project({ pose, angle, point: planet, viewport: DESKTOP });
+    };
+
+    const first = onScreen(0);
+    const last = onScreen(1);
+    const length = Math.hypot(last.x - first.x, last.y - first.y);
+    for (const progress of [0.25, 0.5, 0.75]) {
+      const point = onScreen(progress);
+      // How far it strays from the straight line between where it starts and lands.
+      const offLine =
+        Math.abs(
+          (last.x - first.x) * (first.y - point.y) - (first.x - point.x) * (last.y - first.y),
+        ) / length;
+      expect(offLine).toBeLessThan(length * 0.05);
+    }
   });
 });
 
