@@ -23,14 +23,14 @@ function getLabel(destination: BackDestination) {
   }
 }
 
-// The way home, fixed top left: beside the music button on its center line, or in its own spot
-// when there is no button. After a launch from the cockpit it leads back into the cockpit.
+// The way home, fixed in the top left corner. After a launch from the cockpit it leads back into
+// the cockpit.
 export function BackToOrbitLink({ destination = "orbit", onClick }: BackToOrbitLinkProps) {
   return (
     <Link
       to="/"
       onClick={onClick}
-      className="fixed top-4 left-4 z-30 text-label text-muted transition-colors group-has-[[data-music-button]]/root:top-4 group-has-[[data-music-button]]/root:left-24 group-has-[[data-music-button]]/root:leading-11 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-muted md:top-8 md:left-10 md:group-has-[[data-music-button]]/root:top-4 md:group-has-[[data-music-button]]/root:left-30"
+      className="fixed top-4 left-4 z-30 px-3 text-label leading-11 text-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-muted"
     >
       <span aria-hidden="true">{messages.backArrow}</span> {getLabel(destination)}
     </Link>

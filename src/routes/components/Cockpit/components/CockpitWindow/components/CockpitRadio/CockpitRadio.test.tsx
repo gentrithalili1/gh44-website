@@ -1,10 +1,11 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MusicProvider } from "#/routes/hooks/useMusic";
 import { TRACKS } from "#/routes/hooks/useMusic/utils/tracks";
 import { removeGestureListeners, stubAudio } from "#/test/audio";
+import { fakeFrames, playFor } from "#/test/motion";
 import { renderAt } from "#/test/renderAt";
 
 import { CockpitRadio } from "./CockpitRadio";
@@ -21,6 +22,11 @@ function getRadio() {
   return screen.getByRole("region", { name: "radio" });
 }
 
+// The page has loaded the radio and it plays.
+async function waitForPlaying(players: ReturnType<typeof stubAudio>) {
+  await waitFor(() => expect(players[0]?.paused).toBe(false));
+}
+
 // What the radio says is playing, apart from its playlist.
 function getNowPlaying() {
   return within(getRadio()).getByRole("status");
@@ -29,14 +35,85 @@ function getNowPlaying() {
 describe("CockpitRadio", () => {
   afterEach(() => {
     removeGestureListeners();
+    vi.useRealTimers();
     vi.unstubAllGlobals();
+  });
+
+  it("plays the first track as the page loads, before the cockpit opens, fading in", async () => {
+    fakeFrames();
+    const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
+    await renderAt("/");
+    await act(async () => {});
+
+    const [player] = players;
+    expect(player?.currentSrc).toBe("/audio/crystalline.mp3");
+    expect(player?.paused).toBe(false);
+    expect(player?.volume).toBe(0);
+    playFor(800);
+    expect(player?.volume).toBeGreaterThan(0);
+    expect(player?.volume).toBeLessThan(0.7);
+    playFor(1000);
+    expect(player?.volume).toBe(0.7);
+  });
+
+  it("plays on the visitor's first interaction when the browser blocks autoplay", async () => {
+    const user = userEvent.setup();
+    const players = stubAudio({ hasTrack: true, autoplay: "needs-gesture" });
+    await renderAt("/");
+    await act(async () => {});
+    expect(players[0]?.paused).toBe(true);
+
+    await user.keyboard("a");
+
+    await waitForPlaying(players);
+  });
+
+  it("plays when the first gesture is a press on the radio's play button", async () => {
+    const user = userEvent.setup();
+    const players = stubAudio({ hasTrack: true, autoplay: "needs-gesture" });
+    await renderAt("/");
+    await act(async () => {});
+    await openCockpit(user);
+    // Opening the cockpit is a gesture too: stop, so the play button is the one to start it.
+    await waitForPlaying(players);
+    await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
+
+    const button = within(getRadio()).getByRole("button", {
+      name: "play crystalline by thomas newman",
+    });
+    // A real press: the page settles between pressing the button down and letting it go.
+    await user.pointer({ keys: "[MouseLeft>]", target: button });
+    await act(async () => {});
+    await user.pointer({ keys: "[/MouseLeft]", target: button });
+
+    expect(
+      await within(getRadio()).findByRole("button", { name: "stop the radio" }),
+    ).toBeInTheDocument();
+  });
+
+  it("fades out on stop", async () => {
+    fakeFrames();
+    const user = userEvent.setup();
+    const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
+    await renderAt("/");
+    await act(async () => {});
+    playFor(1700);
+    await openCockpit(user);
+
+    await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
+
+    const [player] = players;
+    expect(player?.paused).toBe(false);
+    playFor(700);
+    expect(player?.volume).toBe(0);
+    expect(player?.paused).toBe(true);
   });
 
   it("shows what is playing", async () => {
     const user = userEvent.setup();
-    stubAudio({ hasTrack: true, autoplay: "allowed" });
+    const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
 
     await openCockpit(user);
 
@@ -44,17 +121,16 @@ describe("CockpitRadio", () => {
     expect(within(getRadio()).getByRole("button", { name: "stop the radio" })).toBeInTheDocument();
   });
 
-  it("shares one player with the music button: a stop in the cockpit stops it everywhere", async () => {
+  it("holds a stop for the visit: no gesture starts it again", async () => {
     const user = userEvent.setup();
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
 
     await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
     await user.keyboard("{Escape}");
 
-    expect(screen.getByRole("button", { name: "play crystalline by thomas newman" })).toBeVisible();
     expect(players).toHaveLength(1);
     // The stop holds for the visit: no gesture starts it again.
     await user.keyboard("a");
@@ -65,7 +141,7 @@ describe("CockpitRadio", () => {
     const user = userEvent.setup();
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
 
     await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
@@ -97,7 +173,7 @@ describe("CockpitRadio", () => {
     const user = userEvent.setup();
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
 
     await user.click(within(getRadio()).getByRole("button", { name: "next track" }));
@@ -115,7 +191,7 @@ describe("CockpitRadio", () => {
     const user = userEvent.setup();
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
     await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
 
@@ -132,7 +208,7 @@ describe("CockpitRadio", () => {
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     const user = userEvent.setup();
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
 
     act(() => {
@@ -158,7 +234,7 @@ describe("CockpitRadio", () => {
     const user = userEvent.setup();
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
     const playlist = within(getRadio()).getByRole("list", { name: "playlist" });
 
@@ -194,7 +270,7 @@ describe("CockpitRadio", () => {
     const user = userEvent.setup();
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
     await user.click(within(getRadio()).getByRole("button", { name: "stop the radio" }));
 
@@ -208,9 +284,9 @@ describe("CockpitRadio", () => {
 
   it("opens and closes the playlist from its toggle on phones", async () => {
     const user = userEvent.setup();
-    stubAudio({ hasTrack: true, autoplay: "allowed" });
+    const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     await renderAt("/");
-    await screen.findByRole("button", { name: "stop the music" });
+    await waitForPlaying(players);
     await openCockpit(user);
     const toggle = within(getRadio()).getByRole("button", { name: "playlist" });
 

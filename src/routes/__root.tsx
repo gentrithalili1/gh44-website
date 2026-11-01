@@ -9,7 +9,6 @@ import { findPlanet } from "#/utils/planets";
 
 import appCss from "../styles.css?url";
 import { Cockpit } from "./components/Cockpit";
-import { MusicButton } from "./components/MusicButton";
 import { NotFound } from "./components/NotFound";
 import { PageLayer } from "./components/PageLayer";
 import { MusicProvider } from "./hooks/useMusic";
@@ -81,7 +80,6 @@ function RootLayout() {
           <SolarSystem openPlanetId={planet?.id} />
           <PageLayer>
             <Outlet />
-            <MusicButton />
           </PageLayer>
           <Cockpit />
         </ExplorerProvider>

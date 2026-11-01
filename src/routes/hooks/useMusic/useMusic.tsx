@@ -17,7 +17,7 @@ type FadeParams = { audio: HTMLAudioElement; to: number; durationMs: number; onD
 // touch screens, where a tap only counts as a gesture once it ends.
 const GESTURE_EVENTS = ["pointerdown", "keydown", "click"] as const;
 
-// The music button and the cockpit's radio mark their buttons with this attribute.
+// The cockpit's radio marks its buttons with this attribute.
 const MUSIC_CONTROL_SELECTOR = "[data-music-control]";
 
 function isAutoplayBlocked(error: unknown) {
@@ -185,9 +185,11 @@ interface MusicProviderProps {
   children: React.ReactNode;
 }
 
-// One player for the whole site: the music button and the cockpit's radio both control it.
+// One player for the whole site, controlled from the cockpit's radio. It loads (and autoplays)
+// with the page, whether or not the radio is on screen.
 export function MusicProvider({ tracks = TRACKS, children }: MusicProviderProps) {
   const [player] = useState(() => createMusicPlayer(tracks));
+  useSyncExternalStore(player.subscribe, player.getSnapshot, getServerSnapshot);
 
   return <MusicContext value={{ player, tracks }}>{children}</MusicContext>;
 }
