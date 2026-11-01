@@ -11,6 +11,7 @@ describe("TerminalFloki", () => {
         status="thinking"
         canListen
         isLocked={false}
+        isConversing={false}
         getLevel={() => 0}
         onTalk={vi.fn()}
       />,
@@ -23,7 +24,14 @@ describe("TerminalFloki", () => {
     const user = userEvent.setup();
     const onTalk = vi.fn();
     render(
-      <TerminalFloki status="idle" canListen isLocked={false} getLevel={() => 0} onTalk={onTalk} />,
+      <TerminalFloki
+        status="idle"
+        canListen
+        isLocked={false}
+        isConversing={false}
+        getLevel={() => 0}
+        onTalk={onTalk}
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "talk to floki" }));
@@ -38,6 +46,7 @@ describe("TerminalFloki", () => {
         status="listening"
         canListen
         isLocked={false}
+        isConversing
         getLevel={() => 0}
         onTalk={vi.fn()}
       />,
@@ -55,6 +64,7 @@ describe("TerminalFloki", () => {
         status="idle"
         canListen={false}
         isLocked={false}
+        isConversing={false}
         getLevel={() => 0}
         onTalk={vi.fn()}
       />,

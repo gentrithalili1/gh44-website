@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Destination } from "#/utils/destinations";
 
@@ -21,6 +21,9 @@ import { type TerminalLine, useTerminal } from "./hooks/useTerminal";
 import { messages } from "./messages";
 import { getLineSegments } from "./utils/terminalLinks";
 
+// Two turns in a row with nothing heard end a conversation.
+const MAX_QUIET_TURNS = 2;
+
 interface CockpitTerminalProps {
   // After `go`: the terminal shows the confirmation and takes no more commands.
   isLocked: boolean;
@@ -34,6 +37,16 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
   const floki = useFloki();
   // Floki says hello out loud once, on the first tap of talk.
   const [hasGreeted, setHasGreeted] = useState(false);
+  // A conversation goes on, turn after turn, until it ends; a newer one replaces it.
+  const [conversation, setConversation] = useState<"off" | "on">("off");
+  const conversationIdRef = useRef(0);
+
+  // Closing the cockpit ends the conversation.
+  useEffect(() => {
+    return () => {
+      conversationIdRef.current += 1;
+    };
+  }, []);
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -79,20 +92,23 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
     }
   }
 
-  // Floki answers on screen and out loud, and flies once he has said it.
+  // Floki answers on screen and out loud, and flies once he has said it. Returns whether the
+  // conversation can go on.
   async function handleAsk(question: string) {
     const outcome = await floki.ask(question);
     const line = getFlokiLine(outcome);
-    if (line === undefined) return;
+    if (line === undefined) return false;
     terminal.print([{ kind: "floki", text: line }]);
-    if (outcome.status === "failed") return;
+    if (outcome.status === "failed") return false;
     // Cut off by a newer question, a typed go or closing the cockpit: that decides instead.
-    if ((await floki.speak(line)) === "interrupted") return;
+    if ((await floki.speak(line)) === "interrupted") return false;
     const destination =
       outcome.status === "answered" || outcome.status === "navigating"
         ? outcome.destination
         : undefined;
-    if (destination) onGo(destination);
+    if (!destination) return true;
+    onGo(destination);
+    return false;
   }
 
   // What Floki prints when a turn at the mic gave no question; nothing when it did.
@@ -102,7 +118,7 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
         return undefined;
       case "quiet":
       case "failed":
-        return messages.floki.quiet;
+        return messages.floki.goingQuiet;
       case "denied":
         return messages.floki.micDenied;
       default: {
@@ -112,29 +128,51 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
     }
   }
 
-  // Talk opens the mic for one sentence; while Floki listens or speaks, it stops him instead.
+  function endConversation() {
+    conversationIdRef.current += 1;
+    setConversation("off");
+  }
+
+  // Talk starts a conversation: Floki listens, answers, and listens again, until the visitor
+  // taps stop, he flies somewhere, or he hears nothing twice in a row. He never listens while
+  // he speaks, so he can't hear himself.
   async function handleTalk() {
-    if (floki.status === "listening") {
+    if (conversation === "on") {
+      endConversation();
+      floki.stop();
       floki.stopListening();
       return;
     }
-    if (floki.status === "speaking") {
-      floki.stopSpeaking();
-      return;
+    conversationIdRef.current += 1;
+    const conversationId = conversationIdRef.current;
+    function isCurrent() {
+      return conversationId === conversationIdRef.current;
     }
+    setConversation("on");
     if (!hasGreeted) {
       setHasGreeted(true);
       // Stopped during the greeting: the mic stays closed.
       if ((await floki.speak(messages.floki.spokenGreeting)) === "interrupted") return;
     }
-    const hearing = await floki.listen();
-    if (hearing.status === "heard") {
-      terminal.print([{ kind: "visitor", text: hearing.text }]);
-      await handleAsk(hearing.text);
-      return;
+    let quietTurns = 0;
+    while (isCurrent()) {
+      const hearing = await floki.listen();
+      if (!isCurrent()) return;
+      if (hearing.status === "heard") {
+        quietTurns = 0;
+        terminal.print([{ kind: "visitor", text: hearing.text }]);
+        if (!(await handleAsk(hearing.text))) break;
+        continue;
+      }
+      if (hearing.status !== "denied") quietTurns += 1;
+      if (hearing.status === "denied" || quietTurns >= MAX_QUIET_TURNS) {
+        terminal.print([
+          { kind: "floki", text: getHearingLine(hearing) ?? messages.floki.goingQuiet },
+        ]);
+        break;
+      }
     }
-    const line = getHearingLine(hearing);
-    if (line) terminal.print([{ kind: "floki", text: line }]);
+    if (isCurrent()) endConversation();
   }
 
   function handleRun(command: string) {
@@ -146,7 +184,9 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
         return;
       case "go":
         // The visitor takes the controls: Floki's pending answer can't fly anywhere else.
+        endConversation();
         floki.stop();
+        floki.stopListening();
         onGo(result.destination);
         return;
       case "ask":
@@ -262,6 +302,7 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
         status={floki.status}
         canListen={floki.canListen}
         isLocked={isLocked}
+        isConversing={conversation === "on"}
         getLevel={floki.getLevel}
         onTalk={() => void handleTalk()}
       />

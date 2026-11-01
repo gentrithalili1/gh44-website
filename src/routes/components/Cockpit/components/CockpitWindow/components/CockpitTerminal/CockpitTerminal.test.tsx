@@ -138,6 +138,43 @@ describe("CockpitTerminal", () => {
     expect(getSpokenLines(fetchStub)).toEqual(["Floki online. Where to?", "course set for work."]);
   });
 
+  it("keeps listening after each answer, and goes quiet after two silent turns", async () => {
+    const user = userEvent.setup();
+    stubFloki({ replies: [{ say: "Gentrit built me." }, { say: "In Pristina." }] });
+    const recognizers = stubSpeechRecognition([
+      { text: "who built you" },
+      { text: "where does he live" },
+      { error: "no-speech" },
+      { error: "no-speech" },
+    ]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+
+    expect(await getOutput().findByText(/going quiet/)).toBeInTheDocument();
+    expect(getOutput().getByText(/Gentrit built me\./)).toBeInTheDocument();
+    expect(getOutput().getByText(/In Pristina\./)).toBeInTheDocument();
+    expect(recognizers).toHaveLength(4);
+    expect(screen.getByRole("button", { name: "talk to floki" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
+  it("ends the conversation on stop", async () => {
+    const user = userEvent.setup();
+    stubFloki({ replies: [{ say: "Gentrit built me." }], shouldFinishSpeaking: false });
+    const recognizers = stubSpeechRecognition([{ text: "who built you" }]);
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+
+    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(await screen.findByRole("button", { name: "stop floki" }));
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(recognizers).toEqual([]);
+    expect(screen.getByRole("button", { name: "talk to floki" })).toBeInTheDocument();
+  });
+
   it("says when the mic is refused", async () => {
     const user = userEvent.setup();
     stubFloki({ replies: [{ say: "unused" }] });

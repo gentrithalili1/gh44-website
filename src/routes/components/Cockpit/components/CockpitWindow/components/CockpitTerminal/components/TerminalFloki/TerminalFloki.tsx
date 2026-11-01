@@ -8,6 +8,8 @@ interface TerminalFlokiProps {
   // The browser can hear the visitor; without it they type `floki <question>`.
   canListen: boolean;
   isLocked: boolean;
+  // Talk was tapped and Floki keeps listening after each answer until it ends.
+  isConversing: boolean;
   // How loud the mic or Floki's voice is right now, from 0 to 1.
   getLevel: () => number;
   onTalk: () => void;
@@ -19,10 +21,11 @@ export function TerminalFloki({
   status,
   canListen,
   isLocked,
+  isConversing,
   getLevel,
   onTalk,
 }: TerminalFlokiProps) {
-  const isActive = status === "listening" || status === "speaking";
+  const isActive = isConversing || status === "listening" || status === "speaking";
 
   return (
     <section
@@ -45,7 +48,7 @@ export function TerminalFloki({
         <button
           type="button"
           aria-label={isActive ? messages.stopLabel : messages.talkLabel}
-          aria-pressed={status === "listening"}
+          aria-pressed={isConversing}
           disabled={isLocked}
           onClick={onTalk}
           className="flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-rule bg-bg-subtle pr-3 pl-2.5 text-xs text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40 aria-pressed:border-lavender aria-pressed:text-lavender"

@@ -10,7 +10,7 @@ import type { AskFlokiOutcome, FlokiTurn } from "./types";
 import { getFlokiCommand } from "./utils/flokiCommand";
 
 // Floki's humor setting until the visitor changes it, in percent.
-export const DEFAULT_HUMOR = 60;
+export const DEFAULT_HUMOR = 80;
 // How many earlier turns go along with a question.
 const HISTORY_TURNS = 10;
 // Questions the model answers per cockpit visit; plain orders don't count.
