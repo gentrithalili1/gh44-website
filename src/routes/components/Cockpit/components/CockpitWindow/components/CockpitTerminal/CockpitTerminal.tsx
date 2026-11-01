@@ -64,6 +64,8 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
     switch (reason) {
       case "busy":
         return messages.floki.busy;
+      case "questionLimit":
+        return messages.floki.questionLimit;
       case "rateLimited":
         return messages.floki.rateLimited;
       case "unavailable":

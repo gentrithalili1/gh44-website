@@ -13,10 +13,12 @@ import { getFlokiCommand } from "./utils/flokiCommand";
 export const DEFAULT_HUMOR = 60;
 // How many earlier turns go along with a question.
 const HISTORY_TURNS = 10;
+// Questions the model answers per cockpit visit; plain orders don't count.
+export const MAX_QUESTIONS = 10;
 
 export type FlokiStatus = "idle" | "listening" | "thinking" | "speaking";
 
-export type FlokiFailureReason = "busy" | "rateLimited" | "unavailable";
+export type FlokiFailureReason = "busy" | "questionLimit" | "rateLimited" | "unavailable";
 
 export type FlokiOutcome =
   | { status: "answered"; say: string; destination: Destination | undefined }
@@ -70,6 +72,8 @@ export function useFloki() {
         return unknownCommand;
       }
     }
+    const questionCount = turns.filter(({ role }) => role === "visitor").length;
+    if (questionCount >= MAX_QUESTIONS) return { status: "failed", reason: "questionLimit" };
     const visitorTurn = { role: "visitor", text: question.trim() } as const;
     setRequestStatus("thinking");
     const outcome = await requestAnswer({

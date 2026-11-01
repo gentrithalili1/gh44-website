@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { stubFloki } from "#/test/floki";
 
-import { useFloki } from "./useFloki";
+import { MAX_QUESTIONS, useFloki } from "./useFloki";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -64,5 +64,22 @@ describe("useFloki", () => {
     });
 
     expect(outcome).toEqual({ status: "failed", reason: "unavailable" });
+  });
+
+  it("stops answering after the questions of one visit, but still flies", async () => {
+    const { fetchStub } = stubFloki({ replies: [{ say: "Noted." }] });
+    const { result } = renderHook(() => useFloki());
+
+    for (let index = 0; index < MAX_QUESTIONS; index += 1) {
+      await act(() => result.current.ask(`question ${index}`));
+    }
+    let outcome;
+    await act(async () => {
+      outcome = await result.current.ask("one more");
+    });
+
+    expect(outcome).toEqual({ status: "failed", reason: "questionLimit" });
+    expect(fetchStub).toHaveBeenCalledTimes(MAX_QUESTIONS);
+    expect(await result.current.ask("take me to work")).toMatchObject({ status: "navigating" });
   });
 });
