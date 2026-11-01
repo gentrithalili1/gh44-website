@@ -32,10 +32,9 @@ export function PlanetPage() {
 
   return (
     <>
-      {/* Beside the music button when the root layout shows one, vertically centered on it. */}
       <Link
         to="/"
-        className="fixed top-4 left-4 z-30 text-label text-muted transition-colors group-has-[[data-music-button]]/root:top-7 group-has-[[data-music-button]]/root:left-24 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-muted md:top-8 md:left-10 md:group-has-[[data-music-button]]/root:top-11 md:group-has-[[data-music-button]]/root:left-30"
+        className="fixed top-4 left-4 z-30 text-label text-muted transition-colors group-has-[[data-music-button]]/root:top-4 group-has-[[data-music-button]]/root:left-24 group-has-[[data-music-button]]/root:leading-11 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-muted md:top-8 md:left-10 md:group-has-[[data-music-button]]/root:top-4 md:group-has-[[data-music-button]]/root:left-30"
       >
         <span aria-hidden="true">{messages.backArrow}</span> {messages.backToOrbit}
       </Link>

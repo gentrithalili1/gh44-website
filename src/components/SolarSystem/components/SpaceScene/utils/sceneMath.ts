@@ -6,8 +6,6 @@ import type { PlanetState } from "#/components/SolarSystem/types";
 export const PHONE_MAX_WIDTH = 720;
 // The camera looks straight down at the system from this height.
 export const CAMERA_HEIGHT = 1000;
-// A long frame (a background tab coming back) must not jump anything across its orbit.
-export const MAX_FRAME_STEP = 0.05;
 // How fast fades and color changes settle (higher is faster).
 export const FADE_LAMBDA = 6;
 // Opacity of everything that steps back while a planet is open.

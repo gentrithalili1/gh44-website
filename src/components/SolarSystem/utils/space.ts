@@ -16,14 +16,6 @@ export function getOrbitPosition({ radius, phase }: Orbit) {
   return { x: Math.cos(phase) * radius, y: Math.sin(phase) * radius };
 }
 
-// Earth's angular speed (radians per second) at its orbit radius; outer planets move slower.
-const EARTH_SPEED = 0.15;
-const EARTH_ORBIT_RADIUS = 105;
-
-export function getOrbitSpeed(radius: number) {
-  return (EARTH_SPEED * EARTH_ORBIT_RADIUS) / radius;
-}
-
 type GetTiltedPointParams = { radius: number; angle: number };
 
 // A point on a tilted orbit. `y` grows downward on screen; `depth` grows toward the viewer, so the

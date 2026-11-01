@@ -5,34 +5,24 @@ import { useContextBridge } from "its-fine";
 import { type RefObject, useRef, useState } from "react";
 import type { Group } from "three";
 
+import { getOrbitAngle } from "#/components/SolarSystem/utils/motion";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
 import { getRingBands } from "#/components/SolarSystem/utils/rings";
-import {
-  getOrbitPosition,
-  getOrbitSpeed,
-  getPlanetState,
-} from "#/components/SolarSystem/utils/space";
-import { getSurfaceShapes } from "#/components/SolarSystem/utils/surface";
+import { getOrbitPosition, getPlanetState } from "#/components/SolarSystem/utils/space";
 import { PALETTE } from "#/utils/palette";
 import type { Planet } from "#/utils/planets";
 import type { ThemeToolId } from "#/utils/themeTools";
 
 import type { SceneState } from "../../types";
 import { setGroupOpacity } from "../../utils/groupOpacity";
-import {
-  damp,
-  FADED_OPACITY,
-  getOrbitPace,
-  MAX_FRAME_STEP,
-  toScenePosition,
-} from "../../utils/sceneMath";
+import { damp, FADED_OPACITY, getOrbitPace, toScenePosition } from "../../utils/sceneMath";
 import { Orbiters } from "./components/Orbiters";
 import { PlanetLabel } from "./components/PlanetLabel";
+import { PlanetSurface } from "./components/PlanetSurface";
 import { Rings } from "./components/Rings";
 import { Rocket } from "./components/Rocket";
-import { PlanetSurfaceMesh } from "./ScenePlanet.elements";
 import type { HoverChange } from "./types";
-import { createSurfaceOutline } from "./utils/sceneGeometry";
+import { getBodyStencilMark } from "./utils/bodyStencil";
 
 const BODY_HOVER = "body";
 const LABEL_HOVER = "label";
@@ -46,26 +36,31 @@ interface ScenePlanetProps {
   openPlanetId: string | undefined;
   sceneStateRef: RefObject<SceneState>;
   labelList: HTMLUListElement;
+  // Unique per planet: clips its spinning surface to its own body.
+  stencilRef: number;
 }
 
 // One planet on its orbit, carrying what says what it holds: surface, moons, satellites, rings
 // or the rocket. It moves every frame, holds still while hovered or open, and opens its page on
 // click.
-export function ScenePlanet({ planet, openPlanetId, sceneStateRef, labelList }: ScenePlanetProps) {
+export function ScenePlanet({
+  planet,
+  openPlanetId,
+  sceneStateRef,
+  labelList,
+  stencilRef,
+}: ScenePlanetProps) {
   // Hands the router to the label, which drei renders in its own React root.
   const ContextBridge = useContextBridge();
   const navigate = useNavigate();
   const groupRef = useRef<Group>(null);
-  const angleRef = useRef<number>(planet.orbit.phase);
+  // Seconds of orbit: the scene clock, scaled by this planet's own pace.
+  const orbitTimeRef = useRef(0);
   // Everything the pointer is over that holds this planet still.
   const [hoverSources, setHoverSources] = useState<ReadonlySet<string>>(() => new Set());
   const opacityRef = useRef(1);
-  const [surface] = useState(() =>
-    getSurfaceShapes(planet).map((shape) => ({ shape, outline: createSurfaceOutline(shape) })),
-  );
 
   const state = getPlanetState({ planetId: planet.id, openPlanetId });
-  const speed = getOrbitSpeed(planet.orbit.radius);
   const ringBands = getRingBands(planet);
   const isHovered = hoverSources.size > 0;
   // An open gh44-theme still takes ring band clicks: each opens its app's tab.
@@ -75,13 +70,12 @@ export function ScenePlanet({ planet, openPlanetId, sceneStateRef, labelList }: 
   useFrame((_, delta) => {
     const group = groupRef.current;
     if (!group) return;
-    const step = Math.min(delta, MAX_FRAME_STEP);
-    angleRef.current += speed * getOrbitPace({ state, isHovered }) * step;
-    sceneStateRef.current.planetAngles.set(planet.id, angleRef.current);
+    const sceneState = sceneStateRef.current;
+    orbitTimeRef.current += getOrbitPace({ state, isHovered }) * sceneState.frameStep;
+    const angle = getOrbitAngle({ planet, time: orbitTimeRef.current });
+    sceneState.planetAngles.set(planet.id, angle);
     group.position.set(
-      ...toScenePosition(
-        getOrbitPosition({ radius: planet.orbit.radius, phase: angleRef.current }),
-      ),
+      ...toScenePosition(getOrbitPosition({ radius: planet.orbit.radius, phase: angle })),
     );
     opacityRef.current = damp({
       current: opacityRef.current,
@@ -138,29 +132,24 @@ export function ScenePlanet({ planet, openPlanetId, sceneStateRef, labelList }: 
     <group ref={groupRef}>
       <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
         <circleGeometry args={[planet.size, CIRCLE_SEGMENTS]} />
-        <meshBasicMaterial color={PALETTE[planet.color].soft} />
+        <meshBasicMaterial {...getBodyStencilMark(stencilRef)} color={PALETTE[planet.color].soft} />
       </mesh>
-      {surface.map(({ shape, outline }) => (
-        <PlanetSurfaceMesh
-          key={shape.id}
-          outline={outline}
-          color={shape.color}
-          shade={shape.shade}
-          opacity={shape.opacity}
-        />
-      ))}
+      <PlanetSurface planet={planet} sceneStateRef={sceneStateRef} stencilRef={stencilRef} />
       <Orbiters
         orbiters={getOrbiters(planet)}
         isPlanetOpen={state === "current"}
         onHoverChange={handleHoverChange}
         onPlanetClick={handleOpen}
+        sceneStateRef={sceneStateRef}
       />
       <Rings
         bands={ringBands}
         onHoverChange={handleHoverChange}
         onBandClick={handleRingBandClick}
       />
-      {planet.features.hasRocket ? <Rocket planetSize={planet.size} /> : null}
+      {planet.features.hasRocket ? (
+        <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
+      ) : null}
       <Html
         as="li"
         portal={{ current: labelList }}

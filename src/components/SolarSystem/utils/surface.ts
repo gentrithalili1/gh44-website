@@ -3,7 +3,14 @@ import type { Planet } from "#/utils/planets";
 
 import type { Point, Shade } from "../types";
 
-type SurfaceStyle = { id: string; color: PaletteColor; shade: Shade; opacity: number };
+type SurfaceStyle = {
+  id: string;
+  color: PaletteColor;
+  shade: Shade;
+  opacity: number;
+  // Features (land, storms) slide across the disc as the planet turns; bands stay still.
+  shouldSpin: boolean;
+};
 
 // Flat shapes drawn on a planet's disc, in system units from its center (`y` grows downward).
 export type SurfaceShape =
@@ -48,13 +55,14 @@ export function getBandOutline({ radius, top, bottom }: GetBandOutlineParams): P
 type GetBandsParams = {
   planet: Planet;
   bands: readonly (readonly [number, number])[];
-  style: Omit<SurfaceStyle, "id">;
+  style: Omit<SurfaceStyle, "id" | "shouldSpin">;
 };
 
 function getBands({ planet, bands, style }: GetBandsParams): SurfaceShape[] {
   return bands.map(([top, bottom]) => ({
     ...style,
     id: `band-${top}`,
+    shouldSpin: false,
     kind: "polygon",
     points: getBandOutline({
       radius: planet.size,
@@ -74,6 +82,7 @@ export function getSurfaceShapes(planet: Planet): SurfaceShape[] {
     case "continents":
       return CONTINENTS.map((continent, index) => ({
         id: `continent-${index}`,
+        shouldSpin: true,
         kind: "ellipse",
         color: "sage",
         shade: "soft",
@@ -92,6 +101,7 @@ export function getSurfaceShapes(planet: Planet): SurfaceShape[] {
         }),
         {
           id: "red-spot",
+          shouldSpin: true,
           kind: "ellipse",
           color: "red",
           shade: "soft",

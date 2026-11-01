@@ -1,12 +1,10 @@
 import { useCursor } from "@react-three/drei";
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
+import { type RefObject, useRef, useState } from "react";
 import type { Mesh } from "three";
 
-import {
-  MAX_FRAME_STEP,
-  toScenePosition,
-} from "#/components/SolarSystem/components/SpaceScene/utils/sceneMath";
+import type { SceneState } from "#/components/SolarSystem/components/SpaceScene/types";
+import { toScenePosition } from "#/components/SolarSystem/components/SpaceScene/utils/sceneMath";
 import type { Orbiter as OrbiterData } from "#/components/SolarSystem/utils/orbiters";
 import { getTiltedPoint } from "#/components/SolarSystem/utils/space";
 import { PALETTE } from "#/utils/palette";
@@ -28,12 +26,19 @@ interface OrbiterProps {
   isPlanetOpen: boolean;
   onHoverChange: (change: HoverChange) => void;
   onPlanetClick: () => void;
+  sceneStateRef: RefObject<SceneState>;
 }
 
 // One moon or satellite on its tilted orbit; it names itself on hover and holds its planet
 // still. While its planet is open, an orbiter with a link (Earth's moon) opens it; otherwise a
 // click opens the planet.
-export function Orbiter({ orbiter, isPlanetOpen, onHoverChange, onPlanetClick }: OrbiterProps) {
+export function Orbiter({
+  orbiter,
+  isPlanetOpen,
+  onHoverChange,
+  onPlanetClick,
+  sceneStateRef,
+}: OrbiterProps) {
   const meshRef = useRef<Mesh>(null);
   const angleRef = useRef(orbiter.phase);
   const [isHovered, setIsHovered] = useState(false);
@@ -43,8 +48,8 @@ export function Orbiter({ orbiter, isPlanetOpen, onHoverChange, onPlanetClick }:
   const link = isPlanetOpen ? orbiter.link : undefined;
   useCursor(isHovered && link !== undefined);
 
-  useFrame((_, delta) => {
-    angleRef.current += orbiter.speed * Math.min(delta, MAX_FRAME_STEP);
+  useFrame(() => {
+    angleRef.current += orbiter.speed * sceneStateRef.current.frameStep;
     const point = getTiltedPoint({ radius: orbiter.orbitRadius, angle: angleRef.current });
     meshRef.current?.position.set(
       ...toScenePosition({ ...point, depth: point.depth + ORBITER_LIFT }),

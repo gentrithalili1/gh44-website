@@ -6,7 +6,7 @@ import { renderAt } from "#/test/renderAt";
 // Real solar-system order, outward from the sun.
 const PLANET_LINKS = [
   { name: "me", href: "/me" },
-  { name: "confirm()", href: "/confirm" },
+  { name: "gh44-confirm", href: "/confirm" },
   { name: "work", href: "/work" },
   { name: "gh44-theme", href: "/gh44-theme" },
   { name: "gh44-brain", href: "/gh44-brain" },

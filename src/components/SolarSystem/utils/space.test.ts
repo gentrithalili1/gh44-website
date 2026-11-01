@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { PLANETS } from "#/utils/planets";
-
-import { getOrbitPosition, getOrbitSpeed, getTiltedPoint } from "./space";
+import { getOrbitPosition, getTiltedPoint } from "./space";
 
 describe("getOrbitPosition", () => {
   it("puts a planet on its orbit at the given angle, y growing downward", () => {
@@ -10,19 +8,6 @@ describe("getOrbitPosition", () => {
 
     expect(position.x).toBeCloseTo(0);
     expect(position.y).toBeCloseTo(100);
-  });
-});
-
-describe("getOrbitSpeed", () => {
-  it("moves Earth one full orbit in about 42 seconds", () => {
-    expect((2 * Math.PI) / getOrbitSpeed(105)).toBeCloseTo(41.9, 1);
-  });
-
-  it("moves every planet slower than the one inside it", () => {
-    const speeds = PLANETS.map((planet) => getOrbitSpeed(planet.orbit.radius));
-
-    expect(speeds).toEqual([...speeds].sort((a, b) => b - a));
-    expect(new Set(speeds).size).toBe(PLANETS.length);
   });
 });
 

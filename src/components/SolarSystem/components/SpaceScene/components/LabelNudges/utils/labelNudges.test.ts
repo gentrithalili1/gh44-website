@@ -47,7 +47,7 @@ describe("getLabelNudges", () => {
 
   it.each([
     {
-      name: "me and confirm() side by side, as on a 360 wide phone",
+      name: "me and gh44-confirm side by side, as on a 360 wide phone",
       labels: [
         { ...ME, x: 160, y: 361 },
         { ...CONFIRM, x: 145, y: 372 },

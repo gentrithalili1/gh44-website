@@ -12,8 +12,21 @@ export type PlanetFeatures = {
   hasRocket?: boolean;
 };
 
+// The planets of the real solar system, from the sun outward.
+export type RealPlanet =
+  | "mercury"
+  | "venus"
+  | "earth"
+  | "mars"
+  | "jupiter"
+  | "saturn"
+  | "uranus"
+  | "neptune";
+
 export type Planet = {
   id: string;
+  // The real planet this one stands for: it sets how fast it orbits and spins.
+  realPlanet: RealPlanet;
   name: string;
   // The panel heading; the name unless the planet stands for something else.
   title: string;
@@ -32,6 +45,7 @@ export type Planet = {
 export const PLANETS = [
   {
     id: "me",
+    realPlanet: "earth",
     name: "me",
     title: "gentrit halili",
     sub: "who, where, how to reach",
@@ -48,22 +62,24 @@ export const PLANETS = [
   },
   {
     id: "confirm",
-    name: "confirm()",
-    title: "confirm()",
-    sub: "npm · v1.1.3",
+    realPlanet: "mars",
+    name: "gh44-confirm",
+    title: "gh44-confirm",
+    sub: "promise based react dialogs",
     lede: "react confirmation dialogs you can await. resolve means yes.",
     color: "terracotta",
     size: 10,
     orbit: { radius: 160, phase: 5.4 },
     features: { orbiters: "probes", hasRocket: true },
     seo: {
-      title: "confirm(): React Confirmation Dialogs You Can Await | gh44.dev",
+      title: "gh44-confirm: Promise Based React Dialogs | gh44.dev",
       description:
-        "react-promise-confirmation-dialog: await confirm() in React. Resolve means yes, reject means no. v1.1.3 on npm.",
+        "gh44-confirm (react-promise-confirmation-dialog): promise based React dialogs. Await confirm(): resolve means yes, reject means no. v1.1.3 on npm.",
     },
   },
   {
     id: "work",
+    realPlanet: "jupiter",
     name: "work",
     title: "work",
     sub: `${ROLES.length} moons · 2016 → now`,
@@ -80,6 +96,7 @@ export const PLANETS = [
   },
   {
     id: "gh44-theme",
+    realPlanet: "saturn",
     name: "gh44-theme",
     title: "gh44-theme",
     sub: `one theme, ${THEME_TOOLS.length} tools`,
@@ -96,6 +113,7 @@ export const PLANETS = [
   },
   {
     id: "gh44-brain",
+    realPlanet: "neptune",
     name: "gh44-brain",
     title: "gh44-brain",
     sub: "claude code, my way",

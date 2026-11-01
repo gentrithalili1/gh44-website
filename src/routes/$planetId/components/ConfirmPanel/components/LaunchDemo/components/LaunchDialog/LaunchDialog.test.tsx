@@ -24,7 +24,7 @@ describe("LaunchDialog", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     // Announced to screen readers.
     expect(screen.getByText("aborted. the rocket is relieved.")).toHaveAttribute("role", "status");
-    expect(screen.getByRole("heading", { level: 1, name: "confirm()" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "gh44-confirm" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "launch rocket?" })).toHaveFocus();
   });
 

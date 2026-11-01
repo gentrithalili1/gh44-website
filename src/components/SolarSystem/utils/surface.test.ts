@@ -39,4 +39,19 @@ describe("getSurfaceShapes", () => {
       expect(Math.hypot(shape.x, shape.y) + Math.max(shape.rx, shape.ry)).toBeLessThan(earth.size);
     }
   });
+
+  it("spins Earth's land and Jupiter's red spot, and keeps every band still", () => {
+    const shapes = ["me", "work", "gh44-brain"].flatMap((id) => {
+      const planet = findPlanet(id);
+      if (!planet) throw new Error(`No planet ${id}`);
+      return getSurfaceShapes(planet);
+    });
+
+    expect(shapes.filter((shape) => shape.shouldSpin).map((shape) => shape.id)).toEqual([
+      "continent-0",
+      "continent-1",
+      "continent-2",
+      "red-spot",
+    ]);
+  });
 });
