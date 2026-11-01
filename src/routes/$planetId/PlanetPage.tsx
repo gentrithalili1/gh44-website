@@ -1,6 +1,7 @@
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
+import { useExplorer } from "#/hooks/useExplorer";
 import { PANEL_STYLE } from "#/utils/panel";
 import type { Planet, PlanetId } from "#/utils/planets";
 
@@ -18,22 +19,36 @@ const routeApi = getRouteApi("/$planetId");
 export function PlanetPage() {
   const loaderData = routeApi.useLoaderData();
   const navigate = useNavigate();
+  const explorer = useExplorer();
 
+  const { planet } = loaderData;
+  // Launched here from the cockpit: the way back leads into it again.
+  const isCockpitTrip = explorer.cockpitTripPlanetId === planet.id;
+
+  function handleBack() {
+    if (isCockpitTrip) explorer.openCockpit();
+  }
+
+  const handleEscape = useEffectEvent((event: KeyboardEvent) => {
+    // A dialog that handles Esc itself prevents the default.
+    if (event.key !== "Escape" || event.defaultPrevented) return;
+    handleBack();
+    void navigate({ to: "/" });
+  });
+
+  // Added once: the effect event always reads the current trip.
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      // A dialog that handles Esc itself prevents the default.
-      if (event.key === "Escape" && !event.defaultPrevented) void navigate({ to: "/" });
+      handleEscape(event);
     }
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [navigate]);
-
-  const { planet } = loaderData;
+  }, []);
 
   return (
     <>
-      <BackToOrbitLink />
+      <BackToOrbitLink destination={isCockpitTrip ? "cockpit" : "orbit"} onClick={handleBack} />
       <main
         style={PANEL_STYLE}
         className="fixed inset-x-0 bottom-0 z-20 h-(--sheet-height) overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(var(--panel-width),100%)] md:border-t-0 md:bg-transparent md:px-12 md:pt-24 md:pb-12"

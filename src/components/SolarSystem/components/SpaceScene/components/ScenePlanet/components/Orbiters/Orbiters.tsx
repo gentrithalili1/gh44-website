@@ -4,11 +4,22 @@ import type { Orbiter as OrbiterData } from "#/components/SolarSystem/utils/orbi
 import { SPACE_COLORS } from "#/utils/palette";
 
 import type { SceneState } from "../../../../types";
+import { toPlanePosition } from "../../../../utils/sceneMath";
 import type { HoverChange } from "../../types";
-import { getTiltedOrbitPositions } from "../../utils/sceneGeometry";
 import { Orbiter } from "./components/Orbiter";
 
 const ORBIT_OPACITY = 0.14;
+const ORBIT_SEGMENTS = 128;
+
+// A moon or satellite orbit: a circle around the planet's equator, on the orbit plane.
+function getOrbitPositions(radius: number) {
+  return new Float32Array(
+    Array.from({ length: ORBIT_SEGMENTS }, (_, index) => {
+      const angle = (index / ORBIT_SEGMENTS) * Math.PI * 2;
+      return toPlanePosition({ x: Math.cos(angle) * radius, y: Math.sin(angle) * radius });
+    }).flat(),
+  );
+}
 
 interface OrbitersProps {
   orbiters: OrbiterData[];
@@ -18,7 +29,8 @@ interface OrbitersProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// A planet's moons and satellites, each on a tilted orbit that passes behind and in front of it.
+// A planet's moons and satellites, each on its orbit around the planet's equator, passing behind
+// and in front of it.
 export function Orbiters({
   orbiters,
   isPlanetOpen,
@@ -29,7 +41,7 @@ export function Orbiters({
   const [orbits] = useState(() =>
     orbiters.map((orbiter) => ({
       orbiter,
-      positions: getTiltedOrbitPositions(orbiter.orbitRadius),
+      positions: getOrbitPositions(orbiter.orbitRadius),
     })),
   );
 

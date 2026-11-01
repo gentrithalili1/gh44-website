@@ -60,30 +60,6 @@ export function CockpitWindshield() {
   );
 }
 
-// A seat back with its headrest on two posts, from behind.
-const SEAT_PATH =
-  "M30 48 H90 C104 48 112 58 112 74 V160 H8 V74 C8 58 16 48 30 48 Z M40 0 H80 C86 0 90 4 90 10 V28 C90 34 86 36 80 36 H40 C34 36 30 34 30 28 V10 C30 4 34 0 40 0 Z M46 36 H52 V48 H46 Z M68 36 H74 V48 H68 Z";
-const SEAT_SEAM_PATHS = "M24 80 H96 M30 80 V160 M90 80 V160";
-
-interface CockpitSeatProps {
-  side: "left" | "right";
-}
-
-// A seat back from behind, at a bottom corner: the pilot's, and one for the visitor.
-export function CockpitSeat({ side }: CockpitSeatProps) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 120 160"
-      data-side={side}
-      className="pointer-events-none absolute bottom-0 hidden w-[clamp(6rem,8.5vw,8.5rem)] translate-y-[62%] data-[side=left]:left-[6%] data-[side=right]:right-[6%] md:block"
-    >
-      <path d={SEAT_PATH} className="fill-surface-active" />
-      <path d={SEAT_SEAM_PATHS} className="fill-none stroke-surface stroke-2" />
-    </svg>
-  );
-}
-
 type IndicatorLight = { id: string; color: string; blink?: string };
 
 // Tiny lights in the palette's hues; a few blink slowly, out of step.
@@ -148,7 +124,7 @@ interface ConsoleScreenProps {
 export function ConsoleScreen({ className = "", children }: ConsoleScreenProps) {
   return (
     <div
-      className={`min-h-0 rounded-md border border-border-subtle bg-night p-3 shadow-[inset_0_2px_10px_rgb(0_0_0/0.35)] ${className}`}
+      className={`min-h-0 min-w-0 rounded-md border border-border-subtle bg-night p-3 shadow-[inset_0_2px_10px_rgb(0_0_0/0.35)] ${className}`}
     >
       {children}
     </div>

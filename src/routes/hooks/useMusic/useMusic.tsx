@@ -17,7 +17,7 @@ type FadeParams = { audio: HTMLAudioElement; to: number; durationMs: number; onD
 // touch screens, where a tap only counts as a gesture once it ends.
 const GESTURE_EVENTS = ["pointerdown", "keydown", "click"] as const;
 
-// The music button and the cockpit's radio mark their buttons with this attribute.
+// The cockpit's radio marks its buttons with this attribute.
 const MUSIC_CONTROL_SELECTOR = "[data-music-control]";
 
 function isAutoplayBlocked(error: unknown) {
@@ -137,6 +137,21 @@ function createMusicPlayer(tracks: readonly Track[]) {
     }
   }
 
+  // A track picked from the list: a playing radio switches to it at once, a quiet one starts with
+  // it.
+  async function playTrack(trackIndex: number) {
+    if (!audio || state.status === "checking" || state.status === "unavailable") return;
+    if (trackIndex !== state.trackIndex) {
+      audio.src = tracks[trackIndex]?.path ?? "";
+      setState({ trackIndex });
+    }
+    if (state.status !== "playing") {
+      await play();
+      return;
+    }
+    await audio.play().catch(() => setStatus("unavailable"));
+  }
+
   function subscribe(listener: () => void) {
     load();
     listeners.add(listener);
@@ -148,6 +163,7 @@ function createMusicPlayer(tracks: readonly Track[]) {
     stop,
     next: () => skip(1),
     previous: () => skip(-1),
+    playTrack,
     subscribe,
     getSnapshot: () => state,
   };
@@ -169,14 +185,16 @@ interface MusicProviderProps {
   children: React.ReactNode;
 }
 
-// One player for the whole site: the music button and the cockpit's radio both control it.
+// One player for the whole site, controlled from the cockpit's radio. It loads (and autoplays)
+// with the page, whether or not the radio is on screen.
 export function MusicProvider({ tracks = TRACKS, children }: MusicProviderProps) {
   const [player] = useState(() => createMusicPlayer(tracks));
+  useSyncExternalStore(player.subscribe, player.getSnapshot, getServerSnapshot);
 
   return <MusicContext value={{ player, tracks }}>{children}</MusicContext>;
 }
 
-// The radio: its tracks in turn, from s.t.a.y. It plays on load, or on the first gesture when
+// The radio: its tracks in turn, from crystalline. It plays on load, or on the first gesture when
 // the browser blocks autoplay, and the visitor can stop it any time; a stop holds for the visit.
 // It fades each way.
 export function useMusic() {
@@ -188,10 +206,13 @@ export function useMusic() {
   return {
     status: state.status,
     track: tracks[state.trackIndex] ?? TRACKS[0],
+    trackIndex: state.trackIndex,
+    tracks,
     hasManyTracks: tracks.length > 1,
     play: player.play,
     stop: player.stop,
     next: player.next,
     previous: player.previous,
+    playTrack: player.playTrack,
   };
 }

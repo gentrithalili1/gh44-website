@@ -21,9 +21,16 @@ describe("StaticShip", () => {
     expect(ship).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("steps the ship back while a planet is open", async () => {
+  it("stays one click from the cockpit on a planet's page, and closing it returns there", async () => {
+    const user = userEvent.setup();
     await renderAt("/work");
+    const ship = screen.getByRole("button", SHIP);
 
-    expect(screen.getByRole("button", SHIP)).toBeDisabled();
+    await user.click(ship);
+    expect(screen.getByRole("dialog", { name: "gh44 explorer" })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "gh44 explorer" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "work" })).toBeInTheDocument();
   });
 });

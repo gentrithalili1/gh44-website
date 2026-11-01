@@ -11,12 +11,23 @@ import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 import { PANEL_WIDTH, SHEET_HEIGHT } from "#/utils/panel";
 import { findPlanet, type PlanetBody, PLANETS } from "#/utils/planets";
 
-import { PHONE_MAX_WIDTH } from "../../../utils/sceneMath";
+import { PHONE_MAX_WIDTH, toPlanePosition } from "../../../utils/sceneMath";
 
 type Viewport = { width: number; height: number };
 
-// Where the camera looks (system units, `y` down) and how many pixels one unit spans.
-export type CameraPose = { x: number; y: number; zoom: number };
+// Where the camera looks (system units, `y` down), how many pixels one unit spans there, and
+// where that point sits on screen (pixels from the center, `y` down).
+export type CameraPose = { x: number; y: number; zoom: number; offset: Point };
+
+// Which way the camera looks at its point: `polar` radians off straight down, `azimuth` radians
+// around it (0 looks from the bottom of the screen).
+export type CameraAngle = { polar: number; azimuth: number };
+
+// The camera's vertical field of view, in degrees.
+export const CAMERA_FOV = 45;
+// Home looks down on the system at about 41 degrees off vertical, like the prototype.
+export const HOME_ANGLE: CameraAngle = { polar: 0.72, azimuth: 0 };
+const NO_OFFSET: Point = { x: 0, y: 0 };
 
 // What the camera frames: the whole system, an open planet, or the ship with its cockpit open.
 export type CameraFocus =
@@ -24,9 +35,11 @@ export type CameraFocus =
   | { kind: "planet"; planetId: string }
   | { kind: "ship" };
 
-// With the cockpit open, pixels per system unit on any screen: the ship close, and enough of
-// its neighbourhood through the windshield that a planet or two is usually in view.
+// With the cockpit open, pixels per system unit on any screen, and how far off straight down the
+// camera looks: from just behind the ship, in toward the sun, so a planet or two is usually in
+// view through the windshield.
 const SHIP_ZOOM = 3;
+const SHIP_POLAR = 1.05;
 
 // The share of a phone's height the bottom sheet leaves free.
 const PHONE_FREE_HEIGHT = 1 - SHEET_HEIGHT;
@@ -42,7 +55,7 @@ function getFitZoom({ width, height }: Viewport) {
 }
 
 export function getHomePose(viewport: Viewport): CameraPose {
-  return { x: 0, y: 0, zoom: getFitZoom(viewport) };
+  return { x: 0, y: 0, zoom: getFitZoom(viewport), offset: NO_OFFSET };
 }
 
 // The free box the panel leaves: its center on screen and its size, in pixels.
@@ -76,9 +89,9 @@ export function getPlanetPose({
   const zoom = Math.min(MAX_ZOOM * getFitZoom(viewport), (box.size * REACH_FILL) / reach);
 
   return {
-    x: planetPosition.x + (viewport.width / 2 - box.x) / zoom,
-    y: planetPosition.y + (viewport.height / 2 - box.y) / zoom,
+    ...planetPosition,
     zoom,
+    offset: { x: box.x - viewport.width / 2, y: box.y - viewport.height / 2 },
   };
 }
 
@@ -125,21 +138,142 @@ export function getCameraPose({ viewport, planetId, planetAngle }: GetCameraPose
   });
 }
 
-type MixPosesParams = { from: CameraPose; to: CameraPose; anchor: Point; progress: number };
+type MixPosesParams = {
+  from: CameraPose;
+  to: CameraPose;
+  anchor: Point;
+  progress: number;
+  // The camera's angle at each end: it turns between them on the way.
+  fromAngle: CameraAngle;
+  toAngle: CameraAngle;
+};
+
+function mix({ from, to, progress }: { from: number; to: number; progress: number }) {
+  return from + (to - from) * progress;
+}
+
+// From a step on the orbit plane to the pixels it spans on screen, per unit of zoom, seen from an
+// angle: across turns with the azimuth, and toward the viewer foreshortens with the polar angle.
+function toScreen({ step, angle }: { step: Point; angle: CameraAngle }): Point {
+  const sin = Math.sin(angle.azimuth);
+  const cos = Math.cos(angle.azimuth);
+
+  return {
+    x: step.x * cos - step.y * sin,
+    y: (step.x * sin + step.y * cos) * Math.cos(angle.polar),
+  };
+}
+
+// The inverse of `toScreen`.
+function toPlane({ screen, angle }: { screen: Point; angle: CameraAngle }): Point {
+  const sin = Math.sin(angle.azimuth);
+  const cos = Math.cos(angle.azimuth);
+  const toward = screen.y / Math.cos(angle.polar);
+
+  return { x: screen.x * cos + toward * sin, y: -screen.x * sin + toward * cos };
+}
+
+type GetAnchorOnScreenParams = { pose: CameraPose; anchor: Point; angle: CameraAngle };
+
+// Where the anchor sits on screen, in pixels from the center.
+function getAnchorOnScreen({ pose, anchor, angle }: GetAnchorOnScreenParams): Point {
+  const step = toScreen({ step: { x: anchor.x - pose.x, y: anchor.y - pose.y }, angle });
+
+  return { x: step.x * pose.zoom + pose.offset.x, y: step.y * pose.zoom + pose.offset.y };
+}
 
 // A point of the flight between two poses. Zoom blends on a log scale, so every zoom step feels
 // the same; the anchor (the planet flown to or from) moves along a straight line on screen
-// instead of drifting.
-export function mixPoses({ from, to, anchor, progress }: MixPosesParams): CameraPose {
+// instead of drifting, from any angle and while the camera turns.
+export function mixPoses({
+  from,
+  to,
+  anchor,
+  progress,
+  fromAngle,
+  toAngle,
+}: MixPosesParams): CameraPose {
   const zoom = from.zoom * (to.zoom / from.zoom) ** progress;
-  const screenFrom = { x: (anchor.x - from.x) * from.zoom, y: (anchor.y - from.y) * from.zoom };
-  const screenTo = { x: (anchor.x - to.x) * to.zoom, y: (anchor.y - to.y) * to.zoom };
-  const screen = {
-    x: screenFrom.x + (screenTo.x - screenFrom.x) * progress,
-    y: screenFrom.y + (screenTo.y - screenFrom.y) * progress,
+  const offset = {
+    x: mix({ from: from.offset.x, to: to.offset.x, progress }),
+    y: mix({ from: from.offset.y, to: to.offset.y, progress }),
   };
+  const screenFrom = getAnchorOnScreen({ pose: from, anchor, angle: fromAngle });
+  const screenTo = getAnchorOnScreen({ pose: to, anchor, angle: toAngle });
+  const screen = {
+    x: (mix({ from: screenFrom.x, to: screenTo.x, progress }) - offset.x) / zoom,
+    y: (mix({ from: screenFrom.y, to: screenTo.y, progress }) - offset.y) / zoom,
+  };
+  const step = toPlane({ screen, angle: mixAngles({ from: fromAngle, to: toAngle, progress }) });
 
-  return { x: anchor.x - screen.x / zoom, y: anchor.y - screen.y / zoom, zoom };
+  return { x: anchor.x - step.x, y: anchor.y - step.y, zoom, offset };
+}
+
+const FULL_TURN = Math.PI * 2;
+
+type MixAnglesParams = { from: CameraAngle; to: CameraAngle; progress: number };
+
+// Turns the camera between two angles, around the short way.
+export function mixAngles({ from, to, progress }: MixAnglesParams): CameraAngle {
+  const turn =
+    ((((to.azimuth - from.azimuth + Math.PI) % FULL_TURN) + FULL_TURN) % FULL_TURN) - Math.PI;
+
+  return {
+    polar: mix({ from: from.polar, to: to.polar, progress }),
+    azimuth: from.azimuth + turn * progress,
+  };
+}
+
+// How far from its point the camera sits for one unit there to span `zoom` pixels.
+export function getCameraDistance({ viewport, zoom }: { viewport: Viewport; zoom: number }) {
+  return viewport.height / (2 * Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180) * zoom);
+}
+
+// The visitor zooms out at most this many times past home, and in this many times past the
+// closest a planet is framed.
+const ZOOM_OUT_LIMIT = 1.5;
+const ZOOM_IN_LIMIT = 1.5;
+
+// How close to and far from its point the visitor may move the camera.
+export function getDistanceLimits(viewport: Viewport) {
+  const fitZoom = getFitZoom(viewport);
+
+  return {
+    min: getCameraDistance({ viewport, zoom: fitZoom * MAX_ZOOM * ZOOM_IN_LIMIT }),
+    max: getCameraDistance({ viewport, zoom: fitZoom / ZOOM_OUT_LIMIT }),
+  };
+}
+
+type Offset = { x: number; y: number; z: number };
+
+// The angle a camera looks from, given where it sits relative to its point: the inverse of
+// `getCameraPlacement`.
+export function getCameraAngle(offset: Offset): CameraAngle {
+  return {
+    polar: Math.acos(offset.y / Math.hypot(offset.x, offset.y, offset.z)),
+    azimuth: Math.atan2(offset.x, offset.z),
+  };
+}
+
+type GetCameraPlacementParams = { pose: CameraPose; angle: CameraAngle; viewport: Viewport };
+
+// Where the perspective camera goes for a pose seen from an angle, and the view offset that
+// moves its point to the pose's spot on screen.
+export function getCameraPlacement({ pose, angle, viewport }: GetCameraPlacementParams) {
+  const distance = getCameraDistance({ viewport, zoom: pose.zoom });
+  const target = toPlanePosition(pose);
+  const [x, , z] = target;
+  const across = Math.sin(angle.polar) * distance;
+
+  return {
+    target,
+    position: [
+      x + Math.sin(angle.azimuth) * across,
+      Math.cos(angle.polar) * distance,
+      z + Math.cos(angle.azimuth) * across,
+    ] satisfies [number, number, number],
+    viewOffset: { x: -pose.offset.x, y: -pose.offset.y },
+  };
 }
 
 type GetShipCameraPoseParams = { viewport: Viewport; shipPosition: Point };
@@ -149,9 +283,15 @@ type GetShipCameraPoseParams = { viewport: Viewport; shipPosition: Point };
 export function getShipCameraPose({ viewport, shipPosition }: GetShipCameraPoseParams): CameraPose {
   return {
     x: shipPosition.x,
-    y: shipPosition.y + (viewport.height / 2 - viewport.height * COCKPIT_SHIP_Y) / SHIP_ZOOM,
+    y: shipPosition.y,
     zoom: SHIP_ZOOM,
+    offset: { x: 0, y: viewport.height * COCKPIT_SHIP_Y - viewport.height / 2 },
   };
+}
+
+// The angle the cockpit looks from: behind the ship, in toward the sun across the system.
+export function getShipCameraAngle(shipPosition: Point): CameraAngle {
+  return { polar: SHIP_POLAR, azimuth: Math.atan2(shipPosition.x, shipPosition.y) };
 }
 
 type GetCameraFocusParams = {

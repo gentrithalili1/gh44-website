@@ -40,14 +40,14 @@ describe("getSurfaceShapes", () => {
     }
   });
 
-  it("spins Earth's land and Jupiter's red spot, and keeps every band still", () => {
+  it("draws Earth's land and Jupiter's red spot as round features, apart from the bands", () => {
     const shapes = ["me", "work", "gh44-brain"].flatMap((id) => {
       const planet = findPlanet(id);
       if (!planet) throw new Error(`No planet ${id}`);
       return getSurfaceShapes(planet);
     });
 
-    expect(shapes.filter((shape) => shape.shouldSpin).map((shape) => shape.id)).toEqual([
+    expect(shapes.filter((shape) => shape.kind === "ellipse").map((shape) => shape.id)).toEqual([
       "continent-0",
       "continent-1",
       "continent-2",
@@ -55,7 +55,7 @@ describe("getSurfaceShapes", () => {
     ]);
   });
 
-  it("gives Mercury a few darker crater spots that turn with it", () => {
+  it("gives Mercury a few darker crater spots", () => {
     const mercury = DECORATIVE_PLANETS.find((planet) => planet.id === "mercury");
     if (!mercury) throw new Error("No Mercury");
     const craters = getSurfaceShapes(mercury);
@@ -63,26 +63,25 @@ describe("getSurfaceShapes", () => {
     expect(craters.length).toBeGreaterThanOrEqual(3);
     for (const crater of craters) {
       expect(crater.color).toBe("shadow");
-      expect(crater.shouldSpin).toBe(true);
+      expect(crater.kind).toBe("ellipse");
     }
   });
 
-  it("bands Venus softly and keeps the bands still", () => {
+  it("bands Venus softly", () => {
     const venus = DECORATIVE_PLANETS.find((planet) => planet.id === "venus");
     if (!venus) throw new Error("No Venus");
     const bands = getSurfaceShapes(venus).filter((shape) => shape.kind === "polygon");
 
     expect(bands.length).toBeGreaterThan(0);
     for (const band of bands) {
-      expect(band.shouldSpin).toBe(false);
       expect(band.opacity).toBeLessThan(0.5);
     }
   });
 
-  it("gives Venus a few faint cloud swirls that turn with it", () => {
+  it("gives Venus a few faint cloud swirls", () => {
     const venus = DECORATIVE_PLANETS.find((planet) => planet.id === "venus");
     if (!venus) throw new Error("No Venus");
-    const swirls = getSurfaceShapes(venus).filter((shape) => shape.shouldSpin);
+    const swirls = getSurfaceShapes(venus).filter((shape) => shape.kind === "ellipse");
 
     expect(swirls.length).toBeGreaterThanOrEqual(3);
     for (const swirl of swirls) {

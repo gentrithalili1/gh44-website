@@ -8,4 +8,5 @@ export const messages = {
   stopLabel: "stop the radio",
   previousLabel: "previous track",
   nextLabel: "next track",
+  playlistLabel: "playlist",
 } as const;

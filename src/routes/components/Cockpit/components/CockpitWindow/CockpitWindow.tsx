@@ -7,7 +7,6 @@ import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 
 import {
   AstronautIcon,
-  CockpitSeat,
   CockpitWindshield,
   ConsoleScreen,
   IndicatorLights,
@@ -40,6 +39,10 @@ function getAnimation({ reveal, isClosing }: { reveal: CockpitReveal; isClosing:
 
 interface CockpitWindowProps {
   reveal: CockpitReveal;
+  // Opened by itself to greet the visitor: not modal, and focus stays on the page, until they
+  // step in.
+  isGreeting: boolean;
+  onBoard: () => void;
   // Fading out while the camera pulls back: no longer a dialog.
   isClosing: boolean;
   // After `go`: the confirmation shows, and nothing closes the cockpit or takes commands.
@@ -52,9 +55,11 @@ interface CockpitWindowProps {
 
 // Inside the gh44 explorer, full screen: an arched windshield with two struts looks out on the
 // live system, over a graphite console with the terminal on its center screen, a radar and a
-// readout on its side screens, rows of indicator lights and two seats.
+// readout on its side screens, and rows of indicator lights.
 export function CockpitWindow({
   reveal,
+  isGreeting,
+  onBoard,
   isClosing,
   isLocked,
   onClose,
@@ -96,6 +101,10 @@ export function CockpitWindow({
     }
   }
 
+  function handleStepIn() {
+    if (isGreeting) onBoard();
+  }
+
   function handleAnimationEnd(event: React.AnimationEvent) {
     if (isClosing && event.target === event.currentTarget) onClosed();
   }
@@ -104,13 +113,15 @@ export function CockpitWindow({
     <div
       ref={dialogRef}
       role={isClosing ? undefined : "dialog"}
-      aria-modal={isClosing ? undefined : true}
+      aria-modal={isClosing || isGreeting ? undefined : true}
       aria-labelledby={titleId}
       aria-hidden={isClosing ? true : undefined}
       inert={isClosing}
       // A click on the windshield or the console keeps focus in the dialog, so Esc still reaches it.
       tabIndex={-1}
       onKeyDown={handleKeyDown}
+      onFocus={handleStepIn}
+      onPointerDown={handleStepIn}
       onAnimationEnd={handleAnimationEnd}
       style={COCKPIT_STYLE}
       className={`fixed inset-0 z-50 overflow-hidden text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing })}`}
@@ -141,7 +152,7 @@ export function CockpitWindow({
         </button>
       </header>
       <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
-        <div className="mx-auto grid max-w-[96rem] gap-4 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-4 md:px-8 md:pt-12 md:pb-8">
+        <div className="mx-auto grid max-w-[96rem] gap-4 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)_auto] md:gap-x-6 md:gap-y-4 md:px-8 md:pt-12 md:pb-8">
           <div className="hidden min-h-0 flex-col gap-4 pb-[clamp(2.5rem,4vw,3.5rem)] md:row-span-3 md:flex">
             <ConsoleScreen className="flex-1">
               <CockpitRadar />
@@ -151,18 +162,16 @@ export function CockpitWindow({
           <ConsoleScreen className="hidden md:col-start-3 md:row-start-1 md:block">
             <CockpitReadout />
           </ConsoleScreen>
-          <ConsoleScreen className="md:col-start-3 md:row-start-2">
+          <ConsoleScreen className="md:col-start-3 md:row-start-2 md:flex md:flex-col">
             <CockpitRadio />
           </ConsoleScreen>
           <div className="flex min-h-0 flex-col md:col-start-2 md:row-span-3 md:row-start-1">
-            <CockpitTerminal isLocked={isLocked} onGo={onGo} />
+            <CockpitTerminal isLocked={isLocked} shouldFocus={!isGreeting} onGo={onGo} />
           </div>
           <div className="hidden md:col-start-3 md:row-start-3 md:block">
             <IndicatorLights isMirrored />
           </div>
         </div>
-        <CockpitSeat side="left" />
-        <CockpitSeat side="right" />
       </div>
     </div>
   );

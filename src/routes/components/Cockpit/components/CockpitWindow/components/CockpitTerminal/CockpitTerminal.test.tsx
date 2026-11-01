@@ -14,7 +14,7 @@ describe("CockpitTerminal", () => {
   it("runs go for a destination clicked in the output", async () => {
     const user = userEvent.setup();
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={onGo} /> });
 
     await user.click(getOutput().getByRole("link", { name: "gh44-theme" }));
 
@@ -27,7 +27,7 @@ describe("CockpitTerminal", () => {
   it("takes no clicks on destinations once a launch is locked in", async () => {
     const user = userEvent.setup();
     const onGo = vi.fn();
-    await renderInRouter({ ui: <CockpitTerminal isLocked onGo={onGo} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked shouldFocus onGo={onGo} /> });
 
     const link = getOutput().getByRole("link", { name: "work" });
     await user.click(link);
@@ -37,7 +37,7 @@ describe("CockpitTerminal", () => {
   });
 
   it("is a zsh window", async () => {
-    await renderInRouter({ ui: <CockpitTerminal isLocked={false} onGo={vi.fn()} /> });
+    await renderInRouter({ ui: <CockpitTerminal isLocked={false} shouldFocus onGo={vi.fn()} /> });
 
     expect(screen.getByRole("region", { name: "gh44@explorer — zsh" })).toBeInTheDocument();
   });

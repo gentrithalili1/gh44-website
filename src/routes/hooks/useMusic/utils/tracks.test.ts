@@ -3,14 +3,15 @@ import { describe, expect, it } from "vitest";
 import { getTrackIndex, TRACKS } from "./tracks";
 
 describe("TRACKS", () => {
-  it("plays s.t.a.y., then spacewalk", () => {
-    expect(TRACKS).toEqual([
-      { id: "stay", title: "s.t.a.y.", artist: "hans zimmer", path: "/audio/stay.mp3" },
+  it("plays crystalline, s.t.a.y., spacewalk, then the starship avalon", () => {
+    expect(TRACKS.map(({ title, artist, path }) => ({ title, artist, path }))).toEqual([
+      { title: "crystalline", artist: "thomas newman", path: "/audio/crystalline.mp3" },
+      { title: "s.t.a.y.", artist: "hans zimmer", path: "/audio/stay.mp3" },
+      { title: "spacewalk", artist: "thomas newman", path: "/audio/spacewalk.mp3" },
       {
-        id: "spacewalk",
-        title: "spacewalk",
+        title: "the starship avalon",
         artist: "thomas newman",
-        path: "/audio/spacewalk.mp3",
+        path: "/audio/the-starship-avalon.mp3",
       },
     ]);
   });
