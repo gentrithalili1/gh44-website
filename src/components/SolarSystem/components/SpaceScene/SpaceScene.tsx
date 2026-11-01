@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { messages } from "#/components/SolarSystem/messages";
 import { PLANETS } from "#/utils/planets";
 
+import { LabelNudges } from "./components/LabelNudges";
 import { Orbits } from "./components/Orbits";
 import { SceneCamera } from "./components/SceneCamera";
 import { ScenePlanet } from "./components/ScenePlanet";
@@ -61,6 +62,13 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
               />
             ))
           : null}
+        {labelList ? (
+          <LabelNudges
+            labelList={labelList}
+            openPlanetId={openPlanetId}
+            sceneStateRef={sceneStateRef}
+          />
+        ) : null}
         <Ships />
       </Canvas>
       <nav aria-label={messages.planetsLabel} className="pointer-events-none absolute inset-0">

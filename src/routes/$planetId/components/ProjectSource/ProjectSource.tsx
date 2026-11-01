@@ -2,11 +2,12 @@ import { ExternalLink } from "../ExternalLink";
 import { messages } from "./messages";
 import { PROJECT_REPOS, type ProjectId } from "./utils/projectRepos";
 
-interface ProjectPanelProps {
+interface ProjectSourceProps {
   projectId: ProjectId;
 }
 
-export function ProjectPanel({ projectId }: ProjectPanelProps) {
+// The project's repository, at the end of its panel.
+export function ProjectSource({ projectId }: ProjectSourceProps) {
   const repo = PROJECT_REPOS[projectId];
 
   return (

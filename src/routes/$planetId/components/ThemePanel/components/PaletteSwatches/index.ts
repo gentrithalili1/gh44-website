@@ -1,0 +1,1 @@
+export { PaletteSwatches } from "./PaletteSwatches";

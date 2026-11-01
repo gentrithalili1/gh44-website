@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "lilex",
+        "createdAt": "2026-10-31T21:43:58.923Z",
+        "reason": "Claude: Lilex is the gh44-theme mono, declared in DESIGN.md as 'Lilex Variable'"
+      }
+    ]
+  }
+}
