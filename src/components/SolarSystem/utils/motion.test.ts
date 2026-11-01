@@ -27,7 +27,7 @@ describe("getOrbitSpeed", () => {
   });
 
   it("scales every planet from Earth by its relative orbit speed", () => {
-    expect(getOrbitPeriod("confirm")).toBeCloseTo(51.7, 1);
+    expect(getOrbitPeriod("gh44-confirm")).toBeCloseTo(51.7, 1);
     expect(getOrbitPeriod("work")).toBeCloseTo(94.2, 1);
     expect(getOrbitPeriod("gh44-theme")).toBeCloseTo(125.7, 1);
     expect(getOrbitPeriod("gh44-brain")).toBeCloseTo(239.9, 1);
@@ -63,7 +63,7 @@ describe("getSpinPeriod", () => {
   });
 
   it("spins Jupiter fastest and Mars slowest, apart from how fast they orbit", () => {
-    const periods = ["work", "gh44-theme", "gh44-brain", "me", "confirm"].map((id) =>
+    const periods = ["work", "gh44-theme", "gh44-brain", "me", "gh44-confirm"].map((id) =>
       getSpinPeriod(getPlanet(id)),
     );
 

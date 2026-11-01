@@ -75,7 +75,7 @@ export const PLANETS = [
   },
   {
     kind: "site",
-    id: "confirm",
+    id: "gh44-confirm",
     realPlanet: "mars",
     name: "gh44-confirm",
     title: "gh44-confirm",

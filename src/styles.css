@@ -15,6 +15,13 @@
   --color-accent: var(--accent);
   /* Code blocks sit a shade below the page. */
   --color-code: color-mix(in oklab, var(--background) 85%, black);
+  /* The cockpit's graphite, from the gh44 neutrals: never tinted by an open planet. */
+  --color-night: var(--night);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-surface-active: var(--surface-active);
+  --color-border-subtle: var(--border-subtle);
+  --color-fg-faint: var(--fg-faint);
 
   --color-terracotta: var(--terracotta);
   --color-sage: var(--sage);
@@ -59,10 +66,57 @@
   --ease-space: cubic-bezier(0.33, 1, 0.68, 1);
 
   --animate-music-bar: music-bar 900ms var(--ease-space) infinite alternate;
+  --animate-cockpit-iris: cockpit-iris 450ms var(--ease-space) 550ms both;
+  --animate-cockpit-close: cockpit-close 350ms var(--ease-space) forwards;
+  --animate-cursor-blink: cursor-blink 1.1s steps(1) infinite;
+  --animate-light-blink: light-blink 3.2s ease-in-out infinite;
+  --animate-radar-sweep: radar-sweep 4s linear infinite;
+  --animate-radio-level: radio-level 700ms var(--ease-space) infinite alternate;
 
   @keyframes music-bar {
     to {
       height: 1rem;
+    }
+  }
+
+  /* The cockpit opens out of the ship's window once the camera arrives (--ship-y: how far down
+     the screen the ship is). */
+  @keyframes cockpit-iris {
+    from {
+      clip-path: circle(0 at 50% var(--ship-y));
+    }
+    to {
+      clip-path: circle(150vmax at 50% var(--ship-y));
+    }
+  }
+
+  @keyframes cockpit-close {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes light-blink {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @keyframes radio-level {
+    to {
+      height: 0.75rem;
+    }
+  }
+
+  @keyframes radar-sweep {
+    to {
+      rotate: 1turn;
     }
   }
 }
@@ -91,6 +145,14 @@
   --faint: #868a92;
   --rule: #414349;
   --sun: #ddbe8e;
+
+  /* gh44 dark neutrals: bg, bg-subtle, surface, surface-active, border-subtle, fg-faint. */
+  --night: #1e1f22;
+  --bg-subtle: #25262a;
+  --surface: #2b2d30;
+  --surface-active: #393b41;
+  --border-subtle: #313236;
+  --fg-faint: #5c5f66;
   --accent: var(--sun);
 
   --terracotta: #e49b80;

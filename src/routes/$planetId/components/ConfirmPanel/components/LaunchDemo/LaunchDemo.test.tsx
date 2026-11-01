@@ -7,7 +7,7 @@ import { renderAt } from "#/test/renderAt";
 describe("LaunchDemo", () => {
   it("asks with the package's dialog before launching", async () => {
     const user = userEvent.setup();
-    await renderAt("/confirm");
+    await renderAt("/gh44-confirm");
 
     await user.click(screen.getByRole("button", { name: "launch rocket?" }));
 
@@ -16,7 +16,7 @@ describe("LaunchDemo", () => {
 
   it("launches the rocket on confirm, and says so", async () => {
     const user = userEvent.setup();
-    await renderAt("/confirm");
+    await renderAt("/gh44-confirm");
 
     await user.click(screen.getByRole("button", { name: "launch rocket?" }));
     await user.click(screen.getByRole("button", { name: "launch" }));
@@ -28,7 +28,7 @@ describe("LaunchDemo", () => {
 
   it("aborts on cancel, and says so", async () => {
     const user = userEvent.setup();
-    await renderAt("/confirm");
+    await renderAt("/gh44-confirm");
 
     await user.click(screen.getByRole("button", { name: "launch rocket?" }));
     await user.click(screen.getByRole("button", { name: "abort" }));

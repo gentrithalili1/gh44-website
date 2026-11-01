@@ -1,3 +1,5 @@
+import { EXPLORER_NAME } from "#/utils/explorer";
+
 export const messages = {
   planetsLabel: "planets",
   earthMoon: "the moon",
@@ -11,4 +13,6 @@ export const messages = {
   },
   companyMoon: ({ company, title }: { company: string; title: string }) => `${company} · ${title}`,
   appRing: (app: string) => `gh44 for ${app}`,
+  shipName: EXPLORER_NAME,
+  shipAction: "open cockpit",
 } as const;

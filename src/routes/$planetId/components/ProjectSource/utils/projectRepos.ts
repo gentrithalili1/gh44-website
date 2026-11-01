@@ -7,7 +7,7 @@ export const PROJECT_REPOS = {
     path: "gentrithalili1/gh44-theme",
     href: "https://github.com/gentrithalili1/gh44-theme",
   },
-  confirm: {
+  "gh44-confirm": {
     path: "gentrithalili1/react-promise-confirmation-dialog",
     href: "https://github.com/gentrithalili1/react-promise-confirmation-dialog",
   },

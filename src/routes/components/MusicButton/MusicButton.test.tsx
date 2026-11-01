@@ -2,62 +2,13 @@ import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { removeGestureListeners, stubAudio } from "#/test/audio";
 import { fakeFrames, playFor } from "#/test/motion";
 import { renderAt } from "#/test/renderAt";
 
 const TRACK = "/audio/stay.mp3";
-const PLAY_LABEL = "play s.t.a.y. from interstellar";
+const PLAY_LABEL = "play s.t.a.y. by hans zimmer";
 const STOP_LABEL = "stop the music";
-const GESTURE_EVENTS = ["pointerdown", "keydown", "click"] as const;
-
-// What the last `stubAudio` left on the document.
-let removeGestureListeners = () => {};
-
-type AutoplayPolicy = "allowed" | "needs-gesture";
-
-// jsdom plays no audio: a stand-in that finds the track, or not, follows an autoplay policy and
-// records what it is told.
-function stubAudio({ hasTrack, autoplay }: { hasTrack: boolean; autoplay: AutoplayPolicy }) {
-  const players: FakeAudio[] = [];
-  let hasGesture = autoplay === "allowed";
-  function handleGesture() {
-    hasGesture = true;
-  }
-  // Registered before the player's own listeners, as the browser grants the gesture first.
-  for (const type of GESTURE_EVENTS) document.addEventListener(type, handleGesture);
-  removeGestureListeners = () => {
-    for (const type of GESTURE_EVENTS) document.removeEventListener(type, handleGesture);
-  };
-
-  class FakeAudio extends EventTarget {
-    volume = 1;
-    loop = false;
-    preload = "";
-    paused = true;
-    currentSrc = "";
-    play = vi.fn(async () => {
-      if (!hasGesture) throw new DOMException("Needs a gesture", "NotAllowedError");
-      this.paused = false;
-    });
-    pause = vi.fn(() => {
-      this.paused = true;
-    });
-
-    constructor() {
-      super();
-      players.push(this);
-    }
-
-    set src(src: string) {
-      this.currentSrc = src;
-      queueMicrotask(() => this.dispatchEvent(new Event(hasTrack ? "loadedmetadata" : "error")));
-    }
-  }
-
-  vi.stubGlobal("Audio", FakeAudio);
-  return players;
-}
-
 describe("MusicButton", () => {
   afterEach(() => {
     removeGestureListeners();

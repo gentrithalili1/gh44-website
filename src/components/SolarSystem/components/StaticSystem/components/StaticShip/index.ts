@@ -1,0 +1,1 @@
+export { StaticShip } from "./StaticShip";

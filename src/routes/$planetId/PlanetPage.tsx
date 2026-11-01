@@ -69,7 +69,7 @@ function getPanel({ planetId, code }: GetPanelParams) {
       return <BrainPanel code={code} />;
     case "gh44-theme":
       return <ThemePanel code={code} />;
-    case "confirm":
+    case "gh44-confirm":
       return <ConfirmPanel code={code} />;
     default: {
       const unknownPlanet: never = planetId;

@@ -13,7 +13,9 @@ function getPlanet(id: string): Planet {
 describe("getOrbiters", () => {
   it("gives Earth one moon, slower than any other orbiter", () => {
     const [moon, ...rest] = getOrbiters(getPlanet("me"));
-    const others = ["confirm", "work", "gh44-brain"].flatMap((id) => getOrbiters(getPlanet(id)));
+    const others = ["gh44-confirm", "work", "gh44-brain"].flatMap((id) =>
+      getOrbiters(getPlanet(id)),
+    );
 
     expect(rest).toEqual([]);
     expect(moon).toMatchObject({ kind: "moon", label: "the moon" });
@@ -28,7 +30,9 @@ describe("getOrbiters", () => {
   });
 
   it("gives Mars two satellites", () => {
-    expect(getOrbiters(getPlanet("confirm")).map(({ kind, label }) => ({ kind, label }))).toEqual([
+    expect(
+      getOrbiters(getPlanet("gh44-confirm")).map(({ kind, label }) => ({ kind, label })),
+    ).toEqual([
       { kind: "satellite", label: "resolve" },
       { kind: "satellite", label: "reject" },
     ]);
@@ -71,7 +75,7 @@ describe("getOrbiters", () => {
   });
 
   it("keeps every orbit clear of its planet", () => {
-    for (const id of ["me", "confirm", "work", "gh44-brain"]) {
+    for (const id of ["me", "gh44-confirm", "work", "gh44-brain"]) {
       const planet = getPlanet(id);
       for (const orbiter of getOrbiters(planet)) {
         expect(orbiter.orbitRadius - orbiter.radius).toBeGreaterThan(planet.size);
