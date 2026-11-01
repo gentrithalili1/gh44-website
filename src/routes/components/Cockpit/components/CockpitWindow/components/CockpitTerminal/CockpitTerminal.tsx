@@ -11,12 +11,14 @@ import { getLineSegments } from "./utils/terminalLinks";
 interface CockpitTerminalProps {
   // After `go`: the terminal shows the confirmation and takes no more commands.
   isLocked: boolean;
+  // A greeting cockpit leaves focus where it was: the command line waits for the visitor.
+  shouldFocus: boolean;
   onGo: (destination: Destination) => void;
 }
 
 // A zsh window in the gh44 Warp theme on the console's center screen. Every destination it prints
 // is a link: clicking one runs `go` for it.
-export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
+export function CockpitTerminal({ isLocked, shouldFocus, onGo }: CockpitTerminalProps) {
   const terminal = useTerminal();
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
@@ -144,7 +146,8 @@ export function CockpitTerminal({ isLocked, onGo }: CockpitTerminalProps) {
                 <input
                   ref={inputRef}
                   readOnly={isLocked}
-                  autoFocus
+                  autoFocus={shouldFocus}
+                  data-cockpit-command=""
                   value={terminal.input}
                   onChange={(event) => {
                     terminal.setInput(event.target.value);

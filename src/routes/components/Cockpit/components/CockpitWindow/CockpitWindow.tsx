@@ -39,6 +39,10 @@ function getAnimation({ reveal, isClosing }: { reveal: CockpitReveal; isClosing:
 
 interface CockpitWindowProps {
   reveal: CockpitReveal;
+  // Opened by itself to greet the visitor: not modal, and focus stays on the page, until they
+  // step in.
+  isGreeting: boolean;
+  onBoard: () => void;
   // Fading out while the camera pulls back: no longer a dialog.
   isClosing: boolean;
   // After `go`: the confirmation shows, and nothing closes the cockpit or takes commands.
@@ -54,6 +58,8 @@ interface CockpitWindowProps {
 // readout on its side screens, and rows of indicator lights.
 export function CockpitWindow({
   reveal,
+  isGreeting,
+  onBoard,
   isClosing,
   isLocked,
   onClose,
@@ -95,6 +101,10 @@ export function CockpitWindow({
     }
   }
 
+  function handleStepIn() {
+    if (isGreeting) onBoard();
+  }
+
   function handleAnimationEnd(event: React.AnimationEvent) {
     if (isClosing && event.target === event.currentTarget) onClosed();
   }
@@ -103,13 +113,15 @@ export function CockpitWindow({
     <div
       ref={dialogRef}
       role={isClosing ? undefined : "dialog"}
-      aria-modal={isClosing ? undefined : true}
+      aria-modal={isClosing || isGreeting ? undefined : true}
       aria-labelledby={titleId}
       aria-hidden={isClosing ? true : undefined}
       inert={isClosing}
       // A click on the windshield or the console keeps focus in the dialog, so Esc still reaches it.
       tabIndex={-1}
       onKeyDown={handleKeyDown}
+      onFocus={handleStepIn}
+      onPointerDown={handleStepIn}
       onAnimationEnd={handleAnimationEnd}
       style={COCKPIT_STYLE}
       className={`fixed inset-0 z-50 overflow-hidden text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing })}`}
@@ -154,7 +166,7 @@ export function CockpitWindow({
             <CockpitRadio />
           </ConsoleScreen>
           <div className="flex min-h-0 flex-col md:col-start-2 md:row-span-3 md:row-start-1">
-            <CockpitTerminal isLocked={isLocked} onGo={onGo} />
+            <CockpitTerminal isLocked={isLocked} shouldFocus={!isGreeting} onGo={onGo} />
           </div>
           <div className="hidden md:col-start-3 md:row-start-3 md:block">
             <IndicatorLights isMirrored />

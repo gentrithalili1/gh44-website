@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
 import { messages } from "#/components/SolarSystem/messages";
@@ -20,6 +20,7 @@ import { usePageVisible } from "./hooks/usePageVisible";
 import type { SceneState } from "./types";
 import { PHONE_MAX_WIDTH } from "./utils/sceneMath";
 
+const HOME_PATH = "/";
 // Phones get a lower pixel ratio, which keeps the scene smooth.
 const PHONE_MAX_DPR = 1.5;
 const DESKTOP_MAX_DPR = 2;
@@ -41,6 +42,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const [labelList, setLabelList] = useState<HTMLUListElement | null>(null);
   const explorer = useExplorer();
   const navigate = useNavigate();
+  const pathname = useLocation({ select: (location) => location.pathname });
   const sceneStateRef = useRef<SceneState>({
     frameStep: 0,
     planetAngles: new Map(),
@@ -53,13 +55,19 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isSystemFaded = openPlanetId !== undefined || isCockpitOpen;
   const maxDpr = window.innerWidth < PHONE_MAX_WIDTH ? PHONE_MAX_DPR : DESKTOP_MAX_DPR;
 
+  // The scene up at home greets the session's first visit from the cockpit. Reduced motion and
+  // the static system have no scene, so no greeting.
+  function handleSceneRef(scene: HTMLDivElement | null) {
+    if (scene && pathname === HOME_PATH) explorer.greetVisitor();
+  }
+
   function handlePointerMissed() {
     if (openPlanetId === undefined || explorer.cockpit.status !== "closed") return;
     void navigate({ to: "/" });
   }
 
   return (
-    <div className="absolute inset-0 isolate overflow-hidden">
+    <div ref={handleSceneRef} className="absolute inset-0 isolate overflow-hidden">
       <Canvas
         // No tone mapping: palette colors as in styles.css, where the light falls fully.
         flat

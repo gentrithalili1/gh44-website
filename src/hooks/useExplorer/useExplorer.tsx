@@ -6,10 +6,12 @@ import type { Destination } from "#/utils/destinations";
 // opens out of its window, or (no ship: reduced motion, no WebGL) it is there at once.
 export type CockpitReveal = "flight" | "instant";
 
-// A closing cockpit fades out while the camera pulls back; it is no longer a dialog by then.
+// A closing cockpit fades out while the camera pulls back; it is no longer a dialog by then. A
+// greeting cockpit opened by itself on the session's first visit: the page behind stays readable
+// and keeps focus until the visitor steps in.
 type Cockpit =
   | { status: "closed" }
-  | { status: "open"; reveal: CockpitReveal }
+  | { status: "open"; reveal: CockpitReveal; isGreeting: boolean }
   | { status: "closing" };
 
 // The ship's trip to a destination, from the cockpit's `go` to the page opening.
@@ -24,6 +26,10 @@ type Explorer = {
   flight: ExplorerFlight;
   // Does nothing while the ship flies to a destination: the launch can't be cancelled.
   openCockpit: () => void;
+  // Opens a greeting cockpit, once a session; after that the visitor opens it themselves.
+  greetVisitor: () => void;
+  // The visitor stepped into the greeting cockpit: it is theirs now, a modal dialog.
+  boardCockpit: () => void;
   closeCockpit: () => void;
   // The closing cockpit has faded out.
   finishClosing: () => void;
@@ -35,6 +41,9 @@ type Explorer = {
   // The planet the visitor last launched to from the cockpit: its page leads back to the cockpit.
   cockpitTripPlanetId: string | undefined;
 };
+
+// Set once the cockpit has greeted this tab's visitor.
+const GREETED_KEY = "gh44-cockpit-greeted";
 
 const CLOSED: Cockpit = { status: "closed" };
 const CLOSING: Cockpit = { status: "closing" };
@@ -65,8 +74,19 @@ export function ExplorerProvider({ children }: ExplorerProviderProps) {
     openCockpit: () => {
       if (flight.status === "flying") return;
       setCockpitTripPlanetId(undefined);
-      setCockpit({ status: "open", reveal: hasShip() ? "flight" : "instant" });
+      setCockpit({ status: "open", reveal: hasShip() ? "flight" : "instant", isGreeting: false });
     },
+    greetVisitor: () => {
+      if (sessionStorage.getItem(GREETED_KEY) !== null) return;
+      sessionStorage.setItem(GREETED_KEY, "true");
+      setCockpit({ status: "open", reveal: hasShip() ? "flight" : "instant", isGreeting: true });
+    },
+    boardCockpit: () =>
+      setCockpit((current) =>
+        current.status === "open" && current.isGreeting
+          ? { ...current, isGreeting: false }
+          : current,
+      ),
     closeCockpit: () =>
       setCockpit((current) =>
         current.status === "open" && current.reveal === "flight" ? CLOSING : CLOSED,
