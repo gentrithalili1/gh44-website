@@ -2,9 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import type { RefObject } from "react";
 
 import type { SceneState } from "../../types";
-
-// A long frame (a background tab coming back) must not jump anything across its orbit.
-const MAX_FRAME_STEP = 0.05;
+import { MAX_FRAME_STEP } from "../../utils/sceneMath";
 // Runs before every other frame callback, so they all read this frame's step.
 const CLOCK_PRIORITY = -1;
 

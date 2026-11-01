@@ -1,7 +1,7 @@
 import type { PlanetState } from "../types";
 
 // The system spans this many units across the shorter side of the screen.
-export const SYSTEM_SIZE = 980;
+export const SYSTEM_SIZE = 1040;
 export const SUN_RADIUS = 56;
 export const SUN_GLOW_RADIUS = 150;
 

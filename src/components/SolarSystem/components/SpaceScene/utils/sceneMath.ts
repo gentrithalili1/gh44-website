@@ -8,6 +8,9 @@ export const PHONE_MAX_WIDTH = 720;
 export const CAMERA_HEIGHT = 1000;
 // How fast fades and color changes settle (higher is faster).
 export const FADE_LAMBDA = 6;
+// A long frame (a background tab coming back) must not jump anything across its orbit, or
+// launch a burst of meteors: no frame moves the scene further than this many seconds.
+export const MAX_FRAME_STEP = 0.05;
 // Opacity of everything that steps back while a planet is open.
 export const FADED_OPACITY = 0.08;
 

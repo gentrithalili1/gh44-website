@@ -53,6 +53,11 @@ describe("getLabelNudges", () => {
         { ...CONFIRM, x: 145, y: 372 },
       ],
     },
+  ])("keeps $name from touching", ({ labels }) => {
+    expect(getTouchingPairs(getNudgedBoxes({ labels, gap: GAP }))).toEqual([]);
+  });
+
+  it.each([
     {
       name: "the inner planets bunched around the sun",
       labels: [
@@ -60,14 +65,6 @@ describe("getLabelNudges", () => {
         { ...CONFIRM, x: 178, y: 384 },
         { ...WORK, x: 186, y: 376 },
         { ...THEME, x: 170, y: 390 },
-      ],
-    },
-    {
-      name: "labels on the very same spot",
-      labels: [
-        { ...ME, x: 180, y: 380 },
-        { ...CONFIRM, x: 180, y: 380 },
-        { ...WORK, x: 180, y: 380 },
       ],
     },
     {
@@ -80,7 +77,12 @@ describe("getLabelNudges", () => {
         { ...BRAIN, x: 180, y: 383 },
       ],
     },
-  ])("keeps $name from touching", ({ labels }) => {
-    expect(getTouchingPairs(getNudgedBoxes({ labels, gap: GAP }))).toEqual([]);
+  ])("never moves a label more than one label height from its planet: $name", ({ labels }) => {
+    const nudges = getLabelNudges({ labels, gap: GAP });
+
+    for (const label of labels) {
+      const nudge = nudges.get(label.id) ?? { x: 0, y: 0 };
+      expect(Math.hypot(nudge.x, nudge.y)).toBeLessThanOrEqual(label.height + 1e-9);
+    }
   });
 });

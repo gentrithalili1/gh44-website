@@ -6,12 +6,15 @@ import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
 import { PLANETS } from "#/utils/planets";
 
 import type { SceneState } from "../../types";
-import { PHONE_MAX_WIDTH, toScenePosition } from "../../utils/sceneMath";
+import { damp, PHONE_MAX_WIDTH, toScenePosition } from "../../utils/sceneMath";
 import { getLabelNudges, type LabelBox } from "./utils/labelNudges";
 
 // The least space between two labels, in pixels.
 const LABEL_GAP = 6;
 const NO_NUDGE = { x: 0, y: 0 } as const;
+// How fast a label eases to its new nudge (higher is faster): two labels part smoothly instead
+// of jumping.
+const NUDGE_LAMBDA = 8;
 
 const anchor = new Vector3();
 
@@ -29,17 +32,21 @@ interface LabelNudgesProps {
 }
 
 // On phones the inner planets pass close, and their fixed-size labels would touch: every frame,
-// labels that would are moved apart. Desktop has room, and an open planet hides the labels.
+// labels that would ease apart, never further than a label's height from their planet. Desktop
+// has room, and an open planet hides the labels.
 export function LabelNudges({ labelList, openPlanetId, sceneStateRef }: LabelNudgesProps) {
   // Whether the labels may still carry a nudge from an earlier frame.
   const hasNudgesRef = useRef(false);
+  // Each label's nudge as drawn, easing toward the one it needs.
+  const shownNudgesRef = useRef(new Map<string, { x: number; y: number }>());
 
-  useFrame(({ camera, size }) => {
+  useFrame(({ camera, size }, delta) => {
     const isActive = size.width < PHONE_MAX_WIDTH && openPlanetId === undefined;
     if (!isActive) {
       // Put the labels back once, then do nothing until nudging is needed again.
       if (hasNudgesRef.current) {
         labelList.querySelectorAll<HTMLElement>("[data-planet-label]").forEach(setNudge(NO_NUDGE));
+        shownNudgesRef.current.clear();
         hasNudgesRef.current = false;
       }
       return;
@@ -69,7 +76,14 @@ export function LabelNudges({ labelList, openPlanetId, sceneStateRef }: LabelNud
     }
 
     const nudges = getLabelNudges({ labels: labels.map(({ box }) => box), gap: LABEL_GAP });
-    for (const { element, box } of labels) setNudge(nudges.get(box.id) ?? NO_NUDGE)(element);
+    for (const { element, box } of labels) {
+      const target = nudges.get(box.id) ?? NO_NUDGE;
+      const shown = shownNudgesRef.current.get(box.id) ?? { x: 0, y: 0 };
+      shown.x = damp({ current: shown.x, target: target.x, delta, lambda: NUDGE_LAMBDA });
+      shown.y = damp({ current: shown.y, target: target.y, delta, lambda: NUDGE_LAMBDA });
+      shownNudgesRef.current.set(box.id, shown);
+      setNudge(shown)(element);
+    }
   });
 
   return null;

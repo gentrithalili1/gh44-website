@@ -1,6 +1,11 @@
 import type { PlanetState } from "#/components/SolarSystem/types";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
-import { getRingBands, type RingBand } from "#/components/SolarSystem/utils/rings";
+import {
+  getRingBands,
+  getUprightRing,
+  type RingBand,
+  type UprightRing,
+} from "#/components/SolarSystem/utils/rings";
 import {
   getRocketPose,
   getTiltedPoint,
@@ -9,7 +14,7 @@ import {
 } from "#/components/SolarSystem/utils/space";
 import { getSurfaceShapes } from "#/components/SolarSystem/utils/surface";
 import { getColorVars } from "#/utils/palette";
-import type { Planet } from "#/utils/planets";
+import type { PlanetBody } from "#/utils/planets";
 
 import { PlanetOrbiter, PlanetSurfaceShape } from "./SolarSystemPlanet.elements";
 
@@ -28,8 +33,22 @@ function getRingBandPath({ innerRadius, outerRadius }: RingBand) {
   return `${ellipse(outerRadius)} ${ellipse(innerRadius)}`;
 }
 
+// Uranus' upright ring: an ellipse squashed sideways, leaning off vertical. `half` keeps only its
+// right half, the near one.
+function getUprightRingPath({ ring, half }: { ring: UprightRing; half: "full" | "near" }) {
+  const ellipse = (radius: number) => {
+    const rx = radius * ring.squash;
+    const nearHalf = `M 0 ${-radius} A ${rx} ${radius} 0 0 1 0 ${radius}`;
+    return half === "near" ? nearHalf : `${nearHalf} A ${rx} ${radius} 0 0 1 0 ${-radius} Z`;
+  };
+
+  return half === "near"
+    ? `${ellipse(ring.outerRadius)} L 0 ${ring.innerRadius} A ${ring.innerRadius * ring.squash} ${ring.innerRadius} 0 0 0 0 ${-ring.innerRadius} Z`
+    : `${ellipse(ring.outerRadius)} ${ellipse(ring.innerRadius)}`;
+}
+
 interface SolarSystemPlanetProps {
-  planet: Planet;
+  planet: PlanetBody;
   x: number;
   y: number;
   state: PlanetState;
@@ -43,6 +62,10 @@ export function SolarSystemPlanet({ planet, x, y, state }: SolarSystemPlanetProp
     point: getTiltedPoint({ radius: orbiter.orbitRadius, angle: orbiter.phase }),
   }));
   const ringBands = getRingBands(planet);
+  const uprightRing = getUprightRing(planet);
+  const uprightRingTransform = uprightRing
+    ? `rotate(${uprightRing.lean * RADIANS_TO_DEGREES})`
+    : undefined;
   const rocket = planet.features.hasRocket
     ? getRocketPose({ planetSize: planet.size, angle: ROCKET_ANGLE })
     : null;
@@ -80,7 +103,16 @@ export function SolarSystemPlanet({ planet, x, y, state }: SolarSystemPlanetProp
           <title>{band.label}</title>
         </path>
       ))}
-      <circle r={planet.size} className="fill-(--hue)" />
+      {uprightRing ? (
+        <path
+          d={getUprightRingPath({ ring: uprightRing, half: "full" })}
+          transform={uprightRingTransform}
+          fillRule="evenodd"
+          style={getColorVars(uprightRing.color)}
+          className="fill-(--hue)"
+        />
+      ) : null}
+      <circle data-testid="planet-body" r={planet.size} className="fill-(--hue)" />
       {getSurfaceShapes(planet).map((shape) => (
         <PlanetSurfaceShape key={shape.id} shape={shape} />
       ))}
@@ -101,6 +133,14 @@ export function SolarSystemPlanet({ planet, x, y, state }: SolarSystemPlanetProp
             ))}
           </g>
         </>
+      ) : null}
+      {uprightRing ? (
+        <path
+          d={getUprightRingPath({ ring: uprightRing, half: "near" })}
+          transform={uprightRingTransform}
+          style={getColorVars(uprightRing.color)}
+          className="fill-(--hue)"
+        />
       ) : null}
       {rocket ? (
         <path

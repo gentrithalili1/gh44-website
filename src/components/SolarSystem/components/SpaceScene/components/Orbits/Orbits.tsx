@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import type { Group } from "three";
 
 import { SPACE_COLORS } from "#/utils/palette";
-import { PLANETS } from "#/utils/planets";
+import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { setGroupOpacity } from "../../utils/groupOpacity";
 import { damp, FADED_OPACITY } from "../../utils/sceneMath";
@@ -29,7 +29,10 @@ interface OrbitsProps {
 // One hairline per planet; WebGL lines stay 1px at any zoom.
 export function Orbits({ isPlanetOpen }: OrbitsProps) {
   const [orbits] = useState(() =>
-    PLANETS.map((planet) => ({ id: planet.id, positions: getOrbitPositions(planet.orbit.radius) })),
+    SOLAR_SYSTEM.map((planet) => ({
+      id: planet.id,
+      positions: getOrbitPositions(planet.orbit.radius),
+    })),
   );
   const groupRef = useRef<Group>(null);
   const opacityRef = useRef(1);

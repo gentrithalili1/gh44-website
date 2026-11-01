@@ -33,17 +33,18 @@ export const STAR_FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-// A shooting star is a line from its head (aTail 0) fading to its tail (aTail 1).
+// Shooting stars are streaks from their head (aTail 0) fading to their tail (aTail 1); each
+// corner carries its meteor's life, so one draw holds them all.
 export const SHOOTING_STAR_VERTEX_SHADER = /* glsl */ `
   attribute float aTail;
+  attribute float aLife;
   uniform vec2 uViewport;
-  uniform float uLife;
   varying float vAlpha;
 
   void main() {
     vec2 clip = position.xy / uViewport * 2.0 - 1.0;
     gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
-    vAlpha = uLife * (1.0 - aTail);
+    vAlpha = aLife * (1.0 - aTail);
   }
 `;
 

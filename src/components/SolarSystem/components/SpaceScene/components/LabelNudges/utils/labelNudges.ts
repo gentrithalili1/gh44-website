@@ -46,7 +46,8 @@ function getPush({ offset, clearance, direction }: GetPushParams) {
 }
 
 // How far each label moves so no two come closer than `gap`: two labels that would touch move
-// apart along the line between them, each taking half.
+// apart along the line between them, each taking half. No label moves more than its own height,
+// so it always stays by its planet; a crowd too tight for that may still touch.
 export function getLabelNudges({ labels, gap }: GetLabelNudgesParams) {
   const nudges = new Map<string, LabelNudge>(labels.map((label) => [label.id, { x: 0, y: 0 }]));
 
@@ -78,6 +79,15 @@ export function getLabelNudges({ labels, gap }: GetLabelNudgesParams) {
       }
     });
     if (isSettled) break;
+  }
+
+  for (const label of labels) {
+    const nudge = nudges.get(label.id);
+    if (!nudge) continue;
+    const length = Math.hypot(nudge.x, nudge.y);
+    if (length <= label.height) continue;
+    nudge.x *= label.height / length;
+    nudge.y *= label.height / length;
   }
 
   return nudges;
