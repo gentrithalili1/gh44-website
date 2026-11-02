@@ -1,8 +1,8 @@
 import { EXPLORER_NAME } from "#/utils/explorer";
 
 export const messages = {
-  title: "nav console",
-  prompt: "nav>",
+  title: "terminal",
+  prompt: "gh44-explorer>",
   commandLabel: "command",
   outputLabel: "terminal output",
   welcome: "welcome aboard. type help.",

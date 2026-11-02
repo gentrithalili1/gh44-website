@@ -7,7 +7,7 @@ export const messages = {
   spacewalk: "spacewalk",
   spacewalkLabel: "go on a spacewalk",
   // Engraved on each screen's bezel.
-  screens: { floki: "floki", radar: "radar", radio: "radio", nav: "nav console" },
+  screens: { floki: "floki", radar: "radar", radio: "radio", terminal: "terminal" },
   // Floki says it out loud when the cockpit opens by itself on a first visit.
   flokiWelcome:
     "Welcome aboard, stranger! I'm FLOKI, the captain's German Shepherd and your guide to this universe. Tap Ask FLOKI and let's explore!",

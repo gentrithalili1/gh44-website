@@ -58,7 +58,7 @@ interface CockpitWindowProps {
 }
 
 // Inside the gh44 explorer, full screen: an arched windshield with two struts looks out on the
-// live system, over a graphite console of bezeled screens: the nav console in the middle, Floki on
+// live system, over a graphite console of bezeled screens: the terminal in the middle, Floki on
 // the left, the radar and the radio on the right.
 export function CockpitWindow({
   reveal,
@@ -167,8 +167,8 @@ export function CockpitWindow({
         </button>
       </header>
       <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
-        {/* Desktop: Floki on the left, the nav console in the middle, the radar over the radio on
-            the right. Phones: Floki beside the radar and the radio, the nav console under them. */}
+        {/* Desktop: Floki on the left, the terminal in the middle, the radar over the radio on
+            the right. Phones: Floki beside the radar and the radio, the terminal under them. */}
         <div className="mx-auto grid max-w-[96rem] grid-cols-[7rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
           <ConsoleScreen
             label={messages.screens.floki}
@@ -199,7 +199,7 @@ export function CockpitWindow({
             <CockpitRadio />
           </ConsoleScreen>
           <ConsoleScreen
-            label={messages.screens.nav}
+            label={messages.screens.terminal}
             indicator={<ConsoleLights />}
             className="col-span-2 h-[min(14rem,27dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto"
             screenClassName="flex flex-col"
