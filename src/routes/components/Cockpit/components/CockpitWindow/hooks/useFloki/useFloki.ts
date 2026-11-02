@@ -82,22 +82,25 @@ export function useFloki() {
   // The radio on the visitor's order. Play, next and previous all end with a track playing.
   function getRadioTrack(trackIndex: number): FlokiOutcome {
     const track = music.tracks[trackIndex];
-    if (music.status === "checking" || music.status === "unavailable" || !track) {
+    const { status } = music.getState();
+    if (status === "checking" || status === "unavailable" || !track) {
       return { status: "failed", reason: "radioUnavailable" };
     }
 
     return { status: "radioPlaying", track, trackIndex };
   }
 
+  // Read from the player, not the render: a turn at the mic can outlive the render it began in.
   function getMusicOutcome(action: FlokiMusicAction): FlokiOutcome {
     const count = music.tracks.length;
+    const { trackIndex } = music.getState();
     switch (action) {
       case "play":
-        return getRadioTrack(music.trackIndex);
+        return getRadioTrack(trackIndex);
       case "next":
-        return getRadioTrack(getTrackIndex({ index: music.trackIndex, step: 1, count }));
+        return getRadioTrack(getTrackIndex({ index: trackIndex, step: 1, count }));
       case "previous":
-        return getRadioTrack(getTrackIndex({ index: music.trackIndex, step: -1, count }));
+        return getRadioTrack(getTrackIndex({ index: trackIndex, step: -1, count }));
       case "stop":
         return { status: "radioStopped" };
       default: {

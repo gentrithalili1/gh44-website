@@ -6,9 +6,6 @@ import { messages } from "../../components/CockpitTerminal/messages";
 import type { Floki, FlokiFailureReason, FlokiHearing, FlokiOutcome } from "../useFloki";
 import type { Terminal } from "../useTerminal";
 
-// Two turns in a row with nothing heard end a conversation.
-const MAX_QUIET_TURNS = 2;
-
 type UseFlokiTalkParams = {
   floki: Floki;
   terminal: Terminal;
@@ -65,7 +62,7 @@ function getHearingLine(hearing: FlokiHearing) {
       return undefined;
     case "quiet":
     case "failed":
-      return messages.floki.goingQuiet;
+      return messages.floki.quiet;
     case "denied":
       return messages.floki.micDenied;
     default: {
@@ -105,7 +102,6 @@ export function useFlokiTalk({ floki, terminal, onGo }: UseFlokiTalkParams) {
     if (outcome.status === "failed") return false;
     // Cut off by a newer question, a typed go or closing the cockpit: that decides instead.
     if ((await floki.speak(line)) === "interrupted") return false;
-    // A radio order ends the conversation, so his next turn at the mic doesn't pause it again.
     if (outcome.status === "radioPlaying") {
       await floki.playRadio(outcome.trackIndex);
       return false;
@@ -123,11 +119,10 @@ export function useFlokiTalk({ floki, terminal, onGo }: UseFlokiTalkParams) {
     return false;
   }
 
-  // Talk starts a conversation: Floki listens, answers, and listens again, until the visitor
-  // taps stop, he flies somewhere, or he hears nothing twice in a row. He never listens while
-  // he speaks, so he can't hear himself.
+  // Talk is one question: Floki listens, answers, and closes the mic. A tap while he listens or
+  // speaks stops him. He never listens while he speaks, so he can't hear himself.
   async function talk() {
-    if (conversation === "on") {
+    if (conversation === "on" || floki.status === "listening" || floki.status === "speaking") {
       endConversation();
       floki.stop();
       floki.stopListening();
@@ -143,23 +138,14 @@ export function useFlokiTalk({ floki, terminal, onGo }: UseFlokiTalkParams) {
     if (!floki.hasGreeted && (await floki.greet(messages.floki.spokenGreeting)) === "interrupted") {
       return;
     }
-    let quietTurns = 0;
-    while (isCurrent()) {
-      const hearing = await floki.listen();
-      if (!isCurrent()) return;
-      if (hearing.status === "heard") {
-        quietTurns = 0;
-        terminal.print([{ kind: "visitor", text: hearing.text }]);
-        if (!(await ask(hearing.text))) break;
-        continue;
-      }
-      if (hearing.status !== "denied") quietTurns += 1;
-      if (hearing.status === "denied" || quietTurns >= MAX_QUIET_TURNS) {
-        terminal.print([
-          { kind: "floki", text: getHearingLine(hearing) ?? messages.floki.goingQuiet },
-        ]);
-        break;
-      }
+    const hearing = await floki.listen();
+    if (!isCurrent()) return;
+    if (hearing.status === "heard") {
+      terminal.print([{ kind: "visitor", text: hearing.text }]);
+      await ask(hearing.text);
+    } else {
+      const line = getHearingLine(hearing);
+      if (line) terminal.print([{ kind: "floki", text: line }]);
     }
     if (isCurrent()) endConversation();
   }

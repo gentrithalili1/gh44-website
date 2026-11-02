@@ -156,7 +156,16 @@ function createMusicPlayer(tracks: readonly Track[]) {
       player
         .play()
         .then(() => fade({ audio: player, to: VOLUME, durationMs: FADE_IN_MS }))
-        .catch((error: unknown) => setStatus(isAutoplayBlocked(error) ? "ready" : "unavailable"));
+        .catch((error: unknown) => {
+          // iOS can refuse to resume outside a tap (after the mic had the audio): the radio
+          // comes back on the visitor's next tap instead.
+          if (!isAutoplayBlocked(error)) {
+            setStatus("unavailable");
+            return;
+          }
+          setStatus("ready");
+          waitForGesture();
+        });
     }, RELEASE_DELAY_MS);
   }
 
@@ -274,5 +283,7 @@ export function useMusic() {
     playTrack: player.playTrack,
     hold: player.hold,
     release: player.release,
+    // The player's state right now, for code that runs after an await (Floki's orders).
+    getState: player.getSnapshot,
   };
 }

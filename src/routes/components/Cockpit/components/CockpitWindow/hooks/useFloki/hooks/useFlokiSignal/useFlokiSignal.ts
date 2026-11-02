@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
 import type { Playback } from "../useFlokiVoice";
+import { setAudioSessionType } from "../useFlokiVoice/utils/audioSession";
 import { getSignalLevel } from "./utils/signalLevel";
 
 const FFT_SIZE = 512;
@@ -49,8 +50,10 @@ export function useFlokiSignal() {
   }
 
   // Starts the audio graph. Call it straight from a click or key press: browsers only let audio
-  // start from one.
+  // start from one. iOS picks the session when the graph starts: in "playback", the silent
+  // switch doesn't mute Floki.
   function prepare() {
+    setAudioSessionType("playback");
     getSignal()
       ?.context.resume()
       .catch(() => {

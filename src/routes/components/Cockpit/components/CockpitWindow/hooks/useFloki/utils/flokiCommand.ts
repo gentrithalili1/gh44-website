@@ -24,9 +24,9 @@ const PLAY_PATTERN =
 const STOP_PATTERN =
   /^(?:please |floki )*(?:(?:stop|pause|mute|turn off|kill)(?: the| this| that)? (?:music|radio|song|track|tunes)|pause|mute|turn off)(?: please)?$/;
 const NEXT_PATTERN =
-  /^(?:please |floki )*(?:next|skip)(?: the| this| that)?(?: song| track| one)?(?: please)?$/;
+  /^(?:please |floki )*(?:play |go to )?(?:the )?(?:next|skip)(?: the| this| that)?(?: song| track| one)?(?: please)?$/;
 const PREVIOUS_PATTERN =
-  /^(?:please |floki )*(?:previous(?: song| track| one)?|(?:last|go back a|back a) (?:song|track))(?: please)?$/;
+  /^(?:please |floki )*(?:play |go to )?(?:the )?(?:previous(?: song| track| one)?|(?:last|go back a|back a) (?:song|track))(?: please)?$/;
 const TRACK_PATTERN = /^(?:please |floki )*(?:play|put on)(?: me| us)? (.+?)(?: on the radio)?$/;
 
 export type FlokiMusicAction = "play" | "stop" | "next" | "previous";
