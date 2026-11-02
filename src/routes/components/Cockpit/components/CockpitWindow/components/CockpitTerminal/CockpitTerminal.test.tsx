@@ -28,7 +28,7 @@ describe("CockpitTerminal", () => {
       ui: <TerminalWithScreen isLocked={false} shouldFocus onGo={vi.fn()} />,
     });
 
-    expect(getOutput().getByText(/floki online/)).toBeInTheDocument();
+    expect(getOutput().getByText("floki here, how can I help?")).toBeInTheDocument();
   });
 
   it("hands floki <question> to floki", async () => {

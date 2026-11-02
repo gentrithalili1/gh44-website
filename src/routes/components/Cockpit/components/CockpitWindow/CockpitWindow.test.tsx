@@ -234,7 +234,7 @@ describe("CockpitWindow's Floki", () => {
       expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/work" })),
     );
     expect(getSpokenLines(fetchStub)).toEqual([
-      "[[ flˈoʊki ]] here. Where are we going?",
+      "[[ flˈoʊki ]] here, how can I help?",
       "course set for work.",
     ]);
   });
@@ -367,7 +367,7 @@ describe("CockpitWindow's Floki", () => {
 
     await waitFor(() =>
       expect(getSpokenLines(fetchStub)[0]).toMatch(
-        /^Welcome aboard\. I'm \[\[ flˈoʊki \]\], the captain's/,
+        /^Welcome aboard, stranger! I'm \[\[ flˈoʊki \]\], the captain's/,
       ),
     );
     await user.click(screen.getByRole("button", { name: "ask floki" }));
