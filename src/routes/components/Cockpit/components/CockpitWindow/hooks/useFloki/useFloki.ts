@@ -61,9 +61,15 @@ export function useFloki() {
   // Bumped by stop, so an answer still on its way is dropped.
   const questionIdRef = useRef(0);
 
+  // Starts the audio graph and unlocks the voice's element: only a click or key press can.
+  function prepareAudio() {
+    signal.prepare();
+    voice.prepare();
+  }
+
   async function ask(question: string): Promise<FlokiOutcome> {
     if (requestStatus === "thinking") return { status: "failed", reason: "busy" };
-    signal.prepare();
+    prepareAudio();
     // A new question cuts him off.
     voice.stop();
     const command = getFlokiCommand(question);
@@ -117,7 +123,7 @@ export function useFloki() {
   // that opened the mic closes it.
   async function listen(): Promise<FlokiHearing> {
     if (listening.status === "listening") return { status: "failed" };
-    signal.prepare();
+    prepareAudio();
     voice.stop();
     void signal.openMic();
     const hearing = await listening.listen();
@@ -128,7 +134,7 @@ export function useFloki() {
 
   // Says a line out loud; from a click it also starts the audio graph in time.
   function speak(text: string) {
-    signal.prepare();
+    prepareAudio();
     return voice.speak(text);
   }
 

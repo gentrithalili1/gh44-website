@@ -47,7 +47,7 @@ export function stubFloki({
 
   const players: FakeVoiceAudio[] = [];
   class FakeVoiceAudio extends EventTarget {
-    src: string;
+    #src = "";
     paused = true;
     pause = vi.fn(() => {
       this.paused = true;
@@ -57,11 +57,21 @@ export function stubFloki({
       if (shouldFinishSpeaking) queueMicrotask(() => this.dispatchEvent(new Event("ended")));
     });
 
+    // A source given here is the silent clip that unlocks the voice on a tap, not a line.
     constructor(src = "") {
       super();
-      this.src = src;
-      // Only Floki's lines: other players on the page (the radio) are not his.
-      if (src.startsWith("data:audio")) players.push(this);
+      this.#src = src;
+    }
+
+    get src() {
+      return this.#src;
+    }
+
+    // Only Floki's lines: other players on the page (the radio) are not his. One element can
+    // play many lines; it counts once.
+    set src(src: string) {
+      this.#src = src;
+      if (src.startsWith("data:audio") && !players.includes(this)) players.push(this);
     }
   }
   vi.stubGlobal("Audio", FakeVoiceAudio);
