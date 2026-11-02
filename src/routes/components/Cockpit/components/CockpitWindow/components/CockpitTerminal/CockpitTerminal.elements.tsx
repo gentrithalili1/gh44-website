@@ -1,6 +1,6 @@
 import { messages } from "./messages";
 
-// "nav>" before each command, like "floki>" and "you>" before what they say.
+// "gh44-explorer>" before each command, like "floki>" and "you>" before what they say.
 export function TerminalPrompt() {
   return <span className="whitespace-nowrap text-blue">{messages.prompt}</span>;
 }

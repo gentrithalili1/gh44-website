@@ -24,7 +24,7 @@ interface CockpitTerminalProps {
   onGo: (destination: Destination) => void;
 }
 
-// The nav console on the center screen, the ship's command line. Every destination it prints is a
+// The terminal on the center screen, the ship's command line. Every destination it prints is a
 // link: clicking one runs `go` for it.
 export function CockpitTerminal({
   terminal,

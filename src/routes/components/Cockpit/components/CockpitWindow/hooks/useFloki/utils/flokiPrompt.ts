@@ -1,3 +1,4 @@
+import { TRACKS } from "#/routes/hooks/useMusic/utils/tracks";
 import { DESTINATIONS } from "#/utils/destinations";
 import { PLANETS } from "#/utils/planets";
 import { isCurrentRole, ROLES } from "#/utils/roles";
@@ -51,5 +52,6 @@ export function getFlokiPrompt({ humor }: { humor: number }) {
     ...PLANETS.map(getPlanetLine),
     "Getting around: click a planet or its label, press Cmd+K (Ctrl+K) or click the ship to open this cockpit, or type in the cockpit terminal. Terminal commands:",
     ...commands,
+    `The ship's radio: the visitor says play, stop the music, next, previous or play <track>, and it happens without you. If they ask for music in other words, tell them those words. Tracks: ${TRACKS.map(({ title, artist }) => `${title} by ${artist}`).join(", ")}.`,
   ].join("\n");
 }
