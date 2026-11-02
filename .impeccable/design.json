@@ -1,0 +1,604 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T20:43:20+00:00",
+  "title": "Design System: gh44.dev",
+  "extensions": {
+    "colorMeta": {
+      "ink-violet-dark": {
+        "role": "primary",
+        "displayName": "Ink Violet (dark theme)",
+        "canonical": "#bba8d9",
+        "tonalRamp": [
+          "oklch(15% 0.018 302)",
+          "oklch(26% 0.032 302)",
+          "oklch(38% 0.045 302)",
+          "oklch(49% 0.059 302)",
+          "oklch(61% 0.071 302)",
+          "oklch(72% 0.057 302)",
+          "oklch(84% 0.044 302)",
+          "oklch(95% 0.030 302)"
+        ]
+      },
+      "ink-violet-light": {
+        "role": "primary",
+        "displayName": "Ink Violet (light theme)",
+        "canonical": "#6f58a0",
+        "tonalRamp": [
+          "oklch(15% 0.028 297)",
+          "oklch(26% 0.050 297)",
+          "oklch(38% 0.071 297)",
+          "oklch(49% 0.093 297)",
+          "oklch(61% 0.111 297)",
+          "oklch(72% 0.090 297)",
+          "oklch(84% 0.068 297)",
+          "oklch(95% 0.047 297)"
+        ]
+      },
+      "sage-dark": {
+        "role": "secondary",
+        "displayName": "Sage (dark theme)",
+        "canonical": "#b8c5ac",
+        "tonalRamp": [
+          "oklch(15% 0.009 130)",
+          "oklch(26% 0.016 130)",
+          "oklch(38% 0.023 130)",
+          "oklch(49% 0.031 130)",
+          "oklch(61% 0.037 130)",
+          "oklch(72% 0.030 130)",
+          "oklch(84% 0.023 130)",
+          "oklch(95% 0.016 130)"
+        ]
+      },
+      "sage-light": {
+        "role": "secondary",
+        "displayName": "Sage (light theme)",
+        "canonical": "#5e7350",
+        "tonalRamp": [
+          "oklch(15% 0.015 133)",
+          "oklch(26% 0.026 133)",
+          "oklch(38% 0.037 133)",
+          "oklch(49% 0.048 133)",
+          "oklch(61% 0.058 133)",
+          "oklch(72% 0.047 133)",
+          "oklch(84% 0.036 133)",
+          "oklch(95% 0.024 133)"
+        ]
+      },
+      "amber-dark": {
+        "role": "secondary",
+        "displayName": "Amber (dark theme)",
+        "canonical": "#ddbe8e",
+        "tonalRamp": [
+          "oklch(15% 0.018 78)",
+          "oklch(26% 0.032 78)",
+          "oklch(38% 0.046 78)",
+          "oklch(49% 0.059 78)",
+          "oklch(61% 0.072 78)",
+          "oklch(72% 0.058 78)",
+          "oklch(84% 0.044 78)",
+          "oklch(95% 0.030 78)"
+        ]
+      },
+      "amber-light": {
+        "role": "secondary",
+        "displayName": "Amber (light theme)",
+        "canonical": "#8c6a2e",
+        "tonalRamp": [
+          "oklch(15% 0.022 79)",
+          "oklch(26% 0.039 79)",
+          "oklch(38% 0.056 79)",
+          "oklch(49% 0.073 79)",
+          "oklch(61% 0.087 79)",
+          "oklch(72% 0.071 79)",
+          "oklch(84% 0.054 79)",
+          "oklch(95% 0.037 79)"
+        ]
+      },
+      "slate-blue-dark": {
+        "role": "tertiary",
+        "displayName": "Slate Blue (dark theme)",
+        "canonical": "#9fb7cc",
+        "tonalRamp": [
+          "oklch(15% 0.010 245)",
+          "oklch(26% 0.018 245)",
+          "oklch(38% 0.025 245)",
+          "oklch(49% 0.033 245)",
+          "oklch(61% 0.040 245)",
+          "oklch(72% 0.032 245)",
+          "oklch(84% 0.024 245)",
+          "oklch(95% 0.017 245)"
+        ]
+      },
+      "slate-blue-light": {
+        "role": "tertiary",
+        "displayName": "Slate Blue (light theme)",
+        "canonical": "#3f6a8c",
+        "tonalRamp": [
+          "oklch(15% 0.018 244)",
+          "oklch(26% 0.032 244)",
+          "oklch(38% 0.046 244)",
+          "oklch(49% 0.060 244)",
+          "oklch(61% 0.072 244)",
+          "oklch(72% 0.058 244)",
+          "oklch(84% 0.044 244)",
+          "oklch(95% 0.030 244)"
+        ]
+      },
+      "terracotta-dark": {
+        "role": "tertiary",
+        "displayName": "Terracotta (dark theme)",
+        "canonical": "#e49b80",
+        "tonalRamp": [
+          "oklch(15% 0.024 41)",
+          "oklch(26% 0.042 41)",
+          "oklch(38% 0.061 41)",
+          "oklch(49% 0.079 41)",
+          "oklch(61% 0.095 41)",
+          "oklch(72% 0.077 41)",
+          "oklch(84% 0.058 41)",
+          "oklch(95% 0.040 41)"
+        ]
+      },
+      "terracotta-light": {
+        "role": "tertiary",
+        "displayName": "Terracotta (light theme)",
+        "canonical": "#a9502f",
+        "tonalRamp": [
+          "oklch(15% 0.032 40)",
+          "oklch(26% 0.056 40)",
+          "oklch(38% 0.080 40)",
+          "oklch(49% 0.104 40)",
+          "oklch(61% 0.125 40)",
+          "oklch(72% 0.101 40)",
+          "oklch(84% 0.077 40)",
+          "oklch(95% 0.053 40)"
+        ]
+      },
+      "rose-dark": {
+        "role": "tertiary",
+        "displayName": "Rose (dark theme)",
+        "canonical": "#d99aa6",
+        "tonalRamp": [
+          "oklch(15% 0.019 7)",
+          "oklch(26% 0.034 7)",
+          "oklch(38% 0.048 7)",
+          "oklch(49% 0.063 7)",
+          "oklch(61% 0.076 7)",
+          "oklch(72% 0.061 7)",
+          "oklch(84% 0.047 7)",
+          "oklch(95% 0.032 7)"
+        ]
+      },
+      "rose-light": {
+        "role": "tertiary",
+        "displayName": "Rose (light theme)",
+        "canonical": "#a4506a",
+        "tonalRamp": [
+          "oklch(15% 0.029 2)",
+          "oklch(26% 0.050 2)",
+          "oklch(38% 0.072 2)",
+          "oklch(49% 0.094 2)",
+          "oklch(61% 0.113 2)",
+          "oklch(72% 0.091 2)",
+          "oklch(84% 0.069 2)",
+          "oklch(95% 0.048 2)"
+        ]
+      },
+      "seafoam-dark": {
+        "role": "tertiary",
+        "displayName": "Seafoam (dark theme)",
+        "canonical": "#9cc4c0",
+        "tonalRamp": [
+          "oklch(15% 0.011 189)",
+          "oklch(26% 0.019 189)",
+          "oklch(38% 0.027 189)",
+          "oklch(49% 0.035 189)",
+          "oklch(61% 0.042 189)",
+          "oklch(72% 0.034 189)",
+          "oklch(84% 0.026 189)",
+          "oklch(95% 0.018 189)"
+        ]
+      },
+      "seafoam-light": {
+        "role": "tertiary",
+        "displayName": "Seafoam (light theme)",
+        "canonical": "#3d7a75",
+        "tonalRamp": [
+          "oklch(15% 0.016 188)",
+          "oklch(26% 0.028 188)",
+          "oklch(38% 0.040 188)",
+          "oklch(49% 0.053 188)",
+          "oklch(61% 0.063 188)",
+          "oklch(72% 0.051 188)",
+          "oklch(84% 0.039 188)",
+          "oklch(95% 0.027 188)"
+        ]
+      },
+      "signal-red-dark": {
+        "role": "tertiary",
+        "displayName": "Signal Red (dark theme)",
+        "canonical": "#eb6f6f",
+        "tonalRamp": [
+          "oklch(15% 0.039 22)",
+          "oklch(26% 0.068 22)",
+          "oklch(38% 0.097 22)",
+          "oklch(49% 0.127 22)",
+          "oklch(61% 0.152 22)",
+          "oklch(72% 0.123 22)",
+          "oklch(84% 0.094 22)",
+          "oklch(95% 0.064 22)"
+        ]
+      },
+      "signal-red-light": {
+        "role": "tertiary",
+        "displayName": "Signal Red (light theme)",
+        "canonical": "#c23b32",
+        "tonalRamp": [
+          "oklch(15% 0.043 28)",
+          "oklch(26% 0.076 28)",
+          "oklch(38% 0.109 28)",
+          "oklch(49% 0.142 28)",
+          "oklch(61% 0.171 28)",
+          "oklch(72% 0.138 28)",
+          "oklch(84% 0.105 28)",
+          "oklch(95% 0.072 28)"
+        ]
+      },
+      "editor-night": {
+        "role": "neutral",
+        "displayName": "Editor Night",
+        "canonical": "#1e1f22",
+        "tonalRamp": [
+          "oklch(15% 0.001 271)",
+          "oklch(26% 0.003 271)",
+          "oklch(38% 0.004 271)",
+          "oklch(49% 0.005 271)",
+          "oklch(61% 0.006 271)",
+          "oklch(72% 0.005 271)",
+          "oklch(84% 0.004 271)",
+          "oklch(95% 0.002 271)"
+        ]
+      },
+      "editor-night-raised": {
+        "role": "neutral",
+        "displayName": "Editor Night Raised",
+        "canonical": "#25262a",
+        "tonalRamp": [
+          "oklch(15% 0.002 275)",
+          "oklch(26% 0.003 275)",
+          "oklch(38% 0.005 275)",
+          "oklch(49% 0.006 275)",
+          "oklch(61% 0.007 275)",
+          "oklch(72% 0.006 275)",
+          "oklch(84% 0.005 275)",
+          "oklch(95% 0.003 275)"
+        ]
+      },
+      "editor-night-popover": {
+        "role": "neutral",
+        "displayName": "Editor Night Popover",
+        "canonical": "#2b2d30",
+        "tonalRamp": [
+          "oklch(15% 0.002 258)",
+          "oklch(26% 0.003 258)",
+          "oklch(38% 0.004 258)",
+          "oklch(49% 0.005 258)",
+          "oklch(61% 0.006 258)",
+          "oklch(72% 0.005 258)",
+          "oklch(84% 0.004 258)",
+          "oklch(95% 0.003 258)"
+        ]
+      },
+      "editor-night-text": {
+        "role": "neutral",
+        "displayName": "Editor Night Text",
+        "canonical": "#dfe1e5",
+        "tonalRamp": [
+          "oklch(15% 0.001 265)",
+          "oklch(26% 0.003 265)",
+          "oklch(38% 0.004 265)",
+          "oklch(49% 0.005 265)",
+          "oklch(61% 0.006 265)",
+          "oklch(72% 0.005 265)",
+          "oklch(84% 0.004 265)",
+          "oklch(95% 0.002 265)"
+        ]
+      },
+      "editor-night-muted-text": {
+        "role": "neutral",
+        "displayName": "Editor Night Muted Text",
+        "canonical": "#a8abb2",
+        "tonalRamp": [
+          "oklch(15% 0.003 267)",
+          "oklch(26% 0.005 267)",
+          "oklch(38% 0.007 267)",
+          "oklch(49% 0.009 267)",
+          "oklch(61% 0.010 267)",
+          "oklch(72% 0.008 267)",
+          "oklch(84% 0.006 267)",
+          "oklch(95% 0.004 267)"
+        ]
+      },
+      "editor-night-rule": {
+        "role": "neutral",
+        "displayName": "Editor Night Rule",
+        "canonical": "#414349",
+        "tonalRamp": [
+          "oklch(15% 0.003 271)",
+          "oklch(26% 0.005 271)",
+          "oklch(38% 0.007 271)",
+          "oklch(49% 0.009 271)",
+          "oklch(61% 0.010 271)",
+          "oklch(72% 0.008 271)",
+          "oklch(84% 0.006 271)",
+          "oklch(95% 0.004 271)"
+        ]
+      },
+      "warm-paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "#faf7f3",
+        "tonalRamp": [
+          "oklch(15% 0.002 75)",
+          "oklch(26% 0.003 75)",
+          "oklch(38% 0.004 75)",
+          "oklch(49% 0.005 75)",
+          "oklch(61% 0.006 75)",
+          "oklch(72% 0.005 75)",
+          "oklch(84% 0.004 75)",
+          "oklch(95% 0.003 75)"
+        ]
+      },
+      "warm-paper-raised": {
+        "role": "neutral",
+        "displayName": "Warm Paper Raised",
+        "canonical": "#f2ece5",
+        "tonalRamp": [
+          "oklch(15% 0.003 72)",
+          "oklch(26% 0.005 72)",
+          "oklch(38% 0.007 72)",
+          "oklch(49% 0.009 72)",
+          "oklch(61% 0.011 72)",
+          "oklch(72% 0.009 72)",
+          "oklch(84% 0.007 72)",
+          "oklch(95% 0.005 72)"
+        ]
+      },
+      "warm-paper-text": {
+        "role": "neutral",
+        "displayName": "Warm Paper Text",
+        "canonical": "#2b2d30",
+        "tonalRamp": [
+          "oklch(15% 0.002 258)",
+          "oklch(26% 0.003 258)",
+          "oklch(38% 0.004 258)",
+          "oklch(49% 0.005 258)",
+          "oklch(61% 0.006 258)",
+          "oklch(72% 0.005 258)",
+          "oklch(84% 0.004 258)",
+          "oklch(95% 0.003 258)"
+        ]
+      },
+      "warm-paper-muted-text": {
+        "role": "neutral",
+        "displayName": "Warm Paper Muted Text",
+        "canonical": "#5f6269",
+        "tonalRamp": [
+          "oklch(15% 0.003 267)",
+          "oklch(26% 0.005 267)",
+          "oklch(38% 0.007 267)",
+          "oklch(49% 0.010 267)",
+          "oklch(61% 0.012 267)",
+          "oklch(72% 0.009 267)",
+          "oklch(84% 0.007 267)",
+          "oklch(95% 0.005 267)"
+        ]
+      },
+      "warm-paper-rule": {
+        "role": "neutral",
+        "displayName": "Warm Paper Rule",
+        "canonical": "#d2c4b6",
+        "tonalRamp": [
+          "oklch(15% 0.006 67)",
+          "oklch(26% 0.011 67)",
+          "oklch(38% 0.016 67)",
+          "oklch(49% 0.020 67)",
+          "oklch(61% 0.025 67)",
+          "oklch(72% 0.020 67)",
+          "oklch(84% 0.015 67)",
+          "oklch(95% 0.010 67)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The page h1 (text-intro), one per page: home greeting, section headings, 404."
+      },
+      "logo": {
+        "displayName": "Logo",
+        "purpose": "The gh44 wordmark in the header only."
+      },
+      "statement": {
+        "displayName": "Statement",
+        "purpose": "Lead text under the h1, max 34ch."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Reserved for in-page section headings; not used yet."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Menu items."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default running text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Lowercase mono contact links."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Menu sheet only; page content is flat."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.33, 1, 0.68, 1)",
+        "purpose": "Page transitions and greeting entrance/exit."
+      },
+      {
+        "name": "ease-sheet",
+        "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "Menu sheet slide, 200ms."
+      },
+      {
+        "name": "page-exit",
+        "value": "150ms",
+        "purpose": "Fade out and 8px down offset."
+      },
+      {
+        "name": "page-enter",
+        "value": "300ms",
+        "purpose": "Fade in, rise 8px."
+      },
+      {
+        "name": "greeting-cycle",
+        "value": "5s (1s entrance), 800ms exit",
+        "purpose": "Home greeting rotation and logo accent tick."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "40rem"
+      },
+      {
+        "name": "md",
+        "value": "48rem"
+      },
+      {
+        "name": "lg",
+        "value": "64rem"
+      },
+      {
+        "name": "container",
+        "value": "72rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Icon Button",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "Ghost header button for theme toggle and menu.",
+      "html": "<button class=\"ds-icon-btn\" aria-label=\"Open menu\"><svg width=\"28\" height=\"28\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h16\"/><path d=\"M4 18h16\"/><path d=\"M4 6h16\"/></svg></button>",
+      "css": ".ds-icon-btn { display:inline-flex; align-items:center; justify-content:center; width:3rem; height:3rem; border:1px solid transparent; border-radius:var(--radius, 0.5rem); background:transparent; color:var(--foreground); cursor:pointer; transition:all 150ms; } .ds-icon-btn:hover { background:var(--muted); } .ds-icon-btn:focus-visible { outline:none; border-color:var(--ring); box-shadow:0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-icon-btn:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Contact Link",
+      "kind": "custom",
+      "refersTo": "contact-link",
+      "description": "Lowercase mono link with a quiet underline.",
+      "html": "<a class=\"ds-contact-link\" href=\"#\">github</a>",
+      "css": ".ds-contact-link { font-family:'Lilex Variable', ui-monospace, monospace; font-size:1rem; text-transform:lowercase; color:var(--muted-foreground); text-decoration:underline; text-decoration-color:var(--border); text-underline-offset:4px; border-radius:calc(var(--radius, 0.5rem) * 0.6); transition:color 150ms, text-decoration-color 150ms; } .ds-contact-link:hover { color:var(--foreground); text-decoration-color:currentColor; } .ds-contact-link:focus-visible { color:var(--foreground); outline:2px solid var(--ring); outline-offset:4px; }"
+    },
+    {
+      "name": "Menu Item",
+      "kind": "nav",
+      "refersTo": "menu-item",
+      "description": "Menu sheet link; icon takes the section accent on hover and when active.",
+      "html": "<nav><a class=\"ds-menu-item\" href=\"#\" data-status=\"active\"><svg class=\"ds-menu-icon\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"/></svg>Work experience</a><a class=\"ds-menu-item\" href=\"#\"><svg class=\"ds-menu-icon\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/></svg>gh44-theme</a></nav>",
+      "css": ".ds-menu-item { display:flex; align-items:center; gap:0.75rem; padding:0.625rem 0.75rem; border-radius:calc(var(--radius, 0.5rem) * 1.4); font-family:'IBM Plex Sans Variable', ui-sans-serif, sans-serif; font-size:1.125rem; font-weight:500; color:var(--muted-foreground); text-decoration:none; transition:color 150ms, background-color 150ms; } .ds-menu-item:hover, .ds-menu-item[data-status=active] { background:var(--muted); color:var(--foreground); } .ds-menu-item:hover .ds-menu-icon, .ds-menu-item[data-status=active] .ds-menu-icon { color:var(--success); } .ds-menu-icon { transition:color 150ms; } .ds-menu-item:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }"
+    },
+    {
+      "name": "Site Logo",
+      "kind": "custom",
+      "refersTo": "logo",
+      "description": "gh44 wordmark; the 44 takes the section accent.",
+      "html": "<a class=\"ds-logo\" href=\"#\">gh<span class=\"ds-logo-accent\">44</span></a>",
+      "css": ".ds-logo { font-family:'Lilex Variable', ui-monospace, monospace; font-size:3.125rem; font-weight:700; line-height:1.1; letter-spacing:-0.025em; color:var(--foreground); text-decoration:none; } .ds-logo-accent { color:var(--primary); transition:color 1s ease-out; } .ds-logo:hover .ds-logo-accent { color:var(--warning); } .ds-logo:focus-visible { outline:2px solid var(--ring); outline-offset:4px; }"
+    },
+    {
+      "name": "Display Heading",
+      "kind": "custom",
+      "refersTo": "display",
+      "description": "The one h1 per page, in the section accent.",
+      "html": "<h1 class=\"ds-display\">Work experience</h1>",
+      "css": ".ds-display { margin:0; font-family:'Lilex Variable', ui-monospace, monospace; font-size:clamp(2.75rem, 1rem + 7vw, 6rem); font-weight:700; line-height:1.05; letter-spacing:-0.035em; color:var(--success); text-wrap:balance; }"
+    },
+    {
+      "name": "Statement with Copy Email",
+      "kind": "custom",
+      "refersTo": "statement",
+      "description": "Lead text; the email copies on click and turns sage when copied.",
+      "html": "<p class=\"ds-statement\"><span>Senior Software Engineer</span><span class=\"ds-statement-sub\">Write to me at <button type=\"button\" class=\"ds-copy-email\">hello@example.com</button></span></p>",
+      "css": ".ds-statement { margin:0; max-width:34ch; font-family:'IBM Plex Sans Variable', ui-sans-serif, sans-serif; font-size:clamp(1.5rem, 1.1rem + 1.75vw, 2.25rem); line-height:1.4; letter-spacing:-0.01em; color:var(--foreground); text-wrap:pretty; } .ds-statement > span { display:block; } .ds-statement-sub { font-size:0.75em; } .ds-copy-email { font:inherit; color:var(--foreground); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-decoration-color:var(--border); text-decoration-thickness:2px; text-underline-offset:0.3em; border-radius:calc(var(--radius, 0.5rem) * 0.6); transition:color 150ms, text-decoration-color 150ms; } .ds-copy-email:hover { text-decoration-color:currentColor; } .ds-copy-email:focus-visible { outline:2px solid var(--ring); outline-offset:4px; } .ds-copy-email:active { color:var(--success); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lit Terminal",
+    "overview": "The site reads like a calm code editor at night, or a warm sheet of paper by day. Large type does the work: a mono greeting in Lilex fills the first viewport, a sans statement in IBM Plex Sans sits under it, and almost nothing else competes. Color behaves like syntax highlighting: neutrals carry the page, and one accent per section lights up a word, an icon or the logo's \"44\".\n\nDensity is low. Pages are a single left-aligned column inside a 72rem container, with generous vertical space and no cards, panels or decoration. The interface stays quiet and exact: ghost icon buttons, underlined mono links, muted text that brightens on hover. Motion is short and soft, and it always respects reduced-motion settings.\n\nEvery color, font and radius comes from gh44-theme. The site is the theme's live demo, so it never uses a value outside it.",
+    "keyCharacteristics": [
+      "Two themes, light (warm paper) and dark (editor night), following the system setting by default.",
+      "Mono display type (Lilex) for the greeting, headings and logo; IBM Plex Sans for statements and UI.",
+      "One accent per section: gh44-brain violet, work sage, gh44-theme amber.",
+      "Flat surfaces; depth only on the slide-in menu sheet.",
+      "Short fade-and-rise page transitions, blur-in greeting rotation."
+    ],
+    "rules": [
+      {
+        "name": "The One Section, One Accent Rule",
+        "body": "A section page uses only its own accent (`SECTIONS[id].textClassName`), on its `h1`, its menu icon and the logo \"44\". Don't mix section accents on one page.",
+        "section": "colors"
+      },
+      {
+        "name": "The Syntax Highlight Rule",
+        "body": "Accent color marks a word or icon, never a large surface. Backgrounds stay neutral.",
+        "section": "colors"
+      },
+      {
+        "name": "The Token-Only Rule",
+        "body": "Every color is a gh44-theme token (`text-primary`, `bg-muted`, ...). No raw hex in components.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Speaks First Rule",
+        "body": "Lilex is for the `h1`, the logo and short labels. Running text is always Plex.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Display Rule",
+        "body": "One `text-intro` heading per page.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Page Rule",
+        "body": "Page content never casts a shadow. Depth is reserved for overlays (the menu sheet).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use gh44-theme tokens for every color, font and radius.",
+      "Do give each page one `text-intro` `h1` in Lilex, colored with its section accent.",
+      "Do keep page content in a single left-aligned column with 2rem gaps and text capped near 34ch.",
+      "Do keep controls quiet: ghost buttons, muted text that brightens to foreground on hover.",
+      "Do make motion short (150 to 300ms for UI, longer only for the greeting) and respect reduced motion.",
+      "Do check every change in both light and dark themes."
+    ],
+    "donts": [
+      "Don't fill large surfaces with an accent color.",
+      "Don't use Signal Red for anything but errors, or in the logo rotation.",
+      "Don't add shadows, cards or panels to page content.",
+      "Don't set running text in Lilex.",
+      "Don't mix section accents on one page."
+    ]
+  }
+}
