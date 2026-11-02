@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlanetIdRouteRouteImport } from './routes/$planetId/route'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AudioFileRouteImport } from './routes/audio.$file'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AudioFileRoute = AudioFileRouteImport.update({
+  id: '/audio/$file',
+  path: '/audio/$file',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$planetId': typeof PlanetIdRouteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/audio/$file': typeof AudioFileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$planetId': typeof PlanetIdRouteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/audio/$file': typeof AudioFileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$planetId': typeof PlanetIdRouteRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/audio/$file': typeof AudioFileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$planetId' | '/sitemap.xml'
+  fullPaths: '/' | '/$planetId' | '/sitemap.xml' | '/audio/$file'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$planetId' | '/sitemap.xml'
-  id: '__root__' | '/' | '/$planetId' | '/sitemap.xml'
+  to: '/' | '/$planetId' | '/sitemap.xml' | '/audio/$file'
+  id: '__root__' | '/' | '/$planetId' | '/sitemap.xml' | '/audio/$file'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PlanetIdRouteRoute: typeof PlanetIdRouteRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AudioFileRoute: typeof AudioFileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/audio/$file': {
+      id: '/audio/$file'
+      path: '/audio/$file'
+      fullPath: '/audio/$file'
+      preLoaderRoute: typeof AudioFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PlanetIdRouteRoute: PlanetIdRouteRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AudioFileRoute: AudioFileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
