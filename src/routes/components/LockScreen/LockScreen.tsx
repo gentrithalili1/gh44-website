@@ -52,7 +52,7 @@ export function LockScreen({ children }: LockScreenProps) {
             autoFocus
             aria-invalid={hasError}
             aria-describedby={hasError ? ERROR_ID : undefined}
-            className="rounded-md border border-rule bg-background px-3 py-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="rounded-md border border-rule bg-background px-3 py-2 text-base text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           />
         </label>
         {hasError ? (

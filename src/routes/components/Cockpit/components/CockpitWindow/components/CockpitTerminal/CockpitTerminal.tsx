@@ -194,12 +194,14 @@ export function CockpitTerminal({
                   autoCapitalize="off"
                   spellCheck={false}
                   enterKeyHint="go"
-                  className="w-full min-w-0 bg-transparent text-transparent caret-transparent outline-none selection:bg-terracotta/30"
+                  // iOS zooms into inputs under 16px: on phones the input is 16px scaled to 75%,
+                  // the terminal's 12px, laid over the drawn text.
+                  className="absolute top-0 left-0 h-[133.334%] w-[133.334%] min-w-0 origin-top-left scale-75 bg-transparent text-base text-transparent caret-transparent outline-none selection:bg-terracotta/30 md:h-full md:w-full md:scale-100 md:[font-size:inherit]"
                 />
                 {/* What was typed, drawn again with a block cursor at the caret. */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre"
+                  className="pointer-events-none min-h-lh min-w-0 flex-1 overflow-hidden whitespace-pre"
                 >
                   {beforeCaret}
                   {isLocked ? underCaret : <TerminalCursor>{underCaret}</TerminalCursor>}
