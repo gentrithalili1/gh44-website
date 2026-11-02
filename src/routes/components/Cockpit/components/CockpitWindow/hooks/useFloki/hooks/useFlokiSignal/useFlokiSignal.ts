@@ -63,6 +63,12 @@ export function useFlokiSignal() {
   // that never started gives undefined, and the line plays on its own audio element.
   async function playVoice(audioUrl: string): Promise<Playback | undefined> {
     const signal = signalRef.current;
+    // The mic can knock the graph to "interrupted" on iOS: try to bring it back first.
+    if (signal && signal.context.state !== "running") {
+      await signal.context.resume().catch(() => {
+        // Still interrupted: the line plays on the voice's audio element.
+      });
+    }
     if (signal?.context.state !== "running") return undefined;
     try {
       const base64 = audioUrl.slice(audioUrl.indexOf(",") + 1);
