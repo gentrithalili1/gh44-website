@@ -21,6 +21,13 @@ describe("getFlokiPrompt", () => {
     expect(prompt).toContain("nickname Granko");
   });
 
+  it("knows how the visitor works the radio, and what it plays", () => {
+    const prompt = getFlokiPrompt({ humor: 60 });
+
+    expect(prompt).toContain("stop the music, next, previous or play <track>");
+    expect(prompt).toContain("s.t.a.y. by hans zimmer");
+  });
+
   it("carries the humor setting", () => {
     expect(getFlokiPrompt({ humor: 25 })).toContain("Humor setting: 25%.");
   });

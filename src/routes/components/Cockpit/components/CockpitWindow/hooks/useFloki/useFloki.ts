@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { useMusic } from "#/routes/hooks/useMusic";
+import { getTrackIndex, type Track } from "#/routes/hooks/useMusic/utils/tracks";
 import { DESTINATIONS, type Destination } from "#/utils/destinations";
 
 import { askFloki, MAX_TURN_LENGTH } from "./askFloki";
@@ -7,7 +9,7 @@ import { type FlokiHearing, useFlokiListening } from "./hooks/useFlokiListening"
 import { useFlokiSignal } from "./hooks/useFlokiSignal";
 import { useFlokiVoice } from "./hooks/useFlokiVoice";
 import type { AskFlokiOutcome, FlokiTurn } from "./types";
-import { getFlokiCommand } from "./utils/flokiCommand";
+import { type FlokiMusicAction, getFlokiCommand } from "./utils/flokiCommand";
 
 // Floki's humor setting until the visitor changes it, in percent.
 export const DEFAULT_HUMOR = 80;
@@ -18,13 +20,20 @@ export const MAX_QUESTIONS = 10;
 
 export type FlokiStatus = "idle" | "listening" | "thinking" | "speaking";
 
-export type FlokiFailureReason = "busy" | "questionLimit" | "rateLimited" | "unavailable";
+export type FlokiFailureReason =
+  | "busy"
+  | "questionLimit"
+  | "rateLimited"
+  | "unavailable"
+  | "radioUnavailable";
 
 export type FlokiOutcome =
   | { status: "answered"; say: string; destination: Destination | undefined }
   // A plain order, carried out without asking the model.
   | { status: "navigating"; destination: Destination }
   | { status: "humorSet"; humor: number }
+  | { status: "radioPlaying"; track: Track }
+  | { status: "radioStopped" }
   // Stopped while he was thinking: nothing to say or do.
   | { status: "cancelled" }
   | { status: "failed"; reason: FlokiFailureReason };
@@ -44,8 +53,9 @@ async function requestAnswer({
   }
 }
 
-// Floki, the explorer's onboard computer: carries out plain orders at once, takes a question,
-// keeps the conversation while the cockpit is open, and returns what he says and where to fly.
+// Floki, the explorer's onboard computer: carries out plain orders at once (flying, his humor,
+// the radio), takes a question, keeps the conversation while the cockpit is open, and returns
+// what he says and where to fly.
 // The component prints, speaks and flies.
 export type Floki = ReturnType<typeof useFloki>;
 
@@ -53,6 +63,7 @@ export function useFloki() {
   const signal = useFlokiSignal();
   const voice = useFlokiVoice({ playVoice: signal.playVoice });
   const listening = useFlokiListening();
+  const music = useMusic();
   const [requestStatus, setRequestStatus] = useState<"idle" | "thinking">("idle");
   const [turns, setTurns] = useState<readonly FlokiTurn[]>([]);
   const [humor, setHumor] = useState(DEFAULT_HUMOR);
@@ -67,18 +78,53 @@ export function useFloki() {
     voice.prepare();
   }
 
+  // The radio on the visitor's order. Play, next and previous all end with a track playing.
+  async function playRadio(trackIndex: number): Promise<FlokiOutcome> {
+    if (music.status === "checking" || music.status === "unavailable") {
+      return { status: "failed", reason: "radioUnavailable" };
+    }
+    const track = music.tracks[trackIndex];
+    if (!track) return { status: "failed", reason: "radioUnavailable" };
+    await music.playTrack(trackIndex);
+
+    return { status: "radioPlaying", track };
+  }
+
+  async function runMusicAction(action: FlokiMusicAction): Promise<FlokiOutcome> {
+    const count = music.tracks.length;
+    switch (action) {
+      case "play":
+        return playRadio(music.trackIndex);
+      case "next":
+        return playRadio(getTrackIndex({ index: music.trackIndex, step: 1, count }));
+      case "previous":
+        return playRadio(getTrackIndex({ index: music.trackIndex, step: -1, count }));
+      case "stop":
+        music.stop();
+        return { status: "radioStopped" };
+      default: {
+        const unknownAction: never = action;
+        return unknownAction;
+      }
+    }
+  }
+
   async function ask(question: string): Promise<FlokiOutcome> {
     if (requestStatus === "thinking") return { status: "failed", reason: "busy" };
     prepareAudio();
     // A new question cuts him off.
     voice.stop();
-    const command = getFlokiCommand(question);
+    const command = getFlokiCommand({ text: question, tracks: music.tracks });
     switch (command?.kind) {
       case "go":
         return { status: "navigating", destination: command.destination };
       case "humor":
         setHumor(command.humor);
         return { status: "humorSet", humor: command.humor };
+      case "music":
+        return runMusicAction(command.action);
+      case "track":
+        return playRadio(command.trackIndex);
       case undefined:
         break;
       default: {

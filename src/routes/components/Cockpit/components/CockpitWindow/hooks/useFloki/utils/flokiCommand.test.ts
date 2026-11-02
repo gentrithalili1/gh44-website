@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 
+import { TRACKS } from "#/routes/hooks/useMusic/utils/tracks";
+
 import { getFlokiCommand } from "./flokiCommand";
 
+function getCommand(text: string) {
+  return getFlokiCommand({ text, tracks: TRACKS });
+}
+
 function getDestinationName(text: string) {
-  const command = getFlokiCommand(text);
+  const command = getCommand(text);
   return command?.kind === "go" ? command.destination.name : undefined;
 }
 
@@ -22,7 +28,7 @@ describe("getFlokiCommand", () => {
   it.each(["what is gh44-brain", "take me somewhere fun", "show me saturn and jupiter", "go"])(
     "leaves %j to the model",
     (text) => {
-      expect(getFlokiCommand(text)).toBeUndefined();
+      expect(getCommand(text)).toBeUndefined();
     },
   );
 
@@ -31,6 +37,37 @@ describe("getFlokiCommand", () => {
     ["Humour setting 75 percent", 75],
     ["floki set your humor to 250", 100],
   ])("sets the humor for %j", (text, humor) => {
-    expect(getFlokiCommand(text)).toEqual({ kind: "humor", humor });
+    expect(getCommand(text)).toEqual({ kind: "humor", humor });
   });
+
+  it.each([
+    ["play", "play"],
+    ["Floki, play some music please", "play"],
+    ["turn on the radio", "play"],
+    ["stop the music", "stop"],
+    ["pause", "stop"],
+    ["turn off the radio", "stop"],
+    ["next song", "next"],
+    ["skip this track", "next"],
+    ["previous track", "previous"],
+    ["go back a song", "previous"],
+  ])("works the radio for %j", (text, action) => {
+    expect(getCommand(text)).toEqual({ kind: "music", action });
+  });
+
+  it.each([
+    ["play stay", 1],
+    ["Play S.T.A.Y.", 1],
+    ["put on the starship avalon", 3],
+    ["play crystalline by thomas newman", 0],
+  ])("picks the track for %j", (text, trackIndex) => {
+    expect(getCommand(text)).toEqual({ kind: "track", trackIndex });
+  });
+
+  it.each(["play something by thomas newman", "play something chill", "stop", "what song is this"])(
+    "leaves %j to the model",
+    (text) => {
+      expect(getCommand(text)).toBeUndefined();
+    },
+  );
 });

@@ -52,6 +52,10 @@ export const messages = {
     courseSet: (name: string) => `course set for ${name}.`,
     humorSet: (humor: number) =>
       `humor setting: ${humor}%. ${humor > 80 ? "you asked for it." : "noted."}`,
+    radioPlaying: ({ title, artist }: { title: string; artist: string }) =>
+      `on the radio: ${title} by ${artist}.`,
+    radioStopped: "radio off.",
+    radioUnavailable: "radio's down. no tracks on board.",
     questionLimit:
       "that's my limit for this trip. reopen the cockpit to start over, or use the terminal.",
     busy: "still thinking. one question at a time.",

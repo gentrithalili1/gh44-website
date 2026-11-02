@@ -25,6 +25,8 @@ function getFlokiFailure(reason: FlokiFailureReason) {
       return messages.floki.rateLimited;
     case "unavailable":
       return messages.floki.unavailable;
+    case "radioUnavailable":
+      return messages.floki.radioUnavailable;
     default: {
       const unknownReason: never = reason;
       return unknownReason;
@@ -41,6 +43,10 @@ function getFlokiLine(outcome: FlokiOutcome) {
       return messages.floki.courseSet(outcome.destination.name);
     case "humorSet":
       return messages.floki.humorSet(outcome.humor);
+    case "radioPlaying":
+      return messages.floki.radioPlaying(outcome.track);
+    case "radioStopped":
+      return messages.floki.radioStopped;
     case "cancelled":
       return undefined;
     case "failed":
