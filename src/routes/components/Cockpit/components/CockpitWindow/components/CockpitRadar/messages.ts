@@ -1,7 +1,10 @@
 export const messages = {
-  label: ({ visited, total }: { visited: number; total: number }) =>
+  label: "radar",
+  scopeLabel: ({ visited, total }: { visited: number; total: number }) =>
     `radar: ${visited} of ${total} destinations visited`,
-  title: "radar",
-  visited: ({ visited, total }: { visited: number; total: number }) =>
-    `${visited}/${total} visited`,
+  route: "route",
+  next: "next",
+  visited: "visited",
+  progress: ({ visited, total }: { visited: number; total: number }) => `${visited}/${total}`,
+  allVisited: "all visited",
 } as const;

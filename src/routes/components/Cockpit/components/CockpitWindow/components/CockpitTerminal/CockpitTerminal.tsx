@@ -3,15 +3,13 @@ import { useRef, useState } from "react";
 
 import type { Destination } from "#/utils/destinations";
 
+import type { Terminal, TerminalLine } from "../../hooks/useTerminal";
 import {
   FlokiPrompt,
   TerminalCursor,
-  TerminalLights,
   TerminalPrompt,
-  TerminalTitleBar,
   VisitorPrompt,
 } from "./CockpitTerminal.elements";
-import type { Terminal, TerminalLine } from "../../hooks/useTerminal";
 import { messages } from "./messages";
 import { getLineSegments } from "./utils/terminalLinks";
 
@@ -26,8 +24,8 @@ interface CockpitTerminalProps {
   onGo: (destination: Destination) => void;
 }
 
-// A zsh window in the gh44 Warp theme on the console's center screen. Every destination it prints
-// is a link: clicking one runs `go` for it.
+// The nav console on the center screen, the ship's command line. Every destination it prints is a
+// link: clicking one runs `go` for it.
 export function CockpitTerminal({
   terminal,
   isLocked,
@@ -158,12 +156,7 @@ export function CockpitTerminal({
   }
 
   return (
-    <section
-      aria-label={messages.title}
-      className="flex max-h-[min(20rem,38dvh)] w-full min-h-0 flex-col overflow-hidden rounded-lg border border-rule bg-night shadow-[0_18px_40px_-16px_rgb(0_0_0/0.7)] md:h-full md:max-h-none"
-    >
-      <TerminalTitleBar />
-      <TerminalLights />
+    <section aria-label={messages.title} className="flex min-h-0 w-full flex-1 flex-col">
       {/* Reversed, so the newest line stays in view as lines arrive. A click anywhere in the
           window types at the prompt, like a terminal. */}
       <div

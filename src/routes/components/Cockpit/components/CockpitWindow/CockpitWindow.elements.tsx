@@ -60,19 +60,99 @@ export function CockpitWindshield() {
   );
 }
 
+// The glass over every screen: faint scanlines, and a sage glow from the top like a lit tube.
+const SCREEN_GLASS_STYLE = {
+  backgroundImage: [
+    "repeating-linear-gradient(to bottom, transparent 0 2px, rgb(255 255 255 / 0.02) 2px 3px)",
+    "radial-gradient(130% 80% at 50% 0%, color-mix(in oklab, var(--sage) 6%, transparent), transparent 70%)",
+    "linear-gradient(160deg, rgb(255 255 255 / 0.035), transparent 35%)",
+  ].join(", "),
+} as const;
+
+// A countersunk screw holding the bezel, its slot at an angle.
+function BezelScrew() {
+  return (
+    <span className="relative size-1.5 shrink-0 rounded-full bg-bg-subtle shadow-[inset_0_1px_1px_rgb(0_0_0/0.7),0_1px_0_rgb(255_255_255/0.06)] after:absolute after:inset-x-px after:top-1/2 after:h-px after:-translate-y-1/2 after:rotate-45 after:bg-fg-faint" />
+  );
+}
+
+// The screen's power lamp.
+export function PowerLamp() {
+  return <span className="size-1 shrink-0 rounded-full bg-sage shadow-[0_0_5px_var(--sage)]" />;
+}
+
+type IndicatorLight = { id: string; color: string; blink?: string };
+
+// Status lamps in the palette's hues; a few blink slowly, out of step.
+const LIGHTS = [
+  { id: "l1", color: "bg-sage" },
+  { id: "l2", color: "bg-sage", blink: "animate-light-blink [animation-delay:-0.6s]" },
+  { id: "l3", color: "bg-fg-faint" },
+  { id: "l4", color: "bg-ochre" },
+  { id: "l5", color: "bg-blue" },
+  { id: "l6", color: "bg-lavender", blink: "animate-light-blink [animation-delay:-2.1s]" },
+  { id: "l7", color: "bg-fg-faint" },
+  { id: "l8", color: "bg-terracotta", blink: "animate-light-blink [animation-delay:-1.3s]" },
+] as const satisfies readonly IndicatorLight[];
+
+// A row of status lamps for the busiest screen.
+export function ConsoleLights() {
+  return (
+    <span className="flex shrink-0 gap-1">
+      {LIGHTS.map((light: IndicatorLight) => (
+        <span
+          key={light.id}
+          className={`h-1 w-2 rounded-full opacity-80 ${light.color} ${light.blink ?? ""}`}
+        />
+      ))}
+    </span>
+  );
+}
+
 interface ConsoleScreenProps {
-  // Where the screen sits in the console.
+  // Engraved on the bezel above the screen.
+  label: string;
+  // Right of the label: a power lamp unless the screen has its own lights.
+  indicator?: React.ReactNode;
+  // Where the bezel sits in the console.
   className?: string;
+  // The screen's own layout and padding.
+  screenClassName?: string;
   children: React.ReactNode;
 }
 
-// A small screen set into the console.
-export function ConsoleScreen({ className = "", children }: ConsoleScreenProps) {
+// A screen set into the console: a raised bezel with its label plate and screws, and the glass
+// sunk into it.
+export function ConsoleScreen({
+  label,
+  indicator = <PowerLamp />,
+  className = "",
+  screenClassName = "p-3",
+  children,
+}: ConsoleScreenProps) {
   return (
     <div
-      className={`min-h-0 min-w-0 rounded-md border border-border-subtle bg-night p-3 shadow-[inset_0_2px_10px_rgb(0_0_0/0.35)] ${className}`}
+      className={`flex min-h-0 min-w-0 flex-col rounded-lg bg-surface px-1 pb-1 shadow-[inset_0_1px_0_rgb(255_255_255/0.07),0_1px_0_rgb(0_0_0/0.5),0_12px_22px_-14px_rgb(0_0_0/0.9)] ${className}`}
     >
-      {children}
+      <div
+        aria-hidden="true"
+        className="flex h-5 shrink-0 items-center gap-1.5 px-1 text-[0.5625rem] tracking-kicker text-faint md:h-6 md:text-[0.625rem]"
+      >
+        <BezelScrew />
+        <span className="min-w-0 flex-1 truncate">{label}</span>
+        {indicator}
+        <BezelScrew />
+      </div>
+      <div
+        className={`relative min-h-0 flex-1 overflow-hidden rounded-md bg-night shadow-[inset_0_2px_12px_rgb(0_0_0/0.55)] ring-1 ring-black/50 [text-shadow:0_0_10px_color-mix(in_oklab,var(--sage)_16%,transparent)] ${screenClassName}`}
+      >
+        <span
+          aria-hidden="true"
+          style={SCREEN_GLASS_STYLE}
+          className="pointer-events-none absolute inset-0"
+        />
+        {children}
+      </div>
     </div>
   );
 }

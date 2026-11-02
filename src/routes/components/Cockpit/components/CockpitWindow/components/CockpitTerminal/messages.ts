@@ -1,9 +1,8 @@
 import { EXPLORER_NAME } from "#/utils/explorer";
 
 export const messages = {
-  title: "gh44@explorer — zsh",
-  // The prompt in parts, each in its own color; it reads "gh44@explorer:~$".
-  prompt: { user: "gh44@explorer", separator: ":", path: "~", symbol: "$" },
+  title: "nav console",
+  prompt: "nav>",
   commandLabel: "command",
   outputLabel: "terminal output",
   welcome: "welcome aboard. type help.",
@@ -45,10 +44,10 @@ export const messages = {
   floki: {
     prompt: "floki>",
     visitorPrompt: "you>",
-    greeting: "floki online. tap talk, or type floki <question>.",
-    spokenGreeting: "Floki online. Where to?",
-    quiet: "didn't catch that. tap talk and try again.",
-    goingQuiet: "going quiet. tap talk when you need me.",
+    greeting: "floki online. tap ask floki, or type floki <question>.",
+    spokenGreeting: "Floki here. Where are we going?",
+    quiet: "didn't catch that. tap ask floki and try again.",
+    goingQuiet: "going quiet. tap ask floki when you need me.",
     micDenied: "no mic access. type floki <question> instead.",
     courseSet: (name: string) => `course set for ${name}.`,
     humorSet: (humor: number) =>

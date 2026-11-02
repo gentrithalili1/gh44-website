@@ -2,13 +2,7 @@ import { useId, useState } from "react";
 
 import { useMusic } from "#/routes/hooks/useMusic";
 
-import {
-  PlaylistTrack,
-  RadioButton,
-  RadioIcon,
-  RadioLevel,
-  RadioTrack,
-} from "./CockpitRadio.elements";
+import { PlaylistTrack, RadioButton, RadioIcon, RadioTrack } from "./CockpitRadio.elements";
 import { messages } from "./messages";
 
 type MusicStatus = ReturnType<typeof useMusic>["status"];
@@ -55,16 +49,8 @@ export function CockpitRadio() {
       aria-label={messages.label}
       className="flex min-w-0 flex-col gap-2 md:min-h-0 md:flex-1 md:gap-2.5"
     >
-      {/* On desktop the radio reads like the other screens: its name top left, the level top right. */}
-      <div
-        aria-hidden="true"
-        className="hidden items-center justify-between text-[0.6875rem] text-muted md:flex"
-      >
-        <span>{messages.label}</span>
-        {statusText === null ? <RadioLevel isPlaying={isPlaying} /> : null}
-      </div>
       {/* Phones: one row. Desktop: the controls centered, what plays under them. */}
-      <div className="flex items-center gap-3 md:flex-col-reverse md:items-stretch md:gap-2">
+      <div className="flex items-center gap-2 md:flex-col-reverse md:items-stretch md:gap-2">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 md:items-center md:text-center">
           {statusText === null ? (
             <RadioTrack
@@ -79,13 +65,16 @@ export function CockpitRadio() {
         </div>
         {statusText === null ? (
           <div className="flex shrink-0 items-center gap-1.5 md:justify-center">
-            <RadioButton
-              aria-label={messages.previousLabel}
-              disabled={!music.hasManyTracks}
-              onClick={music.previous}
-            >
-              <RadioIcon name="previous" />
-            </RadioButton>
+            {/* Phones skip back from the playlist instead, to leave room for the track. */}
+            <span className="hidden md:contents">
+              <RadioButton
+                aria-label={messages.previousLabel}
+                disabled={!music.hasManyTracks}
+                onClick={music.previous}
+              >
+                <RadioIcon name="previous" />
+              </RadioButton>
+            </span>
             <RadioButton
               aria-label={isPlaying ? messages.stopLabel : messages.playLabel(music.track)}
               onClick={handlePlayStop}
