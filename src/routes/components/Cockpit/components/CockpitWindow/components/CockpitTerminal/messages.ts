@@ -44,8 +44,8 @@ export const messages = {
   floki: {
     prompt: "floki>",
     visitorPrompt: "you>",
-    greeting: "floki online. tap ask floki, or type floki <question>.",
-    spokenGreeting: "Floki here. Where are we going?",
+    greeting: "floki here, how can I help?",
+    spokenGreeting: "Floki here, how can I help?",
     quiet: "didn't catch that. tap ask floki and try again.",
     goingQuiet: "going quiet. tap ask floki when you need me.",
     micDenied: "no mic access. type floki <question> instead.",
