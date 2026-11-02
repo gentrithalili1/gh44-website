@@ -114,7 +114,7 @@ describe("useExplorer", () => {
     expect(result.current.cockpitTripPlanetId).toBeUndefined();
   });
 
-  it("greets a session's first visit with the cockpit, once", () => {
+  it("greets a page load with the cockpit, once", () => {
     const { result } = renderExplorer();
 
     act(() => result.current.greetVisitor());
@@ -125,7 +125,7 @@ describe("useExplorer", () => {
     expect(result.current.cockpit).toEqual({ status: "closed" });
   });
 
-  it("keeps a session out of the cockpit after it greeted, even on a fresh page", () => {
+  it("greets again on a fresh page in the same session", () => {
     const first = renderExplorer();
     act(() => first.result.current.greetVisitor());
     first.unmount();
@@ -133,7 +133,11 @@ describe("useExplorer", () => {
     const second = renderExplorer();
     act(() => second.result.current.greetVisitor());
 
-    expect(second.result.current.cockpit).toEqual({ status: "closed" });
+    expect(second.result.current.cockpit).toEqual({
+      status: "open",
+      reveal: "instant",
+      isGreeting: true,
+    });
   });
 
   it("boards the greeting cockpit for real once the visitor uses it, or opens it", () => {
@@ -147,7 +151,6 @@ describe("useExplorer", () => {
       isGreeting: false,
     });
 
-    sessionStorage.clear();
     const other = renderExplorer();
     act(() => other.result.current.greetVisitor());
     act(() => other.result.current.openCockpit());

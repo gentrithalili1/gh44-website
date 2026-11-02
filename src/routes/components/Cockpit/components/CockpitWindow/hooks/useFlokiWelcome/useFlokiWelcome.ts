@@ -15,7 +15,7 @@ type UseFlokiWelcomeParams = {
   text: string;
 };
 
-// Floki welcomes the visitor out loud when the cockpit opens by itself on their first visit.
+// Floki welcomes the visitor out loud when the cockpit opens by itself as the site loads.
 // Browsers block sound before the first click or key press; then he speaks on that one.
 export function useFlokiWelcome({ floki, isGreeting, text }: UseFlokiWelcomeParams) {
   const [shouldWelcome] = useState(isGreeting);
