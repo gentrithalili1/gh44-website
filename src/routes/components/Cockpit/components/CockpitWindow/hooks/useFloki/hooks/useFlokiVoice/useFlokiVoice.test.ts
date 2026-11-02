@@ -169,4 +169,21 @@ describe("useFlokiVoice", () => {
 
     expect(speech).toBe("spoken");
   });
+
+  it("unlocks on iOS at the first tap after a try without one", async () => {
+    stubFloki({ replies: [] });
+    const ios = stubIosAudio();
+    const { result } = renderHook(() => useFlokiVoice());
+
+    // The cockpit opened by itself: no tap yet, so iOS refuses.
+    await act(async () => result.current.prepare());
+    await act(async () => ios.tap(() => result.current.prepare()));
+
+    let speech;
+    await act(async () => {
+      speech = await result.current.speak("Welcome aboard.");
+    });
+
+    expect(speech).toBe("spoken");
+  });
 });

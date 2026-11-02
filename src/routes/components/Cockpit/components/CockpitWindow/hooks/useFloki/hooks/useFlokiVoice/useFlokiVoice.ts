@@ -86,7 +86,9 @@ export function useFlokiVoice({ playVoice }: UseFlokiVoiceParams = {}) {
     const audio = new Audio(SILENT_WAV);
     elementRef.current = audio;
     audio.play().catch(() => {
-      // Refused: lines fall back to the audio graph, or stay on screen.
+      // Refused (no gesture yet): the next gesture tries again. Meanwhile lines fall back to the
+      // audio graph, or stay on screen.
+      if (elementRef.current === audio) elementRef.current = undefined;
     });
   }
 
