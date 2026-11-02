@@ -213,6 +213,7 @@ export function useFloki() {
     greet,
     stopSpeaking: voice.stop,
     stop,
+    prepareAudio,
     getLevel: signal.getLevel,
   };
 }
