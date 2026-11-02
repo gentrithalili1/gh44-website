@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
 
+import { useSpaceMode } from "#/hooks/useSpaceMode";
+
 import { StaticSystem } from "./components/StaticSystem";
-import { useSpaceMode } from "./hooks/useSpaceMode";
 
 // three.js loads only once the browser can show the scene; if it fails to load, the static
 // system stays.

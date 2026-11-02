@@ -2,6 +2,8 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach, vi } from "vitest";
 
+import { LOCK_STORAGE_KEY } from "#/routes/components/LockScreen";
+
 vi.mock("@tanstack/react-start", async (importOriginal) => ({
   ...(await importOriginal<object>()),
   ...(await import("./serverFn")),
@@ -29,9 +31,12 @@ window.matchMedia = (query: string) =>
 beforeEach(() => {
   // The root layout mounts the TanStack devtools in dev; tests render the production layout.
   vi.stubEnv("DEV", false);
+  // Every test visits as a browser that already entered the lock screen's password.
+  localStorage.setItem(LOCK_STORAGE_KEY, "true");
 });
 
 afterEach(() => {
   cleanup();
   vi.unstubAllEnvs();
+  localStorage.clear();
 });
