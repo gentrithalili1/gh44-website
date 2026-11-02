@@ -202,7 +202,7 @@ describe("Cockpit", () => {
     await openCockpit(user);
 
     await runCommand({ user, command: "whoami" });
-    expect(getOutput()).toHaveTextContent("gh44@explorer:~$ whoami");
+    expect(getOutput()).toHaveTextContent("nav> whoami");
     const output = within(getOutput());
     for (const line of ["gentrit halili", "senior frontend engineer", "pristina, kosovo"]) {
       expect(output.getByText(line)).toBeInTheDocument();

@@ -5,11 +5,15 @@ import type { CockpitReveal } from "#/hooks/useExplorer";
 import type { Destination } from "#/utils/destinations";
 import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 
-import { AstronautIcon, CockpitWindshield, ConsoleScreen } from "./CockpitWindow.elements";
+import {
+  AstronautIcon,
+  CockpitWindshield,
+  ConsoleLights,
+  ConsoleScreen,
+} from "./CockpitWindow.elements";
 import { CockpitFloki } from "./components/CockpitFloki";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
-import { CockpitReadout } from "./components/CockpitReadout";
 import { CockpitTerminal } from "./components/CockpitTerminal";
 import { useFloki } from "./hooks/useFloki";
 import { useFlokiTalk } from "./hooks/useFlokiTalk";
@@ -54,8 +58,8 @@ interface CockpitWindowProps {
 }
 
 // Inside the gh44 explorer, full screen: an arched windshield with two struts looks out on the
-// live system, over a graphite console with the terminal on its center screen, a radar and a
-// readout on its side screens, and rows of indicator lights.
+// live system, over a graphite console of bezeled screens: the nav console in the middle, Floki on
+// the left, the radar and the radio on the right.
 export function CockpitWindow({
   reveal,
   isGreeting,
@@ -163,10 +167,14 @@ export function CockpitWindow({
         </button>
       </header>
       <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
-        {/* Desktop: Floki's screen over the radar, the terminal in the middle, the readout over
-            the radio. Phones: Floki beside the radio, the terminal under them, no radar. */}
-        <div className="mx-auto grid max-w-[96rem] grid-cols-[6rem_minmax(0,1fr)] gap-3 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,46rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-10 md:pb-6">
-          <ConsoleScreen className="p-2 md:col-start-1 md:row-start-1 md:h-32 md:p-2.5">
+        {/* Desktop: Floki on the left, the nav console in the middle, the radar over the radio on
+            the right. Phones: Floki beside the radar and the radio, the nav console under them. */}
+        <div className="mx-auto grid max-w-[96rem] grid-cols-[7rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
+          <ConsoleScreen
+            label={messages.screens.floki}
+            className="row-span-2 md:col-start-1 md:row-start-1"
+            screenClassName="flex flex-col p-2 md:p-3"
+          >
             <CockpitFloki
               status={floki.status}
               getLevel={floki.getLevel}
@@ -176,16 +184,26 @@ export function CockpitWindow({
               onTalk={() => void flokiTalk.talk()}
             />
           </ConsoleScreen>
-          <ConsoleScreen className="hidden md:col-start-1 md:row-start-2 md:block">
+          <ConsoleScreen
+            label={messages.screens.radar}
+            className="md:col-start-3 md:row-start-1"
+            screenClassName="p-2 md:p-3"
+          >
             <CockpitRadar />
           </ConsoleScreen>
-          <ConsoleScreen className="hidden md:col-start-3 md:row-start-1 md:block">
-            <CockpitReadout />
-          </ConsoleScreen>
-          <ConsoleScreen className="md:col-start-3 md:row-start-2 md:flex md:flex-col">
+          <ConsoleScreen
+            label={messages.screens.radio}
+            className="md:col-start-3 md:row-start-2"
+            screenClassName="flex flex-col p-2 md:p-3"
+          >
             <CockpitRadio />
           </ConsoleScreen>
-          <div className="col-span-2 flex min-h-0 flex-col md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1">
+          <ConsoleScreen
+            label={messages.screens.nav}
+            indicator={<ConsoleLights />}
+            className="col-span-2 h-[min(14rem,27dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto"
+            screenClassName="flex flex-col"
+          >
             <CockpitTerminal
               terminal={terminal}
               isLocked={isLocked}
@@ -193,7 +211,7 @@ export function CockpitWindow({
               onAsk={(question) => void flokiTalk.ask(question)}
               onGo={handleGo}
             />
-          </div>
+          </ConsoleScreen>
         </div>
       </div>
     </div>

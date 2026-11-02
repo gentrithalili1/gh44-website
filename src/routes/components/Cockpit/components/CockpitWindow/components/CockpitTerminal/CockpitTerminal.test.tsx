@@ -55,7 +55,7 @@ describe("CockpitTerminal", () => {
 
     expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/gh44-theme" }));
     expect(screen.getByRole("log", { name: "terminal output" })).toHaveTextContent(
-      "gh44@explorer:~$ go gh44-theme",
+      "nav> go gh44-theme",
     );
   });
 
@@ -71,11 +71,11 @@ describe("CockpitTerminal", () => {
     expect(link).toHaveAttribute("aria-disabled", "true");
   });
 
-  it("is a zsh window", async () => {
+  it("is the nav console", async () => {
     await renderInRouter({
       ui: <TerminalWithScreen isLocked={false} shouldFocus onGo={vi.fn()} />,
     });
 
-    expect(screen.getByRole("region", { name: "gh44@explorer — zsh" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "nav console" })).toBeInTheDocument();
   });
 });

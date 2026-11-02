@@ -32,7 +32,7 @@ describe("CockpitFloki", () => {
     const onTalk = vi.fn();
     renderFloki({ onTalk });
 
-    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
 
     expect(onTalk).toHaveBeenCalled();
     expect(screen.getByText("your browser transcribes what you say.")).toBeInTheDocument();

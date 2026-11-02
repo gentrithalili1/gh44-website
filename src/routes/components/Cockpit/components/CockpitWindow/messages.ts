@@ -6,7 +6,9 @@ export const messages = {
   // Leaving the cockpit is stepping out of the ship.
   spacewalk: "spacewalk",
   spacewalkLabel: "go on a spacewalk",
+  // Engraved on each screen's bezel.
+  screens: { floki: "floki", radar: "radar", radio: "radio", nav: "nav console" },
   // Floki says it out loud when the cockpit opens by itself on a first visit.
   flokiWelcome:
-    "Welcome aboard the gh44 explorer. I'm Floki, the ship's computer. Tap talk and tell me where to fly.",
+    "Welcome aboard. I'm Floki, the captain's German Shepherd, now with more processing power and fewer walks. Tap ask Floki and tell me where we're going.",
 } as const;

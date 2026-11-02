@@ -225,7 +225,7 @@ describe("CockpitWindow's Floki", () => {
     const onGo = vi.fn();
     await renderInRouter({ ui: <FlokiCockpit onGo={onGo} /> });
 
-    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
 
     expect(await getOutput().findByText(/take me to work/)).toHaveTextContent(
       "you> take me to work",
@@ -233,7 +233,10 @@ describe("CockpitWindow's Floki", () => {
     await waitFor(() =>
       expect(onGo).toHaveBeenCalledWith(expect.objectContaining({ route: "/work" })),
     );
-    expect(getSpokenLines(fetchStub)).toEqual(["Flokee online. Where to?", "course set for work."]);
+    expect(getSpokenLines(fetchStub)).toEqual([
+      "Flokee here. Where are we going?",
+      "course set for work.",
+    ]);
   });
 
   it("keeps listening after each answer, and goes quiet after two silent turns", async () => {
@@ -247,13 +250,13 @@ describe("CockpitWindow's Floki", () => {
     ]);
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
 
-    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
 
     expect(await getOutput().findByText(/going quiet/)).toBeInTheDocument();
     expect(getOutput().getByText(/Gentrit built me\./)).toBeInTheDocument();
     expect(getOutput().getByText(/In Pristina\./)).toBeInTheDocument();
     expect(recognizers).toHaveLength(4);
-    expect(screen.getByRole("button", { name: "talk to floki" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "ask floki" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
@@ -265,12 +268,12 @@ describe("CockpitWindow's Floki", () => {
     const recognizers = stubSpeechRecognition([{ text: "who built you" }]);
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
 
-    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
     await user.click(await screen.findByRole("button", { name: "stop floki" }));
 
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(recognizers).toEqual([]);
-    expect(screen.getByRole("button", { name: "talk to floki" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ask floki" })).toBeInTheDocument();
   });
 
   it("says when the mic is refused", async () => {
@@ -279,7 +282,7 @@ describe("CockpitWindow's Floki", () => {
     stubSpeechRecognition([{ error: "not-allowed" }]);
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
 
-    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
 
     expect(await getOutput().findByText(/no mic access/)).toBeInTheDocument();
   });
@@ -287,7 +290,7 @@ describe("CockpitWindow's Floki", () => {
   it("has no talk button where the browser cannot hear", async () => {
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
 
-    expect(screen.queryByRole("button", { name: "talk to floki" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ask floki" })).not.toBeInTheDocument();
   });
 
   it("doesn't fly when the visitor takes the controls while floki speaks", async () => {
@@ -331,7 +334,7 @@ describe("CockpitWindow's Floki", () => {
     const recognizers = stubSpeechRecognition([{ text: "take me to work" }]);
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
 
-    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
     await user.click(await screen.findByRole("button", { name: "stop floki" }));
 
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -363,11 +366,9 @@ describe("CockpitWindow's Floki", () => {
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} isGreeting /> });
 
     await waitFor(() =>
-      expect(getSpokenLines(fetchStub)[0]).toMatch(
-        /^Welcome aboard the gh44 explorer\. I'm Flokee/,
-      ),
+      expect(getSpokenLines(fetchStub)[0]).toMatch(/^Welcome aboard\. I'm Flokee, the captain's/),
     );
-    await user.click(screen.getByRole("button", { name: "talk to floki" }));
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
 
     await waitFor(() => expect(recognizers.length).toBeGreaterThan(0));
   });
