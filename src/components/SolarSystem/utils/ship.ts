@@ -10,7 +10,7 @@ export const SHIP_ORBIT = { radius: 242, phase: -2.4 } as const;
 const SHIP_ORBIT_SPEED = 0.09;
 
 // The ship is drawn this many times the size of its outline below.
-export const SHIP_SCALE = 1.6;
+export const SHIP_SCALE = 1.92;
 
 // Where the ship is on its orbit (radians) after `time` seconds of the scene clock.
 export function getShipAngle(time: number) {
