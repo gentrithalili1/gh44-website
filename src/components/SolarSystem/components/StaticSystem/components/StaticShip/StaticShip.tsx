@@ -29,7 +29,7 @@ export function StaticShip({ isPlanetOpen }: StaticShipProps) {
         "--y": SHIP_POSITION.y,
         "--ship-size": SHIP_LENGTH * SHIP_SCALE,
       }}
-      className="group absolute top-[calc(50%+var(--y)*var(--space-unit))] left-[calc(50%+var(--x)*var(--space-unit))] size-[max(2.25rem,calc(var(--ship-size)*var(--space-unit)))] -translate-1/2 rounded-full transition-opacity duration-600 ease-space focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground data-[state=faded]:opacity-8 data-[state=faded]:hover:opacity-100 data-[state=faded]:focus-visible:opacity-100"
+      className="group absolute top-[calc(50%+var(--y)*var(--space-unit))] left-[calc(50%+var(--x)*var(--space-unit))] size-[max(2.7rem,calc(var(--ship-size)*var(--space-unit)))] -translate-1/2 rounded-full transition-opacity duration-600 ease-space focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground data-[state=faded]:opacity-8 data-[state=faded]:hover:opacity-100 data-[state=faded]:focus-visible:opacity-100"
     >
       <StaticShipDrawing />
       <span

@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { getSpokenText } from "./spokenText";
 
 describe("getSpokenText", () => {
-  it("says Floki with a light L", () => {
-    expect(getSpokenText("Floki online. floki, FLOKI.")).toBe("Flokee online. Flokee, Flokee.");
+  it("says Floki like the Vikings character, FLOH-kee", () => {
+    expect(getSpokenText("Floki here. floki, FLOKI.")).toBe(
+      "[[ flˈoʊki ]] here. [[ flˈoʊki ]], [[ flˈoʊki ]].",
+    );
   });
 
   it("leaves other words alone", () => {

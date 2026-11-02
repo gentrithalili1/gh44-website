@@ -48,7 +48,7 @@ import { getTrailPuff, PUFF_COUNT } from "./utils/shipTrail";
 gsap.registerPlugin(useGSAP);
 
 // On a phone the ship would be a speck: it never draws shorter than this many pixels.
-const SHIP_MIN_LENGTH_PX = 34;
+const SHIP_MIN_LENGTH_PX = 41;
 // It bobs toward and away from the sun, and rocks a little, slowly.
 const BOB_UNITS = 1.4;
 const BOB_SPEED = 1.1;

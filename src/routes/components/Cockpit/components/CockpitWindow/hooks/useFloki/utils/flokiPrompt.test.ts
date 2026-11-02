@@ -13,6 +13,14 @@ describe("getFlokiPrompt", () => {
     expect(prompt).toContain("- go <destination>: fly to a destination");
   });
 
+  it("knows who he is and who his captain is, without made-up memories", () => {
+    const prompt = getFlokiPrompt({ humor: 60 });
+
+    expect(prompt).toContain("late black German Shepherd");
+    expect(prompt).toContain("You have none of his memories");
+    expect(prompt).toContain("nickname Granko");
+  });
+
   it("carries the humor setting", () => {
     expect(getFlokiPrompt({ humor: 25 })).toContain("Humor setting: 25%.");
   });

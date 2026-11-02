@@ -184,7 +184,7 @@ describe("CockpitRadio", () => {
     await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
     expect(getNowPlaying()).toHaveTextContent("thomas newman - crystalline");
     await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
-    expect(getNowPlaying()).toHaveTextContent("thomas newman - the starship avalon");
+    expect(getNowPlaying()).toHaveTextContent("shkurte fejza - fluturo pellumb");
   });
 
   it("only picks the track while stopped", async () => {
@@ -247,6 +247,7 @@ describe("CockpitRadio", () => {
       "hans zimmer - s.t.a.y.",
       "thomas newman - spacewalk",
       "thomas newman - the starship avalon",
+      "shkurte fejza - fluturo pellumb",
     ]);
     expect(
       within(playlist).getByRole("button", { name: "thomas newman - crystalline" }),

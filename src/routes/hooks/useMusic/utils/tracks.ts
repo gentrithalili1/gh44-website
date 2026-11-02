@@ -17,6 +17,12 @@ export const TRACKS = [
     artist: "thomas newman",
     path: "/audio/the-starship-avalon.mp3",
   },
+  {
+    id: "fluturo-pellumb",
+    title: "fluturo pellumb",
+    artist: "shkurte fejza",
+    path: "/audio/fluturo-pellumb.mp3",
+  },
 ] as const satisfies readonly Track[];
 
 type GetTrackIndexParams = { index: number; step: 1 | -1; count: number };
