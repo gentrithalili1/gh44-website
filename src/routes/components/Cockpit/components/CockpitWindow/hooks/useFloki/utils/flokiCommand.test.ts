@@ -49,6 +49,10 @@ describe("getFlokiCommand", () => {
     ["turn off the radio", "stop"],
     ["next song", "next"],
     ["skip this track", "next"],
+    ["play next", "next"],
+    ["play the next song please", "next"],
+    ["skip song", "next"],
+    ["play the previous one", "previous"],
     ["previous track", "previous"],
     ["go back a song", "previous"],
   ])("works the radio for %j", (text, action) => {

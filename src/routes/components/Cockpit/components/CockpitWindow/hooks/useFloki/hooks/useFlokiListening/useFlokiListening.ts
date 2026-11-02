@@ -7,6 +7,10 @@ const LANGUAGE = "en-US";
 const DENIED_ERRORS: readonly string[] = ["not-allowed", "service-not-allowed"];
 // Errors that only mean nothing was said.
 const QUIET_ERRORS: readonly string[] = ["no-speech", "aborted"];
+// iOS's recognizer sometimes never ends, not even on stop: the turn ends anyway after this long.
+const STOP_GRACE_MS = 600;
+// The longest one turn at the mic may last.
+const MAX_LISTEN_MS = 15_000;
 
 export type FlokiListeningStatus = "unsupported" | "idle" | "listening";
 
@@ -45,14 +49,27 @@ export function useFlokiListening() {
     getRecognitionClass() ? "idle" : "unsupported",
   );
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  // Ends the turn at the mic now, with what was heard so far.
+  const finishRef = useRef<(() => void) | undefined>(undefined);
 
   // Closing the cockpit closes the mic.
   useEffect(() => {
-    return () => recognitionRef.current?.abort();
+    return () => {
+      recognitionRef.current?.abort();
+      finishRef.current?.();
+    };
   }, []);
 
+  // Asks the recognizer to end the turn; one that doesn't is cut off.
   function stop() {
-    recognitionRef.current?.stop();
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+    recognition.stop();
+    setTimeout(() => {
+      if (recognitionRef.current !== recognition) return;
+      recognition.abort();
+      finishRef.current?.();
+    }, STOP_GRACE_MS);
   }
 
   function listen() {
@@ -70,6 +87,17 @@ export function useFlokiListening() {
 
     return new Promise<FlokiHearing>((resolve) => {
       let hearing: FlokiHearing = { status: "quiet" };
+      const timeout = setTimeout(stop, MAX_LISTEN_MS);
+      // Runs once: on the recognizer's end, or when a stop or closing the cockpit cuts it off.
+      function finish() {
+        if (recognitionRef.current !== recognition) return;
+        clearTimeout(timeout);
+        recognitionRef.current = null;
+        finishRef.current = undefined;
+        setStatus("idle");
+        resolve(hearing);
+      }
+      finishRef.current = finish;
       recognition.onresult = (event) => {
         const text = event.results[0]?.[0]?.transcript.trim() ?? "";
         if (text !== "") hearing = { status: "heard", text };
@@ -77,18 +105,13 @@ export function useFlokiListening() {
       recognition.onerror = (event) => {
         hearing = getHearingForError(event.error);
       };
-      recognition.onend = () => {
-        recognitionRef.current = null;
-        setStatus("idle");
-        resolve(hearing);
-      };
+      recognition.onend = finish;
       try {
         recognition.start();
       } catch {
         // Already started elsewhere, or blocked: this turn hears nothing.
-        recognitionRef.current = null;
-        setStatus("idle");
-        resolve({ status: "failed" });
+        hearing = { status: "failed" };
+        finish();
       }
     });
   }

@@ -239,27 +239,48 @@ describe("CockpitWindow's Floki", () => {
     ]);
   });
 
-  it("keeps listening after each answer, and goes quiet after two silent turns", async () => {
+  it("closes the mic once floki has answered", async () => {
     const user = userEvent.setup();
-    stubFloki({ replies: [{ say: "Gentrit built me." }, { say: "In Pristina." }] });
-    const recognizers = stubSpeechRecognition([
-      { text: "who built you" },
-      { text: "where does he live" },
-      { error: "no-speech" },
-      { error: "no-speech" },
-    ]);
+    stubFloki({ replies: [{ say: "Gentrit built me." }] });
+    const recognizers = stubSpeechRecognition([{ text: "who built you" }, { text: "unheard" }]);
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
 
     await user.click(screen.getByRole("button", { name: "ask floki" }));
 
-    expect(await getOutput().findByText(/going quiet/)).toBeInTheDocument();
-    expect(getOutput().getByText(/Gentrit built me\./)).toBeInTheDocument();
-    expect(getOutput().getByText(/In Pristina\./)).toBeInTheDocument();
-    expect(recognizers).toHaveLength(4);
-    expect(screen.getByRole("button", { name: "ask floki" })).toHaveAttribute(
-      "aria-pressed",
-      "false",
+    expect(await getOutput().findByText(/Gentrit built me\./)).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "ask floki" })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      ),
     );
+    expect(recognizers).toHaveLength(1);
+  });
+
+  it("says when it heard nothing, and closes the mic", async () => {
+    const user = userEvent.setup();
+    stubFloki({ replies: [{ say: "unused" }] });
+    const recognizers = stubSpeechRecognition([{ error: "no-speech" }]);
+    await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
+
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
+
+    expect(await getOutput().findByText(/didn't catch that/)).toBeInTheDocument();
+    expect(recognizers).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "ask floki" })).toBeInTheDocument();
+  });
+
+  it("stops a mic that never ends by itself, with one tap", async () => {
+    const user = userEvent.setup();
+    stubFloki({ replies: [{ say: "unused" }] });
+    stubSpeechRecognition([{ stuck: true }]);
+    await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
+
+    await user.click(screen.getByRole("button", { name: "ask floki" }));
+    await user.click(await screen.findByRole("button", { name: "stop floki" }));
+
+    expect(await screen.findByRole("button", { name: "ask floki" })).toBeInTheDocument();
+    expect(getOutput().queryByText(/going quiet/)).not.toBeInTheDocument();
   });
 
   it("ends the conversation on stop", async () => {

@@ -96,7 +96,8 @@ export function getModelRequests(fetchStub: ReturnType<typeof stubFloki>["fetchS
     .map(([, init]) => String(init?.body));
 }
 
-type Hearing = { text: string } | { error: string };
+// A stuck turn never ends, not even on stop or abort, as iOS's recognizer sometimes does.
+type Hearing = { text: string } | { error: string } | { stuck: true };
 
 // Stands in for the browser's speech recognition: each turn at the mic hears the next entry,
 // words or an error, then ends. Returns the recognizers it made.
@@ -112,11 +113,20 @@ export function stubSpeechRecognition(hearings: readonly Hearing[]) {
     onresult: ((event: { results: { transcript: string }[][] }) => void) | null = null;
     onerror: ((event: { error: string }) => void) | null = null;
     onend: (() => void) | null = null;
-    stop = vi.fn(() => this.onend?.());
-    abort = vi.fn(() => this.onend?.());
+    isStuck = false;
+    stop = vi.fn(() => {
+      if (!this.isStuck) this.onend?.();
+    });
+    abort = vi.fn(() => {
+      if (!this.isStuck) this.onend?.();
+    });
     start = vi.fn(() => {
       const hearing = hearings[Math.min(hearingIndex, hearings.length - 1)];
       hearingIndex += 1;
+      if (hearing && "stuck" in hearing) {
+        this.isStuck = true;
+        return;
+      }
       queueMicrotask(() => {
         if (hearing && "text" in hearing)
           this.onresult?.({ results: [[{ transcript: hearing.text }]] });

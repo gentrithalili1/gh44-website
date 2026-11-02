@@ -47,7 +47,6 @@ export const messages = {
     greeting: "floki here, how can I help?",
     spokenGreeting: "Floki here, how can I help?",
     quiet: "didn't catch that. tap ask floki and try again.",
-    goingQuiet: "going quiet. tap ask floki when you need me.",
     micDenied: "no mic access. type floki <question> instead.",
     courseSet: (name: string) => `course set for ${name}.`,
     humorSet: (humor: number) =>

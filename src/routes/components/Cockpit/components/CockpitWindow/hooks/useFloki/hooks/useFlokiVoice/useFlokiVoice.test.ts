@@ -186,4 +186,22 @@ describe("useFlokiVoice", () => {
 
     expect(speech).toBe("spoken");
   });
+
+  it("starts the audio graph in the playback session, so iOS's silent switch doesn't mute it", async () => {
+    stubFloki({ replies: [] });
+    const ios = stubIosAudio();
+    const session = { type: "auto" };
+    vi.stubGlobal("navigator", { ...navigator, audioSession: session });
+    const { result } = renderHook(() => useVoiceWithSignal());
+    const [typeAtStart] = await act(async () => {
+      let type = "";
+      ios.tap(() => {
+        result.current.signal.prepare();
+        type = session.type;
+      });
+      return [type];
+    });
+
+    expect(typeAtStart).toBe("playback");
+  });
 });
