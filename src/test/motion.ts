@@ -1,4 +1,4 @@
-import { act } from "@testing-library/react";
+import { act, fireEvent } from "@testing-library/react";
 import { vi } from "vitest";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -40,4 +40,10 @@ export function fakeFrames() {
 
 export function playFor(ms: number) {
   act(() => vi.advanceTimersByTime(ms));
+}
+
+// Ends a CSS animation on `element`. jsdom has no AnimationEvent, so React listens for the
+// prefixed event there.
+export function endAnimation(element: Element) {
+  fireEvent(element, new Event("webkitAnimationEnd", { bubbles: true }));
 }

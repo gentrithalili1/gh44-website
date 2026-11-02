@@ -1,9 +1,10 @@
 import { Canvas } from "@react-three/fiber";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
 import { messages } from "#/components/SolarSystem/messages";
 import { getShipPose, SHIP_ORBIT } from "#/components/SolarSystem/utils/ship";
+import { useBoot } from "#/hooks/useBoot";
 import { useExplorer } from "#/hooks/useExplorer";
 import { SOLAR_SYSTEM } from "#/utils/planets";
 
@@ -20,7 +21,6 @@ import { usePageVisible } from "./hooks/usePageVisible";
 import type { SceneState } from "./types";
 import { PHONE_MAX_WIDTH } from "./utils/sceneMath";
 
-const HOME_PATH = "/";
 // Phones get a lower pixel ratio, which keeps the scene smooth.
 const PHONE_MAX_DPR = 1.5;
 const DESKTOP_MAX_DPR = 2;
@@ -41,8 +41,8 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   // The labels render into this list once it exists.
   const [labelList, setLabelList] = useState<HTMLUListElement | null>(null);
   const explorer = useExplorer();
+  const boot = useBoot();
   const navigate = useNavigate();
-  const pathname = useLocation({ select: (location) => location.pathname });
   const sceneStateRef = useRef<SceneState>({
     frameStep: 0,
     planetAngles: new Map(),
@@ -55,19 +55,13 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isSystemFaded = openPlanetId !== undefined || isCockpitOpen;
   const maxDpr = window.innerWidth < PHONE_MAX_WIDTH ? PHONE_MAX_DPR : DESKTOP_MAX_DPR;
 
-  // The scene up at home greets the session's first visit from the cockpit. Reduced motion and
-  // the static system have no scene, so no greeting.
-  function handleSceneRef(scene: HTMLDivElement | null) {
-    if (scene && pathname === HOME_PATH) explorer.greetVisitor();
-  }
-
   function handlePointerMissed() {
     if (openPlanetId === undefined || explorer.cockpit.status !== "closed") return;
     void navigate({ to: "/" });
   }
 
   return (
-    <div ref={handleSceneRef} className="absolute inset-0 isolate overflow-hidden">
+    <div className="absolute inset-0 isolate overflow-hidden">
       <Canvas
         // No tone mapping: palette colors as in styles.css, where the light falls fully.
         flat
@@ -75,6 +69,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         frameloop={isPageVisible ? "always" : "never"}
         gl={{ alpha: true, antialias: true }}
         camera={{ fov: CAMERA_FOV, near: 1, far: CAMERA_FAR }}
+        onCreated={boot.markSceneReady}
         onPointerMissed={handlePointerMissed}
         aria-hidden="true"
       >

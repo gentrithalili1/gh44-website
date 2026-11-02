@@ -44,6 +44,32 @@
   --color-red-vivid: var(--red-vivid);
 }
 
+/* Boot animations that read a per-element variable (--chars: a log line's length, --orbit: a
+   ring's index). Inline, so each class carries the value and the variable resolves on the
+   element, not on :root where it does not exist. */
+@theme inline {
+  --animate-boot-type: boot-type calc(var(--chars) * 10ms) steps(var(--chars), end) both;
+  --animate-boot-orbit: boot-orbit 500ms var(--ease-space) calc(var(--orbit) * 50ms) both;
+
+  @keyframes boot-type {
+    from {
+      width: 0;
+    }
+    to {
+      width: calc(var(--chars) * 1ch);
+    }
+  }
+
+  @keyframes boot-orbit {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
 @theme {
   /* Below this width the planet panel is a bottom sheet. */
   --breakpoint-md: 45rem;
@@ -71,6 +97,10 @@
   --animate-light-blink: light-blink 3.2s ease-in-out infinite;
   --animate-radar-sweep: radar-sweep 4s linear infinite;
   --animate-radio-level: radio-level 700ms var(--ease-space) infinite alternate;
+  /* The pre-flight boot (BootScreen). */
+  --animate-boot-status: boot-status 160ms var(--ease-space) 60ms both;
+  --animate-boot-ignite: boot-ignite 1100ms var(--ease-space) both;
+  --animate-boot-leave: boot-leave 450ms var(--ease-space) 100ms forwards;
 
   /* The cockpit opens out of the ship's window once the camera arrives (--ship-y: how far down
      the screen the ship is). */
@@ -111,6 +141,36 @@
     to {
       rotate: 1turn;
     }
+  }
+
+  @keyframes boot-status {
+    from {
+      opacity: 0;
+      translate: -0.5ch 0;
+    }
+  }
+
+  @keyframes boot-ignite {
+    from {
+      opacity: 0;
+      scale: 0.04;
+    }
+    40% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes boot-leave {
+    to {
+      opacity: 0;
+    }
+  }
+}
+
+/* Reduced motion has no 3D scene, so no boot: hide the server-rendered cover before hydration. */
+@media (prefers-reduced-motion: reduce) {
+  [data-boot-screen] {
+    display: none;
   }
 }
 
