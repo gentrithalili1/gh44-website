@@ -42,7 +42,7 @@ describe("PageLayer", () => {
   });
 });
 
-// Stands in for the scene, which greets a first visit with the cockpit.
+// Stands in for the scene, which greets each page load with the cockpit.
 function GreetButton() {
   const explorer = useExplorer();
 
