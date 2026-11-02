@@ -105,6 +105,15 @@ export function useFlokiTalk({ floki, terminal, onGo }: UseFlokiTalkParams) {
     if (outcome.status === "failed") return false;
     // Cut off by a newer question, a typed go or closing the cockpit: that decides instead.
     if ((await floki.speak(line)) === "interrupted") return false;
+    // A radio order ends the conversation, so his next turn at the mic doesn't pause it again.
+    if (outcome.status === "radioPlaying") {
+      await floki.playRadio(outcome.trackIndex);
+      return false;
+    }
+    if (outcome.status === "radioStopped") {
+      floki.stopRadio();
+      return false;
+    }
     const destination =
       outcome.status === "answered" || outcome.status === "navigating"
         ? outcome.destination

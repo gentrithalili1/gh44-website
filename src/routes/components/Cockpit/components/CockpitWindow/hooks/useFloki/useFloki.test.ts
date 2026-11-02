@@ -96,7 +96,7 @@ describe("useFloki", () => {
     expect(await result.current.ask("take me to work")).toMatchObject({ status: "navigating" });
   });
 
-  it("works the radio without asking the model", async () => {
+  it("takes radio orders without asking the model, and carries them out after saying them", async () => {
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
     const fetchStub = vi.fn();
     vi.stubGlobal("fetch", fetchStub);
@@ -107,19 +107,20 @@ describe("useFloki", () => {
     await act(async () => {
       outcome = await result.current.ask("next song");
     });
-    expect(outcome).toEqual({ status: "radioPlaying", track: TRACKS[1] });
-    expect(players[0]?.currentSrc).toBe(TRACKS[1].path);
+    expect(outcome).toEqual({ status: "radioPlaying", track: TRACKS[1], trackIndex: 1 });
+    expect(players[0]?.currentSrc).toBe(TRACKS[0].path);
 
-    await act(async () => {
-      outcome = await result.current.ask("stop the music");
-    });
-    expect(outcome).toEqual({ status: "radioStopped" });
+    await act(() => result.current.playRadio(1));
+    expect(players[0]?.currentSrc).toBe(TRACKS[1].path);
 
     await act(async () => {
       outcome = await result.current.ask("play the starship avalon");
     });
-    expect(outcome).toEqual({ status: "radioPlaying", track: TRACKS[3] });
-    expect(players[0]?.currentSrc).toBe(TRACKS[3].path);
+    expect(outcome).toEqual({ status: "radioPlaying", track: TRACKS[3], trackIndex: 3 });
+    await act(async () => {
+      outcome = await result.current.ask("stop the music");
+    });
+    expect(outcome).toEqual({ status: "radioStopped" });
     expect(fetchStub).not.toHaveBeenCalled();
   });
 

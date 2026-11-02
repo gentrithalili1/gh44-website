@@ -5,6 +5,9 @@ import { getTrackIndex, type Track, TRACKS } from "./utils/tracks";
 const VOLUME = 0.7;
 const FADE_IN_MS = 1600;
 const FADE_OUT_MS = 600;
+// How long the music waits after Floki goes quiet before it comes back, so it doesn't pop in
+// between his turns.
+const RELEASE_DELAY_MS = 2500;
 
 // "checking" until the browser has read the track; "unavailable" when it is missing.
 type MusicStatus = "checking" | "ready" | "playing" | "unavailable";
@@ -34,6 +37,11 @@ function createMusicPlayer(tracks: readonly Track[]) {
   let isStarting = false;
   // A visitor who pressed stop keeps the quiet for the rest of the visit.
   let hasStopped = false;
+  // Floki holds the music while he listens, thinks or speaks; it comes back once he lets go, if
+  // it was playing.
+  let holdCount = 0;
+  let shouldResume = false;
+  let releaseTimer: ReturnType<typeof setTimeout> | undefined;
   const listeners = new Set<() => void>();
 
   function setState(next: Partial<MusicState>) {
@@ -105,12 +113,57 @@ function createMusicPlayer(tracks: readonly Track[]) {
       isStarting = false;
     }
     setStatus("playing");
+    // Started by the gesture that also woke Floki: unlocked now, it waits for him to finish.
+    if (holdCount > 0) {
+      audio.pause();
+      shouldResume = true;
+      return;
+    }
     fade({ audio, to: VOLUME, durationMs: FADE_IN_MS });
+  }
+
+  // The visitor works the radio: that overrides any hold of Floki's, at full volume again.
+  function dropHold() {
+    clearTimeout(releaseTimer);
+    const wasHeld = holdCount > 0 || shouldResume;
+    holdCount = 0;
+    shouldResume = false;
+    if (!wasHeld || !audio) return;
+    cancelAnimationFrame(fadeFrame);
+    audio.volume = VOLUME;
+  }
+
+  // Floki starts listening, thinking or speaking: the music fades out and pauses. The radio still
+  // shows it playing, since it comes back.
+  function hold() {
+    clearTimeout(releaseTimer);
+    holdCount += 1;
+    if (holdCount > 1 || !audio || state.status !== "playing") return;
+    const player = audio;
+    shouldResume = true;
+    fade({ audio: player, to: 0, durationMs: FADE_OUT_MS, onDone: () => player.pause() });
+  }
+
+  // Floki is done: after a moment of quiet, the music fades back in where it paused.
+  function release() {
+    if (holdCount === 0) return;
+    holdCount -= 1;
+    if (holdCount > 0) return;
+    releaseTimer = setTimeout(() => {
+      if (!audio || !shouldResume || state.status !== "playing") return;
+      shouldResume = false;
+      const player = audio;
+      player
+        .play()
+        .then(() => fade({ audio: player, to: VOLUME, durationMs: FADE_IN_MS }))
+        .catch((error: unknown) => setStatus(isAutoplayBlocked(error) ? "ready" : "unavailable"));
+    }, RELEASE_DELAY_MS);
   }
 
   // The play button: a gesture itself, and allowed after a stop.
   async function play() {
     stopWaitingForGesture();
+    dropHold();
     hasStopped = false;
     await start();
   }
@@ -118,6 +171,7 @@ function createMusicPlayer(tracks: readonly Track[]) {
   function stop() {
     if (!audio || state.status !== "playing") return;
     const player = audio;
+    dropHold();
     hasStopped = true;
     stopWaitingForGesture();
     setStatus("ready");
@@ -128,6 +182,7 @@ function createMusicPlayer(tracks: readonly Track[]) {
   // With a single track it starts that one over.
   function skip(step: 1 | -1) {
     if (!audio || state.status === "checking" || state.status === "unavailable") return;
+    dropHold();
     const trackIndex = getTrackIndex({ index: state.trackIndex, step, count: tracks.length });
     if (trackIndex === state.trackIndex) audio.currentTime = 0;
     else audio.src = tracks[trackIndex]?.path ?? "";
@@ -141,6 +196,7 @@ function createMusicPlayer(tracks: readonly Track[]) {
   // it.
   async function playTrack(trackIndex: number) {
     if (!audio || state.status === "checking" || state.status === "unavailable") return;
+    dropHold();
     if (trackIndex !== state.trackIndex) {
       audio.src = tracks[trackIndex]?.path ?? "";
       setState({ trackIndex });
@@ -164,6 +220,8 @@ function createMusicPlayer(tracks: readonly Track[]) {
     next: () => skip(1),
     previous: () => skip(-1),
     playTrack,
+    hold,
+    release,
     subscribe,
     getSnapshot: () => state,
   };
@@ -214,5 +272,7 @@ export function useMusic() {
     next: player.next,
     previous: player.previous,
     playTrack: player.playTrack,
+    hold: player.hold,
+    release: player.release,
   };
 }

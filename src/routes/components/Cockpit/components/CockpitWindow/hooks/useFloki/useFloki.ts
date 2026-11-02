@@ -32,7 +32,8 @@ export type FlokiOutcome =
   // A plain order, carried out without asking the model.
   | { status: "navigating"; destination: Destination }
   | { status: "humorSet"; humor: number }
-  | { status: "radioPlaying"; track: Track }
+  // A radio order: carried out once he has said it (playRadio, stopRadio).
+  | { status: "radioPlaying"; track: Track; trackIndex: number }
   | { status: "radioStopped" }
   // Stopped while he was thinking: nothing to say or do.
   | { status: "cancelled" }
@@ -79,28 +80,25 @@ export function useFloki() {
   }
 
   // The radio on the visitor's order. Play, next and previous all end with a track playing.
-  async function playRadio(trackIndex: number): Promise<FlokiOutcome> {
-    if (music.status === "checking" || music.status === "unavailable") {
+  function getRadioTrack(trackIndex: number): FlokiOutcome {
+    const track = music.tracks[trackIndex];
+    if (music.status === "checking" || music.status === "unavailable" || !track) {
       return { status: "failed", reason: "radioUnavailable" };
     }
-    const track = music.tracks[trackIndex];
-    if (!track) return { status: "failed", reason: "radioUnavailable" };
-    await music.playTrack(trackIndex);
 
-    return { status: "radioPlaying", track };
+    return { status: "radioPlaying", track, trackIndex };
   }
 
-  async function runMusicAction(action: FlokiMusicAction): Promise<FlokiOutcome> {
+  function getMusicOutcome(action: FlokiMusicAction): FlokiOutcome {
     const count = music.tracks.length;
     switch (action) {
       case "play":
-        return playRadio(music.trackIndex);
+        return getRadioTrack(music.trackIndex);
       case "next":
-        return playRadio(getTrackIndex({ index: music.trackIndex, step: 1, count }));
+        return getRadioTrack(getTrackIndex({ index: music.trackIndex, step: 1, count }));
       case "previous":
-        return playRadio(getTrackIndex({ index: music.trackIndex, step: -1, count }));
+        return getRadioTrack(getTrackIndex({ index: music.trackIndex, step: -1, count }));
       case "stop":
-        music.stop();
         return { status: "radioStopped" };
       default: {
         const unknownAction: never = action;
@@ -122,9 +120,9 @@ export function useFloki() {
         setHumor(command.humor);
         return { status: "humorSet", humor: command.humor };
       case "music":
-        return runMusicAction(command.action);
+        return getMusicOutcome(command.action);
       case "track":
-        return playRadio(command.trackIndex);
+        return getRadioTrack(command.trackIndex);
       case undefined:
         break;
       default: {
@@ -140,10 +138,12 @@ export function useFloki() {
     } as const;
     setRequestStatus("thinking");
     const questionId = questionIdRef.current;
+    music.hold();
     const outcome = await requestAnswer({
       turns: [...turns.slice(-HISTORY_TURNS), visitorTurn],
       humor,
     });
+    music.release();
     if (questionId !== questionIdRef.current) return { status: "cancelled" };
     setRequestStatus("idle");
     if (outcome.status === "failed") return outcome;
@@ -171,17 +171,29 @@ export function useFloki() {
     if (listening.status === "listening") return { status: "failed" };
     prepareAudio();
     voice.stop();
+    // The mic would hear the radio: it pauses until he is done.
+    music.hold();
     void signal.openMic();
     const hearing = await listening.listen();
     signal.closeMic();
+    music.release();
 
     return hearing;
   }
 
-  // Says a line out loud; from a click it also starts the audio graph in time.
-  function speak(text: string) {
+  // Says a line out loud, over a paused radio; from a click it also starts the audio graph in
+  // time.
+  async function speak(text: string) {
     prepareAudio();
-    return voice.speak(text);
+    music.hold();
+    const speech = await voice.speak(text);
+    music.release();
+
+    return speech;
+  }
+
+  async function playRadio(trackIndex: number) {
+    await music.playTrack(trackIndex);
   }
 
   // Says hello, once. A greeting the browser blocked (no click or key yet) can be tried again.
@@ -214,6 +226,8 @@ export function useFloki() {
     stopSpeaking: voice.stop,
     stop,
     prepareAudio,
+    playRadio,
+    stopRadio: music.stop,
     getLevel: signal.getLevel,
   };
 }
