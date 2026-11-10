@@ -2,6 +2,7 @@ import { useId, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import type { CockpitReveal } from "#/hooks/useExplorer";
+import { findSecret } from "#/hooks/useSecrets";
 import type { Destination } from "#/utils/destinations";
 import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 
@@ -14,7 +15,7 @@ import {
 import { CockpitFloki } from "./components/CockpitFloki";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
-import { CockpitTerminal } from "./components/CockpitTerminal";
+import { CockpitTerminal, type TerminalEgg } from "./components/CockpitTerminal";
 import { useFloki } from "./hooks/useFloki";
 import { useFlokiTalk } from "./hooks/useFlokiTalk";
 import { useFlokiWelcome } from "./hooks/useFlokiWelcome";
@@ -88,6 +89,7 @@ export function CockpitWindow({
   const floki = useFloki();
   const flokiTalk = useFlokiTalk({ floki, terminal, onGo });
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
+  const [praiseCount, setPraiseCount] = useState(0);
 
   // The page behind takes focus again only once the cockpit is no longer open over it.
   function handleClose() {
@@ -127,6 +129,21 @@ export function CockpitWindow({
   function handleGo(destination: Destination) {
     flokiTalk.takeControls();
     onGo(destination);
+  }
+
+  function handleEgg(egg: TerminalEgg) {
+    switch (egg) {
+      case "praise":
+        setPraiseCount((count) => count + 1);
+        return;
+      case "fetch":
+        findSecret("ball");
+        return;
+      default: {
+        const unknownEgg: never = egg;
+        return unknownEgg;
+      }
+    }
   }
 
   // The visitor looks around: the windshield shifts a little against the console.
@@ -203,6 +220,7 @@ export function CockpitWindow({
               canListen={floki.canListen}
               isConversing={flokiTalk.isConversing}
               isLocked={isLocked}
+              praiseCount={praiseCount}
               onTalk={() => void flokiTalk.talk()}
             />
           </ConsoleScreen>
@@ -235,6 +253,7 @@ export function CockpitWindow({
               shouldFocus={!isGreeting}
               onAsk={(question) => void flokiTalk.ask(question)}
               onGo={handleGo}
+              onEgg={handleEgg}
             />
           </ConsoleScreen>
         </div>

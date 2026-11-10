@@ -6,10 +6,20 @@ import { messages } from "../messages";
 // The width of a command or destination name column, so the second column lines up.
 const NAME_COLUMN = 18;
 
-export type CommandContext = { pathname: string; visitedIds: readonly PlanetId[] };
+export type CommandContext = {
+  pathname: string;
+  visitedIds: readonly PlanetId[];
+  // Floki's ball is already out in the system.
+  hasBall: boolean;
+};
+
+// What a secret command sets off outside the terminal.
+export type TerminalEgg = "praise" | "fetch";
 
 export type CommandResult =
   | { kind: "print"; lines: readonly string[] }
+  // Floki answers, and something happens on board or outside.
+  | { kind: "egg"; egg: TerminalEgg; lines: readonly string[] }
   | { kind: "clear" }
   | { kind: "go"; destination: Destination; lines: readonly string[] }
   | { kind: "ask"; question: string; lines: readonly string[] };
@@ -100,6 +110,9 @@ const COMMANDS: Readonly<Record<string, Command>> = {
   floki: { ...messages.commands.floki, run: floki },
 };
 
+// `good boy`, and what else he answers to.
+const PRAISED: readonly string[] = ["boy", "dog", "girl", "floki"];
+
 // Commands help never lists: found by trying them.
 const SECRET_COMMANDS: Readonly<Record<string, Command["run"]>> = {
   sudo: () => print(messages.secrets.sudo),
@@ -107,6 +120,15 @@ const SECRET_COMMANDS: Readonly<Record<string, Command["run"]>> = {
   git: ({ args }) =>
     print(args[0] === "blame" ? messages.secrets.gitBlame : messages.secrets.gitOther),
   "42": () => print(messages.secrets.answer),
+  good: ({ args }) =>
+    PRAISED.includes(args[0] ?? "")
+      ? { kind: "egg", egg: "praise", lines: messages.secrets.praise }
+      : print([messages.secrets.goodWhat]),
+  fetch: ({ context }) => ({
+    kind: "egg",
+    egg: "fetch",
+    lines: context.hasBall ? messages.secrets.fetchAgain : messages.secrets.fetch,
+  }),
 };
 
 // What the terminal shows when the cockpit opens.

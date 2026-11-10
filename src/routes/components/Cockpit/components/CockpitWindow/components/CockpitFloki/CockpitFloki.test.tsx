@@ -13,6 +13,7 @@ function renderFloki(props: Partial<ComponentProps<typeof CockpitFloki>> = {}) {
       canListen
       isConversing={false}
       isLocked={false}
+      praiseCount={0}
       onTalk={vi.fn()}
       {...props}
     />,

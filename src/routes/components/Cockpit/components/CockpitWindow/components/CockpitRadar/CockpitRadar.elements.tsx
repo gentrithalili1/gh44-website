@@ -49,3 +49,12 @@ export function RadarBlip({ x, y, isVisited }: RadarBlipProps) {
     />
   );
 }
+
+// Floki's ball, once `fetch` threw it: a small rose dot circling the middle of the scope.
+export function RadarBall() {
+  return (
+    <g className="motion-safe:animate-radar-sweep">
+      <circle cx={0} cy={-22} r={1.6} className="fill-rose" />
+    </g>
+  );
+}

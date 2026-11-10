@@ -2,6 +2,7 @@ import { useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { useExploration } from "#/hooks/useExploration";
+import { useSecrets } from "#/hooks/useSecrets";
 
 import {
   getWelcomeLines,
@@ -54,6 +55,7 @@ export type Terminal = ReturnType<typeof useTerminal>;
 export function useTerminal() {
   const location = useLocation();
   const exploration = useExploration();
+  const secrets = useSecrets();
   const [screen, setScreen] = useState(getWelcomeScreen);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<readonly string[]>([]);
@@ -63,17 +65,23 @@ export function useTerminal() {
   function run(command: string) {
     const result = runCommand({
       input: command,
-      context: { pathname: location.pathname, visitedIds: exploration.visitedIds },
+      context: {
+        pathname: location.pathname,
+        visitedIds: exploration.visitedIds,
+        hasBall: secrets.hasBall,
+      },
     });
     const echo = { kind: "command", text: command.trim() } as const;
     const output = result.kind === "clear" ? [] : result.lines;
+    // An egg is Floki talking.
+    const outputKind = result.kind === "egg" ? "floki" : "output";
 
     setScreen((current) =>
       result.kind === "clear"
         ? { lines: [], nextLineId: current.nextLineId }
         : addLines({
             screen: current,
-            lines: [echo, ...output.map((text) => ({ kind: "output", text }) as const)],
+            lines: [echo, ...output.map((text) => ({ kind: outputKind, text }) as const)],
           }),
     );
     if (command.trim() !== "") setHistory((current) => [...current, command.trim()]);

@@ -11,6 +11,7 @@ import {
   VisitorPrompt,
 } from "./CockpitTerminal.elements";
 import { messages } from "./messages";
+import type { TerminalEgg } from "./utils/terminalCommands";
 import { getLineSegments } from "./utils/terminalLinks";
 
 interface CockpitTerminalProps {
@@ -22,6 +23,8 @@ interface CockpitTerminalProps {
   // `floki <question>`: Floki answers in the terminal.
   onAsk: (question: string) => void;
   onGo: (destination: Destination) => void;
+  // A secret command set something off outside the terminal.
+  onEgg: (egg: TerminalEgg) => void;
 }
 
 // The terminal on the center screen, the ship's command line. Every destination it prints is a
@@ -32,6 +35,7 @@ export function CockpitTerminal({
   shouldFocus,
   onAsk,
   onGo,
+  onEgg,
 }: CockpitTerminalProps) {
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
@@ -54,6 +58,9 @@ export function CockpitTerminal({
         return;
       case "ask":
         onAsk(result.question);
+        return;
+      case "egg":
+        onEgg(result.egg);
         return;
       default: {
         const unknownResult: never = result;

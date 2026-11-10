@@ -1,9 +1,10 @@
 import { useLocation } from "@tanstack/react-router";
 
 import { useExploration } from "#/hooks/useExploration";
+import { useSecrets } from "#/hooks/useSecrets";
 import { DESTINATIONS } from "#/utils/destinations";
 
-import { RadarBlip, RadarFace } from "./CockpitRadar.elements";
+import { RadarBall, RadarBlip, RadarFace } from "./CockpitRadar.elements";
 import { messages } from "./messages";
 import { getRadarBlips } from "./utils/radarBlips";
 
@@ -14,6 +15,7 @@ const RADAR_BLIPS = getRadarBlips();
 export function CockpitRadar() {
   const location = useLocation();
   const exploration = useExploration();
+  const secrets = useSecrets();
 
   const counts = { visited: exploration.visitedIds.length, total: DESTINATIONS.length };
   const next = DESTINATIONS.find(({ name }) => !exploration.visitedIds.includes(name));
@@ -40,6 +42,7 @@ export function CockpitRadar() {
             isVisited={exploration.visitedIds.includes(blip.id)}
           />
         ))}
+        {secrets.hasBall ? <RadarBall /> : null}
       </svg>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 md:gap-2">
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-[0.6875rem] tabular-nums md:gap-y-1 md:text-xs">

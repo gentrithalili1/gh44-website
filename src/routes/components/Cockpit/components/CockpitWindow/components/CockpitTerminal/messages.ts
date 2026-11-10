@@ -69,6 +69,10 @@ export const messages = {
     gitBlame: ["gentrit. always gentrit."],
     gitOther: ["working tree clean. space is tidy."],
     answer: ["the answer. the question is still loading."],
+    praise: ["ears up. tail would wag, if they'd built one."],
+    goodWhat: "good what? finish the sentence.",
+    fetch: ["ball's away. tracking it on the radar."],
+    fetchAgain: ["it's still out there. your turn."],
   },
   commandNotFound: (name: string) => [`command not found: ${name}`, "type help for commands."],
 } as const;

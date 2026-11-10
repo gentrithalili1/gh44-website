@@ -19,23 +19,33 @@ const RIGHT_EYE = "M72 48 Q65 42.5 58 48.5 Q65 53 72 48 Z";
 
 interface FlokiHeadProps {
   status: FlokiStatus;
+  // Each praise perks his ears up once.
+  praiseCount: number;
   // The voice grille, laid over the muzzle.
   grille: ReactNode;
 }
 
 // Plates in the console's graphite, seams in its rule color, and lavender light where he is
 // alive: ears, eyes and the grille. The eyes dim while he stands by and pulse while he thinks.
-export function FlokiHead({ status, grille }: FlokiHeadProps) {
+export function FlokiHead({ status, praiseCount, grille }: FlokiHeadProps) {
   return (
     <span
       data-status={status}
       className="group/head relative block aspect-square h-full max-w-full"
     >
       <svg viewBox="0 0 100 100" aria-hidden="true" className="absolute inset-0 size-full">
-        <path d={LEFT_EAR} className="fill-surface stroke-rule stroke-[1.2]" />
-        <path d={RIGHT_EAR} className="fill-surface stroke-rule stroke-[1.2]" />
-        <path d={LEFT_INNER_EAR} className="fill-lavender/15" />
-        <path d={RIGHT_INNER_EAR} className="fill-lavender/15" />
+        {/* Keyed by the praise, so every one plays the perk again. */}
+        <g
+          key={praiseCount}
+          className={
+            praiseCount > 0 ? "origin-[50%_40%] motion-safe:animate-floki-perk" : undefined
+          }
+        >
+          <path d={LEFT_EAR} className="fill-surface stroke-rule stroke-[1.2]" />
+          <path d={RIGHT_EAR} className="fill-surface stroke-rule stroke-[1.2]" />
+          <path d={LEFT_INNER_EAR} className="fill-lavender/15" />
+          <path d={RIGHT_INNER_EAR} className="fill-lavender/15" />
+        </g>
         <path
           d={HEAD}
           className="fill-bg-subtle stroke-rule stroke-[1.2] [stroke-linejoin:round]"

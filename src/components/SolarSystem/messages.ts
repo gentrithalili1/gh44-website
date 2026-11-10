@@ -14,5 +14,6 @@ export const messages = {
   shipName: EXPLORER_NAME,
   shipAction: "open cockpit",
   sunScold: "floki: please don't.",
+  fetchBall: "floki's ball",
   pluto: "pluto · still a planet",
 } as const;

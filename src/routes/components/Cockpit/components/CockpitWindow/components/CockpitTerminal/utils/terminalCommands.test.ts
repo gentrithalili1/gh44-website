@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { getWelcomeLines, runCommand } from "./terminalCommands";
 
-const AT_HOME = { pathname: "/", visitedIds: [] } as const;
+const AT_HOME = { pathname: "/", visitedIds: [], hasBall: false } as const;
 
 const DESTINATION_LIST = "destinations: me, gh44-confirm, work, gh44-theme, gh44-brain";
 
@@ -71,13 +71,13 @@ describe("runCommand", () => {
 
   it("gives the current route as coordinates", () => {
     expect(
-      runCommand({ input: "coordinates", context: { pathname: "/work", visitedIds: [] } }),
+      runCommand({ input: "coordinates", context: { ...AT_HOME, pathname: "/work" } }),
     ).toEqual({ kind: "print", lines: ["route: /work"] });
   });
 
   it("shows which destinations are visited, and the progress", () => {
     expect(
-      runCommand({ input: "explore", context: { pathname: "/", visitedIds: ["work", "me"] } }),
+      runCommand({ input: "explore", context: { ...AT_HOME, visitedIds: ["work", "me"] } }),
     ).toEqual({
       kind: "print",
       lines: [
@@ -149,6 +149,31 @@ describe("runCommand", () => {
     expect(runCommand({ input: "42", context: AT_HOME })).toEqual({
       kind: "print",
       lines: ["the answer. the question is still loading."],
+    });
+  });
+
+  it("lets floki answer praise, and asks for the rest of it", () => {
+    expect(runCommand({ input: "good boy", context: AT_HOME })).toEqual({
+      kind: "egg",
+      egg: "praise",
+      lines: ["ears up. tail would wag, if they'd built one."],
+    });
+    expect(runCommand({ input: "good", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["good what? finish the sentence."],
+    });
+  });
+
+  it("throws floki's ball once, and leaves it out there after", () => {
+    expect(runCommand({ input: "fetch", context: AT_HOME })).toEqual({
+      kind: "egg",
+      egg: "fetch",
+      lines: ["ball's away. tracking it on the radar."],
+    });
+    expect(runCommand({ input: "fetch", context: { ...AT_HOME, hasBall: true } })).toEqual({
+      kind: "egg",
+      egg: "fetch",
+      lines: ["it's still out there. your turn."],
     });
   });
 
