@@ -64,7 +64,11 @@ export const messages = {
   // The black hole: only a destination once every planet is visited.
   gargantua: {
     name: "gargantua",
-    signal: "there's something past gh44-brain. try: go gargantua",
+    // What the terminal shows once every planet is visited, until the visitor has been there.
+    alert: "!! signal detected. not a planet. not on any chart.",
+    signal: "that's all five planets. one thing left out there, and it bends light.",
+    // The name in it is a link: it runs `go gargantua`.
+    invite: "new destination unlocked: gargantua",
     confirm: ["destination: gargantua", "route: unknown", "turning away from the sun. first time."],
   },
   // Commands help never lists.

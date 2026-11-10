@@ -42,7 +42,8 @@ describe("CockpitRadar", () => {
 
     await renderInRouter({ ui: <CockpitRadar /> });
 
-    expect(getRadar().getByText("???")).toBeInTheDocument();
+    expect(getRadar().getByText("signal")).toBeInTheDocument();
+    expect(getRadar().getByText("gargantua")).toBeInTheDocument();
     expect(getRadar().getByText("5/5")).toBeInTheDocument();
   });
 

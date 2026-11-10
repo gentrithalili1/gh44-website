@@ -425,10 +425,12 @@ describe("CockpitWindow's Floki", () => {
     await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
     const output = within(screen.getByRole("log", { name: "terminal output" }));
     expect(
-      output.getByText("there's something past gh44-brain. try: go gargantua"),
+      output.getByText("!! signal detected. not a planet. not on any chart."),
     ).toBeInTheDocument();
+    expect(screen.getByText("signal detected · gargantua")).toBeInTheDocument();
 
-    await user.type(screen.getByRole("textbox", { name: "command" }), "go gargantua{Enter}");
+    // The name in the alert is the way there.
+    await user.click(output.getByRole("button", { name: "gargantua" }));
 
     expect(screen.getByText("nothing in here. not even light.")).toBeInTheDocument();
     const back = screen.getByRole("button", { name: "go back" });
@@ -440,6 +442,7 @@ describe("CockpitWindow's Floki", () => {
 
     expect(screen.queryByRole("button", { name: "go back" })).not.toBeInTheDocument();
     expect(output.getByText("that took 8 seconds. 7 years passed on earth.")).toBeInTheDocument();
+    expect(screen.getByText("systems online")).toBeInTheDocument();
     expect(screen.getByLabelText(new RegExp(`^earth time: .*${yearNow + 7}`))).toBeInTheDocument();
     expect(
       within(screen.getByRole("region", { name: "radar" })).getByText("6/5"),

@@ -24,11 +24,14 @@ export function CockpitRadar() {
   };
   const next = DESTINATIONS.find(({ name }) => !exploration.visitedIds.includes(name));
   const hasSignal = next === undefined;
-  const beyond = secrets.hasCrossedHorizon ? messages.beyond : messages.signal;
+  // The signal stands out until the visitor has been there.
+  const isCalling = hasSignal && !secrets.hasCrossedHorizon;
   const rows = [
-    { term: messages.route, value: location.pathname },
-    { term: messages.next, value: next?.name ?? beyond },
-    { term: messages.visited, value: messages.progress(counts) },
+    { term: messages.route, value: location.pathname, isCalling: false },
+    hasSignal
+      ? { term: messages.signal, value: messages.beyond, isCalling }
+      : { term: messages.next, value: next.name, isCalling: false },
+    { term: messages.visited, value: messages.progress(counts), isCalling: false },
   ];
 
   return (
@@ -56,7 +59,12 @@ export function CockpitRadar() {
           {rows.map((row) => (
             <div key={row.term} className="col-span-2 grid grid-cols-subgrid">
               <dt className="text-muted">{row.term}</dt>
-              <dd className="truncate text-right text-foreground">{row.value}</dd>
+              <dd
+                data-calling={row.isCalling ? "" : undefined}
+                className="truncate text-right text-foreground data-calling:text-ochre"
+              >
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>

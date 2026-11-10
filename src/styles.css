@@ -96,6 +96,8 @@
   /* Inside it, the way back shows after a beat of nothing. */
   --animate-void-in: void-in 1400ms var(--ease-space) 1200ms both;
   --animate-jump-back: jump-back 1100ms var(--ease-space) both;
+  /* The black hole's signal on the radar: a ring going out from its blip. */
+  --animate-signal-ping: signal-ping 1800ms var(--ease-space) infinite;
   --animate-floki-perk: floki-perk 700ms var(--ease-space) both;
   --animate-cockpit-rumble: cockpit-rumble 650ms linear both;
   /* Boarding: the hull closes in round the window and the console rises as the iris opens, then
@@ -171,6 +173,13 @@
   @keyframes jump-back {
     from {
       opacity: 1;
+    }
+  }
+
+  @keyframes signal-ping {
+    to {
+      scale: 4.5;
+      opacity: 0;
     }
   }
 

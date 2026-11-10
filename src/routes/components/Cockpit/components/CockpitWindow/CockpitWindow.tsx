@@ -2,7 +2,9 @@ import { useId, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import type { CockpitReveal } from "#/hooks/useExplorer";
-import { findSecret } from "#/hooks/useSecrets";
+import { useExploration } from "#/hooks/useExploration";
+import { findSecret, useSecrets } from "#/hooks/useSecrets";
+import { DESTINATIONS } from "#/utils/destinations";
 import type { Destination } from "#/utils/destinations";
 import { useMusic } from "#/routes/hooks/useMusic";
 import { COCKPIT_SHIP_Y, GARGANTUA_YEARS } from "#/utils/explorer";
@@ -108,6 +110,11 @@ export function CockpitWindow({
   const flokiTalk = useFlokiTalk({ floki, terminal, onGo });
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
   const [praiseCount, setPraiseCount] = useState(0);
+  const exploration = useExploration();
+  const secrets = useSecrets();
+  // Every planet visited, and the black hole still ahead: the cockpit says so.
+  const hasSignal =
+    exploration.visitedIds.length >= DESTINATIONS.length && !secrets.hasCrossedHorizon;
   const music = useMusic();
   // Back from the black hole: the dark lifts and the screens power on again.
   const [hasReturned, setHasReturned] = useState(false);
@@ -261,12 +268,15 @@ export function CockpitWindow({
           <h2 id={titleId} className="text-label font-bold tracking-label">
             {messages.title}
           </h2>
-          <p className="flex items-center gap-2 text-xs text-muted">
+          <p
+            data-signal={hasSignal ? "" : undefined}
+            className="flex items-center gap-2 text-xs text-muted data-signal:text-ochre"
+          >
             <span
               aria-hidden="true"
-              className="size-1.5 animate-light-blink rounded-full bg-sage"
+              className="size-1.5 animate-light-blink rounded-full bg-sage in-data-signal:bg-ochre in-data-signal:shadow-[0_0_6px_var(--ochre)]"
             />
-            {messages.status}
+            {hasSignal ? messages.statusSignal : messages.status}
           </p>
           <EarthClock yearsPassed={earthYearsPassed} />
         </div>

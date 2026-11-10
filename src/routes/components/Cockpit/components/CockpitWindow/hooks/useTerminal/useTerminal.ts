@@ -12,11 +12,11 @@ import {
 
 import { messages } from "../../components/CockpitTerminal/messages";
 
-// A line on the screen: a command echoed at the prompt, what a command printed, or what the
-// visitor and Floki said to each other.
+// A line on the screen: a command echoed at the prompt, what a command printed, what the
+// visitor and Floki said to each other, or an alert that stands out from the rest.
 export type TerminalLine = {
   id: number;
-  kind: "command" | "output" | "visitor" | "floki";
+  kind: "command" | "output" | "visitor" | "floki" | "alert";
   text: string;
 };
 
@@ -30,7 +30,13 @@ function getWelcomeScreen({ hasSignal }: { hasSignal: boolean }): Screen {
   const lines = [
     ...getWelcomeLines().map((text) => ({ kind: "output", text }) as const),
     { kind: "floki", text: messages.floki.greeting } as const,
-    ...(hasSignal ? [{ kind: "floki", text: messages.gargantua.signal } as const] : []),
+    ...(hasSignal
+      ? [
+          { kind: "alert", text: messages.gargantua.alert } as const,
+          { kind: "floki", text: messages.gargantua.signal } as const,
+          { kind: "alert", text: messages.gargantua.invite } as const,
+        ]
+      : []),
   ];
 
   return { lines: lines.map((line, id) => ({ ...line, id })), nextLineId: lines.length };

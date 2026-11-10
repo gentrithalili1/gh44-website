@@ -141,11 +141,38 @@ export function CockpitTerminal({
         );
       case "output":
         return renderOutput(line);
+      case "alert":
+        return renderAlert(line);
       default: {
         const unknownKind: never = line.kind;
         return unknownKind;
       }
     }
+  }
+
+  // An alert stands out; the black hole's name in it flies there.
+  function renderAlert(line: TerminalLine) {
+    const { name } = messages.gargantua;
+    const [before, after] = line.text.split(name);
+
+    return (
+      <span className="font-medium text-ochre">
+        {before}
+        {after === undefined ? null : (
+          <>
+            <button
+              type="button"
+              disabled={isLocked}
+              onClick={() => handleRun(`go ${name}`)}
+              className="rounded-xs underline decoration-ochre/50 decoration-dotted underline-offset-4 transition-colors hover:decoration-ochre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ochre motion-safe:animate-light-blink"
+            >
+              {name}
+            </button>
+            {after}
+          </>
+        )}
+      </span>
+    );
   }
 
   function renderOutput(line: TerminalLine) {
