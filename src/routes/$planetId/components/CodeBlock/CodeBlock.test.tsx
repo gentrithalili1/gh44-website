@@ -24,7 +24,7 @@ describe("CodeBlock", () => {
     expect(panel).toHaveTextContent(BRAIN_INSTALL);
     // Strings in sage, as gh44 for zed colors them.
     expect(within(panel).getByText("git@github.com:gentrithalili1/gh44-brain.git")).toHaveStyle({
-      color: "#b8c5ac",
+      color: "#9ebf7a",
     });
   });
 

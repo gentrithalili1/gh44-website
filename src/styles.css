@@ -23,25 +23,14 @@
   --color-border-subtle: var(--border-subtle);
   --color-fg-faint: var(--fg-faint);
 
-  --color-terracotta: var(--terracotta);
-  --color-sage: var(--sage);
-  --color-lavender: var(--lavender);
-  --color-sand: var(--sand);
-  --color-blue: var(--blue);
+  --color-clay: var(--clay);
   --color-ochre: var(--ochre);
-  --color-rose: var(--rose);
+  --color-sage: var(--sage);
   --color-seafoam: var(--seafoam);
+  --color-sky: var(--sky);
+  --color-lavender: var(--lavender);
+  --color-rose: var(--rose);
   --color-red: var(--red);
-
-  --color-terracotta-vivid: var(--terracotta-vivid);
-  --color-sage-vivid: var(--sage-vivid);
-  --color-lavender-vivid: var(--lavender-vivid);
-  --color-sand-vivid: var(--sand-vivid);
-  --color-blue-vivid: var(--blue-vivid);
-  --color-ochre-vivid: var(--ochre-vivid);
-  --color-rose-vivid: var(--rose-vivid);
-  --color-seafoam-vivid: var(--seafoam-vivid);
-  --color-red-vivid: var(--red-vivid);
 }
 
 /* Boot animations that read a per-element variable (--chars: a log line's length, --orbit: a
@@ -192,51 +181,50 @@
 
 :root {
   color-scheme: dark;
-  --background: #1e1f22;
+  /* gh44 dark (palette/tokens.json in gh44-theme): bg, fg, fg-muted, fg-subtle, border. */
+  --background: #191a1c;
   --foreground: #dfe1e5;
   --muted: #a8abb2;
   --faint: #868a92;
-  --rule: #414349;
-  --sun: #ddbe8e;
+  --rule: #3c3e43;
+  --sun: #d4b25e;
 
   /* gh44 dark neutrals: bg, bg-subtle, surface, surface-active, border-subtle, fg-faint. */
-  --night: #1e1f22;
-  --bg-subtle: #25262a;
-  --surface: #2b2d30;
-  --surface-active: #393b41;
-  --border-subtle: #313236;
+  --night: #191a1c;
+  --bg-subtle: #202124;
+  --surface: #26282a;
+  --surface-active: #34363b;
+  --border-subtle: #2c2d30;
   --fg-faint: #5c5f66;
   --accent: var(--sun);
 
-  --terracotta: #e49b80;
-  --sage: #b8c5ac;
-  --lavender: #bba8d9;
-  --sand: #e9ddd2;
-  --blue: #9fb7cc;
-  --ochre: #ddbe8e;
-  --rose: #d99aa6;
-  --seafoam: #9cc4c0;
-  --red: #eb6f6f;
+  /* gh44's hues: one value each. */
+  --clay: #c59172;
+  --ochre: #d4b25e;
+  --sage: #9ebf7a;
+  --seafoam: #5cb8a2;
+  --sky: #75addb;
+  --lavender: #c1a0f4;
+  --rose: #f08ba2;
+  --red: #fd5d62;
 
-  --terracotta-vivid: #fe8b60;
-  --sage-vivid: #a4d074;
-  --lavender-vivid: #c29ef7;
-  --sand-vivid: #f2dbc6;
-  --blue-vivid: #68bcfe;
-  --ochre-vivid: #fbb42a;
-  --rose-vivid: #f389a1;
-  --seafoam-vivid: #2bd5cb;
-  --red-vivid: #ff5a60;
-
-  /* Past roles and man-made things: foreground, and muted as the vivid shade. */
+  /* The second shade the drawings read (palette.ts): the same hue, except neutral's muted gray. */
+  --clay-vivid: var(--clay);
+  --ochre-vivid: var(--ochre);
+  --sage-vivid: var(--sage);
+  --seafoam-vivid: var(--seafoam);
+  --sky-vivid: var(--sky);
+  --lavender-vivid: var(--lavender);
+  --rose-vivid: var(--rose);
+  --red-vivid: var(--red);
   --neutral: var(--foreground);
   --neutral-vivid: var(--muted);
 
-  /* The space around an open planet (planets.ts colors). */
-  --blue-tint: #161b20;
-  --terracotta-tint: #221713;
-  --ochre-tint: #211c13;
-  --sand-tint: #1f1c1a;
+  /* The space around an open planet (planets.ts colors): the night with a breath of its hue. */
+  --sky-tint: color-mix(in oklab, var(--sky) 6%, #121315);
+  --clay-tint: color-mix(in oklab, var(--clay) 6%, #121315);
+  --ochre-tint: color-mix(in oklab, var(--ochre) 6%, #121315);
+  --lavender-tint: color-mix(in oklab, var(--lavender) 6%, #121315);
 }
 
 /* An open planet recolors the space around it (set from planets.ts). */

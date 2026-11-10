@@ -89,10 +89,10 @@ const LIGHTS = [
   { id: "l2", color: "bg-sage", blink: "animate-light-blink [animation-delay:-0.6s]" },
   { id: "l3", color: "bg-fg-faint" },
   { id: "l4", color: "bg-ochre" },
-  { id: "l5", color: "bg-blue" },
+  { id: "l5", color: "bg-sky" },
   { id: "l6", color: "bg-lavender", blink: "animate-light-blink [animation-delay:-2.1s]" },
   { id: "l7", color: "bg-fg-faint" },
-  { id: "l8", color: "bg-terracotta", blink: "animate-light-blink [animation-delay:-1.3s]" },
+  { id: "l8", color: "bg-clay", blink: "animate-light-blink [animation-delay:-1.3s]" },
 ] as const satisfies readonly IndicatorLight[];
 
 // A row of status lamps for the busiest screen.

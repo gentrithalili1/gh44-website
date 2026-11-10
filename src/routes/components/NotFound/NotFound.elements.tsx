@@ -18,15 +18,15 @@ export function LostPlanet({ label }: LostPlanetProps) {
   return (
     <svg role="img" aria-label={label} viewBox="0 0 240 150" className="mb-8 w-full max-w-80">
       <circle cx={PLANET.x} cy={PLANET.y} r={PLANET.radius} className="fill-sage" />
-      <circle cx={88} cy={118} r={9} className="fill-sage-vivid opacity-40" />
-      <circle cx={150} cy={104} r={5} className="fill-sage-vivid opacity-40" />
-      <circle cx={170} cy={134} r={11} className="fill-sage-vivid opacity-40" />
+      <circle cx={88} cy={118} r={9} className="fill-sage opacity-40" />
+      <circle cx={150} cy={104} r={5} className="fill-sage opacity-40" />
+      <circle cx={170} cy={134} r={11} className="fill-sage opacity-40" />
       <circle cx={30} cy={40} r={1.2} className="fill-foreground" />
       <circle cx={208} cy={28} r={1} className="fill-foreground" />
       <circle cx={180} cy={60} r={0.8} className="fill-muted" />
       <circle cx={60} cy={18} r={0.8} className="fill-muted" />
       {/* A long-neck. */}
-      <g transform={getStandingTransform(-34)} className="fill-terracotta">
+      <g transform={getStandingTransform(-34)} className="fill-clay">
         <ellipse cx={0} cy={-11} rx={14} ry={8} />
         <path d="M8 -15 Q16 -30 19 -42 L25 -41 Q21 -27 14 -10 Z" />
         <ellipse cx={23} cy={-43} rx={5.5} ry={3.2} />
@@ -53,7 +53,7 @@ export function LostPlanet({ label }: LostPlanetProps) {
           d="M-9 -13 L-6 -21 L-3 -14 Z M-2 -15 L1 -24 L4 -15 Z M5 -14 L8 -21 L11 -12 Z"
           className="fill-ochre"
         />
-        <g className="fill-blue">
+        <g className="fill-sky">
           <ellipse cx={0} cy={-9} rx={13} ry={7} />
           <ellipse cx={14} cy={-6} rx={4.5} ry={3} />
           <path d="M-12 -9 L-23 -6 L-12 -5 Z" />

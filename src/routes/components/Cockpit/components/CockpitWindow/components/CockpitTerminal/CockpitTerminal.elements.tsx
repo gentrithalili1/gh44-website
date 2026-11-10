@@ -2,7 +2,7 @@ import { messages } from "./messages";
 
 // "gh44-explorer>" before each command, like "floki>" and "you>" before what they say.
 export function TerminalPrompt() {
-  return <span className="whitespace-nowrap text-blue">{messages.prompt}</span>;
+  return <span className="whitespace-nowrap text-sky">{messages.prompt}</span>;
 }
 
 // "floki>" before what the onboard computer says.
@@ -24,7 +24,7 @@ interface TerminalCursorProps {
 // focus, hollow without it.
 export function TerminalCursor({ children }: TerminalCursorProps) {
   return (
-    <span className="outline-1 -outline-offset-1 outline-terracotta group-focus-within:animate-cursor-blink group-focus-within:bg-terracotta group-focus-within:text-night group-focus-within:outline-0">
+    <span className="outline-1 -outline-offset-1 outline-clay group-focus-within:animate-cursor-blink group-focus-within:bg-clay group-focus-within:text-night group-focus-within:outline-0">
       {children}
     </span>
   );

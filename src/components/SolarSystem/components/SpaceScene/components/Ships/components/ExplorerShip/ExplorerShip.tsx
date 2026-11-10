@@ -105,8 +105,8 @@ function drawEngineGlow() {
   if (context) {
     const center = GLOW_TEXTURE_SIZE / 2;
     const gradient = context.createRadialGradient(center, center, 0, center, center, center);
-    gradient.addColorStop(0, PALETTE.terracotta.vivid);
-    gradient.addColorStop(GLOW_CORE, PALETTE.terracotta.vivid);
+    gradient.addColorStop(0, PALETTE.clay.vivid);
+    gradient.addColorStop(GLOW_CORE, PALETTE.clay.vivid);
     gradient.addColorStop(1, "transparent");
     context.fillStyle = gradient;
     context.fillRect(0, 0, GLOW_TEXTURE_SIZE, GLOW_TEXTURE_SIZE);
@@ -349,7 +349,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
               visible={false}
             >
               <sphereGeometry args={[PUFF_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
-              <meshBasicMaterial color={PALETTE.terracotta.soft} transparent depthWrite={false} />
+              <meshBasicMaterial color={PALETTE.clay.soft} transparent depthWrite={false} />
             </mesh>
           ))}
           <sprite ref={glowRef} position={ENGINE_POSITION}>
@@ -363,7 +363,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
           </mesh>
           <mesh rotation-x={LIE_FLAT} position-y={HULL_THICKNESS / 2 + CANOPY_THICKNESS}>
             <extrudeGeometry args={[shapes.canopy, { depth: CANOPY_THICKNESS, ...HULL_BEVEL }]} />
-            <meshLambertMaterial color={PALETTE.terracotta.soft} />
+            <meshLambertMaterial color={PALETTE.clay.soft} />
           </mesh>
         </group>
         {isActive && !isFlying ? (
@@ -379,7 +379,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
                 className="flex -translate-x-1/2 translate-y-1 flex-col items-center rounded-sm bg-background px-1.5 py-0.5 text-label-sub whitespace-nowrap"
               >
                 <span className="text-foreground">{messages.shipName}</span>
-                <span className="text-terracotta">{messages.shipAction}</span>
+                <span className="text-clay">{messages.shipAction}</span>
               </span>
             </Html>
           </Billboard>

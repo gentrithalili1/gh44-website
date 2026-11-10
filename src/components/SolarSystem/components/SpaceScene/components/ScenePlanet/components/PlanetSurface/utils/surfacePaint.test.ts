@@ -21,7 +21,7 @@ describe("getSurfacePaint", () => {
     // Neptune's first band runs from 0.45 to 0.2 planet radii above the equator.
     expect(band).toEqual({
       kind: "stripe",
-      color: "blue",
+      color: "sky",
       shade: "vivid",
       opacity: 0.35,
       top: expect.closeTo(0.5 - Math.asin(0.45) / Math.PI, 5),

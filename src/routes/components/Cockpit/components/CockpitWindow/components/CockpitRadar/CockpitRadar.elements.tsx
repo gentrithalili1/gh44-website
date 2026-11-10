@@ -43,7 +43,7 @@ export function RadarBlip({ x, y, isVisited }: RadarBlipProps) {
       r={2.2}
       className={
         isVisited
-          ? "fill-sage-vivid"
+          ? "fill-sage"
           : "fill-night stroke-muted [stroke-width:1.2] [vector-effect:non-scaling-stroke]"
       }
     />

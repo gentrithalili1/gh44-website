@@ -10,12 +10,12 @@ describe("getRingBands", () => {
     if (!saturn) throw new Error("No Saturn");
 
     expect(getRingBands(saturn).map(({ label, color }) => [label, color])).toEqual([
-      ["gh44 for zed", "blue"],
-      ["gh44 for warp", "terracotta"],
+      ["gh44 for zed", "sky"],
+      ["gh44 for warp", "clay"],
       ["gh44 for slack", "rose"],
       ["gh44 for linear", "lavender"],
       ["gh44 for chrome", "sage"],
-      ["gh44 for github", "sand"],
+      ["gh44 for github", "ochre"],
       ["gh44 for shadcn/ui", "seafoam"],
     ]);
   });
