@@ -6,6 +6,7 @@ import { useExploration } from "#/hooks/useExploration";
 import { findSecret, useSecrets } from "#/hooks/useSecrets";
 import { DESTINATIONS } from "#/utils/destinations";
 import type { Destination } from "#/utils/destinations";
+import { useSpaceMode } from "#/hooks/useSpaceMode";
 import { useMusic } from "#/routes/hooks/useMusic";
 import { COCKPIT_SHIP_Y, GARGANTUA_YEARS } from "#/utils/explorer";
 
@@ -17,6 +18,7 @@ import {
 } from "./CockpitWindow.elements";
 import { CockpitFloki } from "./components/CockpitFloki";
 import { EarthClock } from "./components/EarthClock";
+import { Tesseract } from "./components/Tesseract";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
 import { CockpitTerminal, type TerminalEgg } from "./components/CockpitTerminal";
@@ -111,6 +113,8 @@ export function CockpitWindow({
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
   const [praiseCount, setPraiseCount] = useState(0);
   const exploration = useExploration();
+  // With the 3D scene, the inside of the black hole is the tesseract; without it, the dark.
+  const spaceMode = useSpaceMode();
   const secrets = useSecrets();
   // Every planet visited, and the black hole still ahead: the cockpit says so.
   const hasSignal =
@@ -249,7 +253,10 @@ export function CockpitWindow({
       {/* The black hole's shadow takes the whole cockpit at the end of the flight in (a little
           past its edges: the cockpit is still shaking), and lifts once the ship is back. */}
       <div className="pointer-events-none absolute -inset-1 z-20 flex flex-col items-center justify-center gap-5 bg-black opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=inside]/cockpit:pointer-events-auto group-data-[jump=inside]/cockpit:opacity-100 group-data-[jump=on]/cockpit:animate-jump-black">
-        {jumpStatus === "inside" ? (
+        {jumpStatus === "inside" && spaceMode === "scene" ? (
+          <Tesseract onReturn={onReturn} />
+        ) : null}
+        {jumpStatus === "inside" && spaceMode === "static" ? (
           <>
             <p className="animate-void-in text-xs text-faint">{messages.voidLine}</p>
             <button
