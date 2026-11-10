@@ -159,8 +159,8 @@ describe("Cockpit", () => {
     expect(output.getByText("welcome aboard. type help.")).toBeInTheDocument();
     expect(output.getAllByRole("link").map((link) => link.textContent)).toEqual([
       "me",
-      "gh44-confirm",
       "work",
+      "gh44-confirm",
       "gh44-theme",
       "gh44-brain",
     ]);
@@ -189,7 +189,7 @@ describe("Cockpit", () => {
 
     expect(getOutput()).toHaveTextContent("unknown destination: earth");
     expect(getOutput()).toHaveTextContent(
-      "destinations: me, gh44-confirm, work, gh44-theme, gh44-brain",
+      "destinations: me, work, gh44-confirm, gh44-theme, gh44-brain",
     );
     expect(getOutput()).toHaveTextContent("command not found: warp");
     expect(getOutput()).toHaveTextContent("type help for commands.");
