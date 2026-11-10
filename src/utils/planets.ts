@@ -6,7 +6,7 @@ export type PlanetFeatures = {
   // Drawn on the body: Mercury's craters, Venus' clouds, Earth's landmasses, Mars' dust,
   // Jupiter's bands and red spot, Neptune's haze.
   surface?: "craters" | "clouds" | "continents" | "dust" | "storms" | "haze";
-  // Earth's moon, Jupiter's company moons, Mars' satellites, Neptune's agent satellites.
+  // Earth's moon, Jupiter's company moons, Mars' Phobos and Deimos, Neptune's agent rocks.
   orbiters?: "moon" | "companies" | "probes" | "agents";
   // Saturn's rings, one band per app; Uranus' thin ring, standing almost upright.
   rings?: "apps" | "upright";
@@ -62,8 +62,8 @@ export const PLANETS = [
     name: "me",
     title: "gentrit halili",
     sub: "who, where, how to reach",
-    lede: "senior frontend engineer in pristina, kosovo. occasionally in orbit.",
-    color: "blue",
+    lede: "senior frontend engineer from kosovo, currently working in barcelona",
+    color: "sky",
     size: 12,
     orbit: { radius: 148, phase: 3.6 },
     features: { surface: "continents", orbiters: "moon" },
@@ -81,7 +81,7 @@ export const PLANETS = [
     title: "gh44-confirm",
     sub: "promise based react dialogs",
     lede: "react confirmation dialogs you can await. resolve means yes.",
-    color: "terracotta",
+    color: "clay",
     size: 10,
     orbit: { radius: 200, phase: 5.4 },
     features: { surface: "dust", orbiters: "probes", hasRocket: true },
@@ -117,7 +117,7 @@ export const PLANETS = [
     title: "gh44-theme",
     sub: `one theme, ${THEME_TOOLS.length} tools`,
     lede: "one palette for every tool i open. zed, warp, slack, linear, chrome, github, shadcn.",
-    color: "sand",
+    color: "lavender",
     size: 21,
     orbit: { radius: 370, phase: 4.1 },
     features: { rings: "apps" },
@@ -135,7 +135,7 @@ export const PLANETS = [
     title: "gh44-brain",
     sub: "claude code, my way",
     lede: "clone it once and every claude code session works the way i do.",
-    color: "blue",
+    color: "sky",
     size: 16,
     orbit: { radius: 478, phase: 0.6 },
     features: { surface: "haze", orbiters: "agents" },
@@ -155,7 +155,7 @@ export const DECORATIVE_PLANETS = [
     id: "mercury",
     realPlanet: "mercury",
     name: "mercury",
-    color: "terracotta",
+    color: "clay",
     size: 6,
     orbit: { radius: 82, phase: 2.6 },
     features: { surface: "craters" },
@@ -165,7 +165,7 @@ export const DECORATIVE_PLANETS = [
     id: "venus",
     realPlanet: "venus",
     name: "venus",
-    color: "sand",
+    color: "ochre",
     size: 9,
     orbit: { radius: 112, phase: 0.2 },
     features: { surface: "clouds" },

@@ -18,24 +18,24 @@ describe("getOrbiters", () => {
     );
 
     expect(rest).toEqual([]);
-    expect(moon).toMatchObject({ kind: "moon", label: "the moon" });
+    expect(moon).toMatchObject({ kind: "moon" });
+    expect(moon?.label).toBeUndefined();
     for (const other of others) expect(other.speed).toBeGreaterThan(moon?.speed ?? Infinity);
   });
 
-  it("lets Earth's moon open a Gmail compose to Gentrit", () => {
-    expect(getOrbiters(getPlanet("me"))[0]?.link).toEqual({
-      href: "https://mail.google.com/mail/?view=cm&to=gentrithalili11@gmail.com&su=hi%20gentrit",
-      label: "write in gmail",
-    });
-  });
+  it("gives Mars Phobos and Deimos: small lumpy rocks, Phobos the bigger, closer and faster", () => {
+    const [phobos, deimos] = getOrbiters(getPlanet("gh44-confirm"));
 
-  it("gives Mars two satellites", () => {
-    expect(
-      getOrbiters(getPlanet("gh44-confirm")).map(({ kind, label }) => ({ kind, label })),
-    ).toEqual([
-      { kind: "satellite", label: "resolve" },
-      { kind: "satellite", label: "reject" },
+    expect([phobos, deimos].map((moon) => [moon?.kind, moon?.label])).toEqual([
+      ["rock", "phobos · resolve"],
+      ["rock", "deimos · reject"],
     ]);
+    if (phobos?.kind !== "rock" || deimos?.kind !== "rock")
+      throw new Error("Mars' moons are rocks");
+    expect(phobos.radius).toBeGreaterThan(deimos.radius);
+    expect(phobos.orbitRadius).toBeLessThan(deimos.orbitRadius);
+    expect(phobos.speed).toBeGreaterThan(deimos.speed);
+    for (const moon of [phobos, deimos]) expect(moon.stretch).not.toEqual({ x: 1, y: 1, z: 1 });
   });
 
   it("gives Jupiter one moon per company, with JOIN highlighted in vivid", () => {

@@ -82,14 +82,14 @@ describe("getHomePose", () => {
 describe("getPlanetPose", () => {
   const planet = { x: 100, y: 50 };
 
-  it("sits the planet in the middle of the space the 672px panel leaves on desktop", () => {
+  it("sits the planet in the middle of the space the half-screen panel leaves on desktop", () => {
     const pose = getPlanetPose({ viewport: DESKTOP, planetPosition: planet, reach: 40 });
 
     const onScreen = project({ pose, point: planet, viewport: DESKTOP });
-    expect(onScreen.x).toBeCloseTo((1440 - 672) / 2);
+    expect(onScreen.x).toBeCloseTo((1440 * 0.5) / 2);
     expect(onScreen.y).toBeCloseTo(450);
-    // Its reach fills 42% of the 648px box.
-    expect(40 * pose.zoom).toBeCloseTo(272.16);
+    // Its reach fills 42% of the 720px box.
+    expect(40 * pose.zoom).toBeCloseTo(302.4);
   });
 
   it("keeps the planet there from any angle the visitor orbits to", () => {
@@ -101,7 +101,7 @@ describe("getPlanetPose", () => {
       viewport: DESKTOP,
       angle: { polar: 1.2, azimuth: -2 },
     });
-    expect(onScreen.x).toBeCloseTo((1440 - 672) / 2);
+    expect(onScreen.x).toBeCloseTo((1440 * 0.5) / 2);
     expect(onScreen.y).toBeCloseTo(450);
   });
 
@@ -110,8 +110,8 @@ describe("getPlanetPose", () => {
     const pose = getPlanetPose({ viewport, planetPosition: planet, reach: 40 });
 
     const onScreen = project({ pose, point: planet, viewport });
-    expect(onScreen.x).toBeCloseTo((1280 - 672) / 2);
-    expect(onScreen.x + 40 * pose.zoom).toBeLessThan(1280 - 672);
+    expect(onScreen.x).toBeCloseTo((1280 * 0.5) / 2);
+    expect(onScreen.x + 40 * pose.zoom).toBeLessThan(1280 * 0.5);
   });
 
   it("sits the planet in the top 38% on a phone, above the sheet", () => {
@@ -310,8 +310,8 @@ describe("getPlanetReach", () => {
     expect(reaches).toEqual({
       // The moon: orbit 24 plus its radius 3.
       me: 27,
-      // The rocket: 20 out from the surface, plus its 3-unit nose.
-      "gh44-confirm": 33,
+      // Deimos: orbit 23 plus its radius 1.5.
+      "gh44-confirm": 24.5,
       // The outermost company moon: orbit 73 plus radius 2.3.
       work: expect.closeTo(75.3, 5),
       // The outermost ring band: 2.15 planet radii.

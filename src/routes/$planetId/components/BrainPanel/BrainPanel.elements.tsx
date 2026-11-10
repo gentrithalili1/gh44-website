@@ -11,17 +11,3 @@ export function PanelSection({ heading, children }: PanelSectionProps) {
     </section>
   );
 }
-
-interface LearningStepProps {
-  name: string;
-  children: React.ReactNode;
-}
-
-export function LearningStep({ name, children }: LearningStepProps) {
-  return (
-    <li className="relative pb-4 pl-5.5 before:absolute before:top-2 before:-left-1 before:size-1.75 before:rounded-full before:bg-accent">
-      <dfn className="block font-medium not-italic">{name}</dfn>
-      <span className="text-label text-muted">{children}</span>
-    </li>
-  );
-}

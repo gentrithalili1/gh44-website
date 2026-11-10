@@ -147,7 +147,7 @@ export function CockpitTerminal({
           title={destination.description}
           aria-disabled={isLocked}
           onClick={(event) => handleDestinationClick({ event, destination })}
-          className="rounded-xs whitespace-nowrap text-terracotta underline decoration-terracotta/40 decoration-dotted underline-offset-4 transition-colors hover:text-terracotta-vivid hover:decoration-terracotta-vivid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta aria-disabled:cursor-default aria-disabled:no-underline"
+          className="rounded-xs whitespace-nowrap text-clay underline decoration-clay/40 decoration-dotted underline-offset-4 transition-colors hover:text-clay hover:decoration-clay focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-clay aria-disabled:cursor-default aria-disabled:no-underline"
         >
           {destination.name}
         </Link>
@@ -161,7 +161,7 @@ export function CockpitTerminal({
           window types at the prompt, like a terminal. */}
       <div
         onClick={handleScreenClick}
-        className="flex min-h-0 flex-1 cursor-text flex-col-reverse overflow-y-auto p-3 text-xs/[1.6] text-foreground md:text-[0.8125rem]/[1.65] selection:bg-terracotta/30 [scrollbar-color:var(--rule)_transparent] [scrollbar-width:thin] md:p-4"
+        className="flex min-h-0 flex-1 cursor-text flex-col-reverse overflow-y-auto p-3 text-xs/[1.6] text-foreground md:text-[0.8125rem]/[1.65] selection:bg-clay/30 [scrollbar-color:var(--rule)_transparent] [scrollbar-width:thin] md:p-4"
       >
         <div className="mb-auto">
           <div role="log" aria-label={messages.outputLabel}>
@@ -196,7 +196,7 @@ export function CockpitTerminal({
                   enterKeyHint="go"
                   // iOS zooms into inputs under 16px: on phones the input is 16px scaled to 75%,
                   // the terminal's 12px, laid over the drawn text.
-                  className="absolute top-0 left-0 h-[133.334%] w-[133.334%] min-w-0 origin-top-left scale-75 bg-transparent text-base text-transparent caret-transparent outline-none selection:bg-terracotta/30 md:h-full md:w-full md:scale-100 md:[font-size:inherit]"
+                  className="absolute top-0 left-0 h-[133.334%] w-[133.334%] min-w-0 origin-top-left scale-75 bg-transparent text-base text-transparent caret-transparent outline-none selection:bg-clay/30 md:h-full md:w-full md:scale-100 md:[font-size:inherit]"
                 />
                 {/* What was typed, drawn again with a block cursor at the caret. */}
                 <span

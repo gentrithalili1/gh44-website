@@ -44,7 +44,7 @@ export function CodeTab({ id, panelId, isSelected, onSelect, children }: CodeTab
       aria-controls={panelId}
       tabIndex={isSelected ? 0 : -1}
       onClick={onSelect}
-      className="-mb-px shrink-0 border-b-2 border-transparent px-2.5 py-2.5 text-kicker whitespace-nowrap text-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-muted aria-selected:border-accent aria-selected:text-foreground"
+      className="shrink-0 border-b-2 border-transparent px-2.5 py-2.5 text-kicker whitespace-nowrap text-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-muted aria-selected:border-accent aria-selected:text-foreground"
     >
       {children}
     </button>

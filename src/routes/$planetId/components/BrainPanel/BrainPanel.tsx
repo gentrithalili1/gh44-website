@@ -2,7 +2,8 @@ import type { HighlightedCode } from "../../types";
 import { CODE_SNIPPETS } from "../../utils/codeSnippets";
 import { CodeBlock } from "../CodeBlock";
 import { ProjectSource } from "../ProjectSource";
-import { LearningStep, PanelSection } from "./BrainPanel.elements";
+import { StepList } from "../StepList";
+import { PanelSection } from "./BrainPanel.elements";
 import { SessionReplay } from "./components/SessionReplay";
 import { messages } from "./messages";
 
@@ -29,13 +30,7 @@ export function BrainPanel({ code }: BrainPanelProps) {
         <SessionReplay />
       </PanelSection>
       <PanelSection heading={messages.learningHeading}>
-        <ol aria-label={messages.learningHeading} className="border-l border-rule">
-          {messages.learningSteps.map((step) => (
-            <LearningStep key={step.id} name={step.name}>
-              {step.text}
-            </LearningStep>
-          ))}
-        </ol>
+        <StepList label={messages.learningHeading} steps={[...messages.learningSteps]} />
       </PanelSection>
       <ProjectSource projectId="gh44-brain" />
     </>

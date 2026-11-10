@@ -137,7 +137,7 @@ export function getSurfaceShapes(planet: PlanetBody): SurfaceShape[] {
           planet,
           name: "swirl",
           spots: VENUS_SWIRLS,
-          style: { color: "terracotta", shade: "soft", opacity: 0.22 },
+          style: { color: "clay", shade: "soft", opacity: 0.22 },
         }),
       ];
     case "continents":
@@ -159,7 +159,7 @@ export function getSurfaceShapes(planet: PlanetBody): SurfaceShape[] {
         ...getBands({
           planet,
           bands: JUPITER_BANDS,
-          style: { color: "sand", shade: "soft", opacity: 0.55 },
+          style: { color: "clay", shade: "soft", opacity: 0.55 },
         }),
         {
           id: "red-spot",
@@ -177,7 +177,7 @@ export function getSurfaceShapes(planet: PlanetBody): SurfaceShape[] {
       return getBands({
         planet,
         bands: NEPTUNE_BANDS,
-        style: { color: "blue", shade: "vivid", opacity: 0.35 },
+        style: { color: "sky", shade: "vivid", opacity: 0.35 },
       });
     default: {
       const unknownSurface: never = surface;

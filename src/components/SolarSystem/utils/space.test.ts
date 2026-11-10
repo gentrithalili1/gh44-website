@@ -55,14 +55,14 @@ describe("SOLAR_SYSTEM", () => {
 
   it("paints each planet in its gh44 palette color, like the illustrated system", () => {
     expect(SOLAR_SYSTEM.map((planet) => [planet.realPlanet, planet.color])).toEqual([
-      ["mercury", "terracotta"],
-      ["venus", "sand"],
-      ["earth", "blue"],
-      ["mars", "terracotta"],
+      ["mercury", "clay"],
+      ["venus", "ochre"],
+      ["earth", "sky"],
+      ["mars", "clay"],
       ["jupiter", "ochre"],
-      ["saturn", "sand"],
+      ["saturn", "lavender"],
       ["uranus", "seafoam"],
-      ["neptune", "blue"],
+      ["neptune", "sky"],
     ]);
   });
 

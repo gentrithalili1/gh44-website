@@ -22,12 +22,12 @@ describe("highlightCode", () => {
       lang: "tsx",
     });
 
-    // Keywords terracotta, strings sage, comments faint, functions lavender, numbers ochre.
-    expect(getTokenColor({ lines, content: "import" })).toBe("#e49b80");
-    expect(getTokenColor({ lines, content: '"pkg"' })).toBe("#b8c5ac");
+    // Keywords clay, strings sage, comments faint, functions sky, numbers rose.
+    expect(getTokenColor({ lines, content: "import" })).toBe("#c59172");
+    expect(getTokenColor({ lines, content: '"pkg"' })).toBe("#9ebf7a");
     expect(getTokenColor({ lines, content: "// declined" })).toBe("#868a92");
-    expect(getTokenColor({ lines, content: "confirm" })).toBe("#bba8d9");
-    expect(getTokenColor({ lines, content: "42" })).toBe("#ddbe8e");
+    expect(getTokenColor({ lines, content: "confirm" })).toBe("#75addb");
+    expect(getTokenColor({ lines, content: "42" })).toBe("#f08ba2");
   });
 
   it("keeps one line per line of code, with the plain text intact", async () => {

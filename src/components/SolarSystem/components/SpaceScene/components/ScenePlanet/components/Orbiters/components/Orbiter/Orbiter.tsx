@@ -1,4 +1,3 @@
-import { useCursor } from "@react-three/drei";
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { type RefObject, useRef, useState } from "react";
 import { type Mesh, Quaternion, Vector3 } from "three";
@@ -46,22 +45,14 @@ function getCraterPlacement({ crater, radius }: { crater: OrbiterCrater; radius:
 
 interface OrbiterProps {
   orbiter: OrbiterData;
-  isPlanetOpen: boolean;
   onHoverChange: (change: HoverChange) => void;
   onPlanetClick: () => void;
   sceneStateRef: RefObject<SceneState>;
 }
 
-// One moon, satellite or rock on its orbit; it names itself on hover and holds its planet
-// still. While its planet is open, an orbiter with a link (Earth's moon) opens it; otherwise a
-// click opens the planet.
-export function Orbiter({
-  orbiter,
-  isPlanetOpen,
-  onHoverChange,
-  onPlanetClick,
-  sceneStateRef,
-}: OrbiterProps) {
+// One moon or rock on its orbit; it names itself on hover, holds its planet still,
+// and opens the planet on click.
+export function Orbiter({ orbiter, onHoverChange, onPlanetClick, sceneStateRef }: OrbiterProps) {
   const meshRef = useRef<Mesh>(null);
   const angleRef = useRef(orbiter.phase);
   const [isHovered, setIsHovered] = useState(false);
@@ -76,9 +67,12 @@ export function Orbiter({
   );
 
   const isMoon = orbiter.kind === "moon";
+  // A lumpy rock (Mars' moons) is a sphere drawn out unevenly; its craters stretch with it.
+  const stretch =
+    orbiter.kind === "rock"
+      ? ([orbiter.stretch.x, orbiter.stretch.y, orbiter.stretch.z] as const)
+      : undefined;
   const opacity = isMoon && !orbiter.isHighlighted ? PAST_MOON_OPACITY : 1;
-  const link = isPlanetOpen ? orbiter.link : undefined;
-  useCursor(isHovered && link !== undefined);
 
   useFrame(() => {
     angleRef.current += orbiter.speed * sceneStateRef.current.frameStep;
@@ -103,20 +97,12 @@ export function Orbiter({
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
     if (isDragRelease(event.delta)) return;
-    if (link) {
-      window.open(link.href, "_blank", "noopener,noreferrer");
-      return;
-    }
     onPlanetClick();
   }
 
   return (
-    <mesh ref={meshRef}>
-      {orbiter.kind === "satellite" ? (
-        <octahedronGeometry args={[orbiter.radius]} />
-      ) : (
-        <sphereGeometry args={[orbiter.radius, MOON_SEGMENTS, MOON_SEGMENTS / 2]} />
-      )}
+    <mesh ref={meshRef} scale={stretch}>
+      <sphereGeometry args={[orbiter.radius, MOON_SEGMENTS, MOON_SEGMENTS / 2]} />
       <meshLambertMaterial
         color={getSurfaceHex({ color: orbiter.color, shade: orbiter.shade })}
         transparent
@@ -140,7 +126,7 @@ export function Orbiter({
         />
         <meshBasicMaterial colorWrite={false} depthWrite={false} />
       </mesh>
-      {isHovered ? <HoverName name={link ? link.label : orbiter.label} /> : null}
+      {isHovered && orbiter.label ? <HoverName name={orbiter.label} /> : null}
     </mesh>
   );
 }

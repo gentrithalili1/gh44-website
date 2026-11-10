@@ -5,14 +5,14 @@ import type { CodeLang } from "../types";
 type CodeSnippet = { planetId: PlanetId; lang: CodeLang; code: string };
 
 // Every code block's code, highlighted on the server by the planet route's loader. `planetId`
-// is the one place that says whose panel a snippet belongs to; gh44-theme's are keyed by app.
+// is the one place that says whose panel a snippet belongs to.
 export const CODE_SNIPPETS = {
   brainInstall: {
     planetId: "gh44-brain",
     lang: "shellscript",
     code: "git clone git@github.com:gentrithalili1/gh44-brain.git && gh44-brain/install.sh",
   },
-  zed: {
+  zedSettings: {
     planetId: "gh44-theme",
     lang: "json",
     code: `{
@@ -20,38 +20,60 @@ export const CODE_SNIPPETS = {
     "mode": "system",
     "light": "gh44 Light",
     "dark": "gh44 Dark"
-  }
+  },
+  "ui_font_family": ".ZedSans",
+  "buffer_font_family": ".ZedMono"
 }`,
   },
-  warp: {
+  warpCopy: {
     planetId: "gh44-theme",
     lang: "shellscript",
-    code: "mkdir -p ~/.warp/themes\ncp warp/gh44-dark.yaml warp/gh44-light.yaml ~/.warp/themes/",
+    code: "mkdir -p ~/.warp/themes && cp warp/*.yaml ~/.warp/themes/",
   },
-  slack: {
+  slackDark: {
     planetId: "gh44-theme",
     lang: "text",
-    code: "#F2ECE5,#EAE2D9,#D9CDC0,#2B2D30,#EAE2D9,#2B2D30,#497C15,#B94000,#A9502F,#FAF7F3",
+    code: "#202124,#26282A,#34363B,#DFE1E5,#26282A,#DFE1E5,#9EBF7A,#B64309,#191A1C,#DFE1E5",
   },
-  linear: {
+  slackLight: {
+    planetId: "gh44-theme",
+    lang: "text",
+    code: "#F2ECE5,#EAE2D9,#D9CDC0,#2B2D30,#EAE2D9,#2B2D30,#4C7B1D,#B64309,#FAF7F3,#2B2D30",
+  },
+  linearDark: {
     planetId: "gh44-theme",
     lang: "json",
-    code: '{"base":[11.744,2.222,272.716,1],"accent":[70.976,47.994,303.946,1],"contrast":30,"sidebar":{"base":[15.177,2.834,275.984,1],"accent":[70.976,47.994,303.946,1],"contrast":30}}',
+    code: '{"base":[9.216,1.578,266.503,1],"accent":[71.248,45.254,303.409,1],"contrast":30,"sidebar":{"base":[12.726,2.203,272.678,1],"accent":[71.248,45.254,303.409,1],"contrast":30}}',
   },
-  chrome: {
+  linearLight: {
+    planetId: "gh44-theme",
+    lang: "json",
+    code: '{"base":[97.382,2.356,77.304,1],"accent":[41.393,62.23,303.997,1],"contrast":30,"sidebar":{"base":[93.727,4.326,73.952,1],"accent":[41.393,62.23,303.997,1],"contrast":30}}',
+  },
+  linearStyle: {
+    planetId: "gh44-theme",
+    lang: "text",
+    code: "https://raw.githubusercontent.com/gentrithalili1/gh44-theme/main/linear/gh44.user.css",
+  },
+  chromeClone: {
     planetId: "gh44-theme",
     lang: "shellscript",
     code: "git clone https://github.com/gentrithalili1/gh44-theme.git",
   },
-  github: {
+  githubStyle: {
     planetId: "gh44-theme",
     lang: "text",
     code: "https://raw.githubusercontent.com/gentrithalili1/gh44-theme/main/github/gh44.user.css",
   },
-  shadcn: {
+  shadcnAdd: {
     planetId: "gh44-theme",
     lang: "shellscript",
     code: "npx shadcn@latest add https://raw.githubusercontent.com/gentrithalili1/gh44-theme/main/shadcn/r/gh44.json",
+  },
+  shadcnColors: {
+    planetId: "gh44-theme",
+    lang: "shellscript",
+    code: "npx shadcn@latest add https://raw.githubusercontent.com/gentrithalili1/gh44-theme/main/shadcn/r/gh44-theme.json",
   },
   confirmInstall: {
     planetId: "gh44-confirm",

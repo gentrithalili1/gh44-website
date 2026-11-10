@@ -15,16 +15,16 @@ describe("getBandOutline", () => {
 });
 
 describe("getSurfaceShapes", () => {
-  it("gives Jupiter sand bands and a red spot", () => {
+  it("gives Jupiter clay bands and a red spot", () => {
     const jupiter = findPlanet("work");
     if (!jupiter) throw new Error("No Jupiter");
     const shapes = getSurfaceShapes(jupiter);
 
     expect(shapes.filter((shape) => shape.kind === "polygon").map((band) => band.color)).toEqual([
-      "sand",
-      "sand",
-      "sand",
-      "sand",
+      "clay",
+      "clay",
+      "clay",
+      "clay",
     ]);
     expect(shapes.filter((shape) => shape.color === "red")).toHaveLength(1);
   });

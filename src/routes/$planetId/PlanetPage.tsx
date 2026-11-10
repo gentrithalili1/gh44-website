@@ -53,14 +53,17 @@ export function PlanetPage() {
         style={PANEL_STYLE}
         className="fixed inset-x-0 bottom-0 z-20 h-(--sheet-height) overflow-y-auto border-t border-rule bg-background px-5 py-8 md:inset-y-0 md:right-0 md:left-auto md:h-auto md:w-[min(var(--panel-width),100%)] md:border-t-0 md:bg-transparent md:px-12 md:pt-24 md:pb-12"
       >
-        <p className="text-kicker tracking-kicker text-accent">
-          {messages.kicker} · {getKicker(planet)}
-        </p>
-        <h1 className="mt-2 mb-1.5 text-planet-sm font-bold tracking-planet text-accent md:text-planet">
-          {planet.title}
-        </h1>
-        <p className="mb-8 max-w-[36ch] text-lede text-muted">{planet.lede}</p>
-        {getPanel({ planetId: planet.id, code: loaderData.code })}
+        {/* One centered column in the right half, whatever the planet's content. */}
+        <div className="md:mx-auto md:max-w-2xl">
+          <p className="text-kicker tracking-kicker text-accent">
+            {messages.kicker} · {getKicker(planet)}
+          </p>
+          <h1 className="mt-2 mb-1.5 text-planet-sm font-bold tracking-planet text-accent md:text-planet">
+            {planet.title}
+          </h1>
+          <p className="mb-8 max-w-[36ch] text-lede text-muted">{planet.lede}</p>
+          {getPanel({ planetId: planet.id, code: loaderData.code })}
+        </div>
       </main>
     </>
   );

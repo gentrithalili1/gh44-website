@@ -47,7 +47,7 @@ export function SessionReplay() {
               <span
                 aria-hidden="true"
                 data-hidden={line.shownText === "" ? "" : undefined}
-                className="text-terracotta data-hidden:invisible"
+                className="text-clay data-hidden:invisible"
               >
                 {messages.promptMark}{" "}
               </span>

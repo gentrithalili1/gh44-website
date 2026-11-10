@@ -7,7 +7,7 @@ import { CodeLines, CodeTab } from "./CodeBlock.elements";
 import { messages } from "./messages";
 import type { CodeBlockTab } from "./types";
 import { getCodeLength, getPlainLines, getTypingDuration, revealLines } from "./utils/codeLines";
-import { getNextTabIndex } from "./utils/tabKeys";
+import { getNextTabIndex } from "../../utils/tabKeys";
 
 function getCopyStatusCopy(status: CopyStatus) {
   switch (status) {
@@ -90,7 +90,7 @@ export function CodeBlock({ label, tabs, selectedTabId, onSelectTab }: CodeBlock
         role="tablist"
         aria-label={label}
         onKeyDown={handleTabKeyDown}
-        className="flex gap-0.5 overflow-x-auto border-b border-rule px-2"
+        className="flex gap-0.5 overflow-x-auto px-2 shadow-[inset_0_-1px_0_var(--color-rule)]"
       >
         {tabs.map((tab) => (
           <CodeTab

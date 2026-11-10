@@ -2,8 +2,8 @@ import { PromiseConfirmationContextProvider } from "react-promise-confirmation-d
 
 import type { HighlightedCode } from "../../types";
 import { CODE_SNIPPETS, getPlanetSnippetIds } from "../../utils/codeSnippets";
-import { CodeBlock } from "../CodeBlock";
 import { ProjectSource } from "../ProjectSource";
+import { StepList } from "../StepList";
 import { LaunchDemo } from "./components/LaunchDemo";
 import { messages } from "./messages";
 
@@ -15,14 +15,25 @@ interface ConfirmPanelProps {
   code: HighlightedCode;
 }
 
-// react-promise-confirmation-dialog: a live demo of the package, then how to install and use it.
+// react-promise-confirmation-dialog: a live demo of the package, then how to use it, step by
+// step.
 export function ConfirmPanel({ code }: ConfirmPanelProps) {
-  const codeTabs = getPlanetSnippetIds("gh44-confirm").map((snippetId) => ({
-    id: snippetId,
-    label: messages.codeTabs[snippetId],
-    code: CODE_SNIPPETS[snippetId].code,
-    lines: code[snippetId],
-  }));
+  const steps = getPlanetSnippetIds("gh44-confirm").map((snippetId) => {
+    const step = messages.steps[snippetId];
+    return {
+      id: snippetId,
+      name: step.name,
+      text: step.text,
+      code: [
+        {
+          id: snippetId,
+          label: step.tab,
+          code: CODE_SNIPPETS[snippetId].code,
+          lines: code[snippetId],
+        },
+      ],
+    };
+  });
 
   return (
     <>
@@ -30,7 +41,7 @@ export function ConfirmPanel({ code }: ConfirmPanelProps) {
         <LaunchDemo />
       </PromiseConfirmationContextProvider>
       <div id={DIALOG_ROOT_ID} />
-      <CodeBlock label={messages.codeLabel} tabs={codeTabs} />
+      <StepList label={messages.stepsLabel} steps={steps} />
       <ProjectSource projectId="gh44-confirm" />
     </>
   );

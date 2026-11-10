@@ -1,12 +1,7 @@
 import type { Point } from "#/components/SolarSystem/types";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
 import { getRingBands, getUprightRing } from "#/components/SolarSystem/utils/rings";
-import {
-  getOrbitPosition,
-  ROCKET_GAP,
-  ROCKET_LENGTH,
-  SYSTEM_SIZE,
-} from "#/components/SolarSystem/utils/space";
+import { getOrbitPosition, ROCKET_HEIGHT, SYSTEM_SIZE } from "#/components/SolarSystem/utils/space";
 import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 import { PANEL_WIDTH, SHEET_HEIGHT } from "#/utils/panel";
 import { findPlanet, type PlanetBody, PLANETS } from "#/utils/planets";
@@ -43,9 +38,9 @@ const SHIP_POLAR = 1.05;
 
 // The share of a phone's height the bottom sheet leaves free.
 const PHONE_FREE_HEIGHT = 1 - SHEET_HEIGHT;
-// On desktop the planet's box is the left 45% of the screen, centered 30% from the left.
-const DESKTOP_FREE_WIDTH = 0.45;
-const DESKTOP_CENTER_X = 0.3;
+// On desktop the planet's box is the left half of the screen, centered in it.
+const DESKTOP_FREE_WIDTH = 0.5;
+const DESKTOP_CENTER_X = 0.25;
 // The planet's reach fills this share of the free box, and zooms in at most this many times.
 const REACH_FILL = 0.42;
 const MAX_ZOOM = 9;
@@ -67,7 +62,7 @@ function getFreeBox({ width, height }: Viewport) {
       size: Math.min(width, height * PHONE_FREE_HEIGHT),
     };
   }
-  const freeWidth = Math.max(width - PANEL_WIDTH, 0);
+  const freeWidth = width * (1 - PANEL_WIDTH);
   const boxWidth = Math.min(width * DESKTOP_FREE_WIDTH, freeWidth);
 
   return {
@@ -100,7 +95,8 @@ export function getPlanetReach(planet: PlanetBody) {
   const orbiterReaches = getOrbiters(planet).map((orbiter) => orbiter.orbitRadius + orbiter.radius);
   const ringReaches = getRingBands(planet).map((band) => band.outerRadius);
   const uprightRingReach = getUprightRing(planet)?.outerRadius ?? 0;
-  const rocketReach = planet.features.hasRocket ? planet.size + ROCKET_GAP + ROCKET_LENGTH : 0;
+  // The rocket stands on top of the planet before it lifts off; its orbits stay inside the moons'.
+  const rocketReach = planet.features.hasRocket ? planet.size + ROCKET_HEIGHT : 0;
 
   return Math.max(planet.size, rocketReach, uprightRingReach, ...orbiterReaches, ...ringReaches);
 }

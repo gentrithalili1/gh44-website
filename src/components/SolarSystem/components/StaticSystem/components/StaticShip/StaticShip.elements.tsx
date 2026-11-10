@@ -26,8 +26,8 @@ export function StaticShipDrawing() {
     <svg viewBox={VIEW_BOX} aria-hidden="true" className="size-full overflow-visible">
       <defs>
         <radialGradient id={ENGINE_GLOW_ID}>
-          <stop offset="0" className="[stop-color:var(--terracotta-vivid)]" />
-          <stop offset="1" stopOpacity={0} className="[stop-color:var(--terracotta-vivid)]" />
+          <stop offset="0" className="[stop-color:var(--clay)]" />
+          <stop offset="1" stopOpacity={0} className="[stop-color:var(--clay)]" />
         </radialGradient>
       </defs>
       <g transform={`rotate(${SHIP_HEADING * RADIANS_TO_DEGREES})`}>
@@ -40,7 +40,7 @@ export function StaticShipDrawing() {
           className="transition-opacity group-hover:opacity-100"
         />
         <path d={HULL_PATH} className="fill-muted" />
-        <path d={CANOPY_PATH} className="fill-terracotta" />
+        <path d={CANOPY_PATH} className="fill-clay" />
       </g>
     </svg>
   );

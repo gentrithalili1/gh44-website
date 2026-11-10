@@ -37,7 +37,7 @@ export function StaticShip({ isPlanetOpen }: StaticShipProps) {
         className="pointer-events-none absolute top-full left-1/2 mt-1 flex -translate-x-1/2 flex-col items-center text-label tracking-label whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
       >
         <span className="text-foreground">{messages.shipName}</span>
-        <span className="text-label-sub text-terracotta">{messages.shipAction}</span>
+        <span className="text-label-sub text-clay">{messages.shipAction}</span>
       </span>
     </button>
   );

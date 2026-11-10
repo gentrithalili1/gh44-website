@@ -44,7 +44,7 @@ describe("SolarSystem", () => {
 
     const planets = screen.getByRole("navigation", { name: "planets" });
     expect(within(planets).getByRole("link", { name: "me" })).toHaveAttribute("href", "/me");
-    // Only the static drawing names Earth's moon without a hover.
-    expect(screen.getByText("the moon")).toBeInTheDocument();
+    // Only the static drawing names Mars' moons without a hover.
+    expect(screen.getByText("phobos · resolve")).toBeInTheDocument();
   });
 });

@@ -10,11 +10,11 @@ describe("getStarTint", () => {
     expect([tint.r * 255, tint.g * 255, tint.b * 255]).toEqual([223, 225, 229]);
   });
 
-  it("tints the stars in the open planet's soft color", () => {
-    // gh44-brain is Neptune, blue #9fb7cc.
+  it("tints the stars in the open planet's color", () => {
+    // gh44-brain is Neptune, sky #75addb.
     const tint = getStarTint("gh44-brain");
 
-    expect([tint.r * 255, tint.g * 255, tint.b * 255]).toEqual([159, 183, 204]);
+    expect([tint.r * 255, tint.g * 255, tint.b * 255]).toEqual([117, 173, 219]);
   });
 });
 

@@ -1,0 +1,1 @@
+export { ThemeAppTabs } from "./ThemeAppTabs";
