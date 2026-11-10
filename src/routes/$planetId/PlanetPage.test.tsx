@@ -48,7 +48,7 @@ describe("PlanetPage", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "gentrit halili" })).toBeInTheDocument();
     expect(
-      screen.getByText("senior frontend engineer in pristina, kosovo. occasionally in orbit."),
+      screen.getByText("senior frontend engineer from kosovo, currently working in barcelona"),
     ).toBeInTheDocument();
     const contact = screen.getByRole("list", { name: "contact" });
     expect(

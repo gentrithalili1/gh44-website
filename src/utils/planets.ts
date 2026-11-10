@@ -62,7 +62,7 @@ export const PLANETS = [
     name: "me",
     title: "gentrit halili",
     sub: "who, where, how to reach",
-    lede: "senior frontend engineer in pristina, kosovo. occasionally in orbit.",
+    lede: "senior frontend engineer from kosovo, currently working in barcelona",
     color: "sky",
     size: 12,
     orbit: { radius: 148, phase: 3.6 },

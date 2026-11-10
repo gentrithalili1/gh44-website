@@ -4,8 +4,6 @@ import { useSpaceMode } from "#/hooks/useSpaceMode";
 
 import { StaticSystem } from "./components/StaticSystem";
 
-// three.js loads only once the browser can show the scene; if it fails to load, the static
-// system stays.
 const SpaceScene = lazy(() =>
   import("./components/SpaceScene").then(
     (module) => ({ default: module.SpaceScene }),
@@ -15,12 +13,15 @@ const SpaceScene = lazy(() =>
 
 interface SolarSystemProps {
   openPlanetId: string | undefined;
+  age?: number;
 }
 
-// The server, tests and visitors without WebGL or with reduced motion get the static system;
-// everyone else gets the 3D scene, with the static system shown while it loads.
-export function SolarSystem({ openPlanetId }: SolarSystemProps) {
+export function SolarSystem({ openPlanetId, age }: SolarSystemProps) {
   const spaceMode = useSpaceMode();
+
+  const TEST = age?.toExponential(2);
+
+  console.log(TEST);
 
   switch (spaceMode) {
     case "static":
