@@ -12,6 +12,8 @@ type UseFlokiTalkParams = {
   onGo: (destination: Destination) => void;
   // He leads the way back out of the tesseract.
   onBack: () => void;
+  // He flies the visitor into the black hole.
+  onJump: () => void;
 };
 
 function getFlokiFailure(reason: FlokiFailureReason) {
@@ -46,6 +48,8 @@ function getFlokiLine(outcome: FlokiOutcome) {
       return messages.floki.radioPlaying(outcome.track);
     case "radioStopped":
       return messages.floki.radioStopped;
+    case "jumping":
+      return outcome.say ?? messages.floki.toGargantua;
     case "returning":
       return outcome.say ?? messages.floki.goingBack;
     case "explainingPlace":
@@ -81,7 +85,7 @@ function getHearingLine(hearing: FlokiHearing) {
 // Talking with Floki in the cockpit: typed questions, and conversations started from his
 // screen. His lines print in the terminal, he says them out loud, and he flies once he has said
 // where.
-export function useFlokiTalk({ floki, terminal, onGo, onBack }: UseFlokiTalkParams) {
+export function useFlokiTalk({ floki, terminal, onGo, onBack, onJump }: UseFlokiTalkParams) {
   // A conversation goes on, turn after turn, until it ends; a newer one replaces it.
   const [conversation, setConversation] = useState<"off" | "on">("off");
   const conversationIdRef = useRef(0);
@@ -118,6 +122,10 @@ export function useFlokiTalk({ floki, terminal, onGo, onBack }: UseFlokiTalkPara
     }
     if (outcome.status === "returning") {
       onBack();
+      return false;
+    }
+    if (outcome.status === "jumping") {
+      onJump();
       return false;
     }
     const destination =

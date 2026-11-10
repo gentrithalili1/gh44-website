@@ -36,6 +36,8 @@ export type FlokiOutcome =
   | { status: "radioPlaying"; track: Track; trackIndex: number }
   | { status: "radioStopped" }
   // Inside the tesseract: he leads the way back, or says what the place is.
+  // Aboard the ship: he flies the visitor into the black hole once he has said so.
+  | { status: "jumping"; say: string | undefined }
   | { status: "returning"; say: string | undefined }
   | { status: "explainingPlace" }
   // Stopped while he was thinking: nothing to say or do.
@@ -136,6 +138,8 @@ export function useFloki({ place = "cockpit" }: UseFlokiParams = {}) {
         return getMusicOutcome(command.action);
       case "track":
         return getRadioTrack(command.trackIndex);
+      case "gargantua":
+        return { status: "jumping", say: undefined };
       case "back":
         return { status: "returning", say: undefined };
       case "place":
@@ -166,9 +170,10 @@ export function useFloki({ place = "cockpit" }: UseFlokiParams = {}) {
     setRequestStatus("idle");
     if (outcome.status === "failed") return outcome;
 
-    const { say, go, back } = outcome.reply;
+    const { say, go, gargantua, back } = outcome.reply;
     setTurns((current) => [...current, visitorTurn, { role: "floki", text: say }]);
     if (back && place === "tesseract") return { status: "returning", say };
+    if (gargantua && place === "cockpit") return { status: "jumping", say };
 
     return {
       status: "answered",

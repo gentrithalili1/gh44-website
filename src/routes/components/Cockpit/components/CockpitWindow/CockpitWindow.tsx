@@ -117,7 +117,13 @@ export function CockpitWindow({
   const terminal = useTerminal();
   // The ship's computer: he answers in the terminal, and his screen shows him.
   const floki = useFloki({ place: jumpStatus === "inside" ? "tesseract" : "cockpit" });
-  const flokiTalk = useFlokiTalk({ floki, terminal, onGo, onBack: onReturn });
+  const flokiTalk = useFlokiTalk({
+    floki,
+    terminal,
+    onGo,
+    onBack: onReturn,
+    onJump: handleJump,
+  });
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
   const [praiseCount, setPraiseCount] = useState(0);
   const exploration = useExploration();

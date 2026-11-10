@@ -7,6 +7,7 @@ describe("parseFlokiReply", () => {
     expect(parseFlokiReply('{"say": " Course set. ", "go": "work"}')).toEqual({
       say: "Course set.",
       go: "work",
+      gargantua: false,
       back: false,
     });
   });
@@ -15,6 +16,7 @@ describe("parseFlokiReply", () => {
     expect(parseFlokiReply('{"say": "Off we go.", "go": "pluto"}')).toEqual({
       say: "Off we go.",
       go: undefined,
+      gargantua: false,
       back: false,
     });
   });
@@ -29,6 +31,15 @@ describe("parseFlokiReply", () => {
     const reply = parseFlokiReply(JSON.stringify({ say: "a".repeat(400) }));
 
     expect(reply?.say).toHaveLength(280);
+  });
+});
+
+describe("parseFlokiReply, for the black hole", () => {
+  it("reads a flight to gargantua only when it is plainly true", () => {
+    expect(parseFlokiReply('{"say":"Hold on.","go":null,"gargantua":true}')?.gargantua).toBe(true);
+    expect(parseFlokiReply('{"say":"Not today.","go":null,"gargantua":"yes"}')?.gargantua).toBe(
+      false,
+    );
   });
 });
 
