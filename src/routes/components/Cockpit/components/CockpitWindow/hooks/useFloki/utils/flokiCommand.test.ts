@@ -90,4 +90,13 @@ describe("getFlokiCommand", () => {
     expect(getFlokiCommand({ text: "lets go back", tracks: [], place: "cockpit" })).toBeUndefined();
     expect(getFlokiCommand({ text: "what is this", tracks: [] })).toBeUndefined();
   });
+
+  it("flies into the black hole from the ship, by its name or what it is", () => {
+    for (const text of ["go gargantua", "floki take me to gargantua", "fly into the black hole"]) {
+      expect(getFlokiCommand({ text, tracks: [] })).toEqual({ kind: "gargantua" });
+    }
+    expect(
+      getFlokiCommand({ text: "go gargantua", tracks: [], place: "tesseract" }),
+    ).toBeUndefined();
+  });
 });

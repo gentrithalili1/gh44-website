@@ -31,6 +31,10 @@ const PREVIOUS_PATTERN =
   /^(?:please |floki )*(?:play |go to )?(?:the )?(?:previous(?: song| track| one)?|(?:last|go back a|back a) (?:song|track))(?: please)?$/;
 const TRACK_PATTERN = /^(?:please |floki )*(?:play|put on)(?: me| us)? (.+?)(?: on the radio)?$/;
 
+// Aboard the ship: "go to gargantua", "take me into the black hole", ... (no planet is called
+// that, so it never clashes with a destination).
+const GARGANTUA_PATTERN = /\b(?:gargantua|black ?hole)\b/;
+
 // Inside the tesseract: "let's go back", "take me home", "get us out of here", ...
 const BACK_PATTERN =
   /^(?:please |floki |ok |okay )*(?:let s |lets |can we |i want to |time to )?(?:go back|go home|head back|turn back|leave|take (?:me|us) (?:back|home)|get (?:me|us) out(?: of here)?|back to the (?:ship|cockpit|explorer))(?: now| please| home| floki| to the (?:ship|cockpit|explorer))*$/;
@@ -45,6 +49,8 @@ export type FlokiCommand =
   | { kind: "humor"; humor: number }
   | { kind: "music"; action: FlokiMusicAction }
   | { kind: "track"; trackIndex: number }
+  // Aboard the ship: fly into the black hole.
+  | { kind: "gargantua" }
   // Inside the tesseract only: leave it, or say what it is.
   | { kind: "back" }
   | { kind: "place" };
@@ -117,6 +123,7 @@ export function getFlokiCommand({
 
   const target = NAVIGATE_PATTERN.exec(normalized)?.[1];
   if (target === undefined) return undefined;
+  if (place === "cockpit" && GARGANTUA_PATTERN.test(target)) return { kind: "gargantua" };
   const matches = DESTINATIONS.filter((destination) =>
     getNames(destination).some((word) => hasWord({ text: target, word })),
   );

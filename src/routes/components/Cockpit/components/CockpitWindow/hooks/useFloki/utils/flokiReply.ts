@@ -25,7 +25,12 @@ export function parseFlokiReply(text: string): FlokiReply | undefined {
   if (say === "") return undefined;
   const destination = DESTINATIONS.find(({ name }) => name === value.go);
 
-  return { say, go: destination?.name, back: value.back === true };
+  return {
+    say,
+    go: destination?.name,
+    gargantua: value.gargantua === true,
+    back: value.back === true,
+  };
 }
 
 // The text of the first choice in an OpenAI-style chat completion response.

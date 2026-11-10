@@ -26,6 +26,12 @@ const TESSERACT_LINES = [
   'If the visitor asks what this is or where you are, explain it from these lines. If they want to leave or go back to the ship, say so briefly and set "back" to true. You cannot fly to a planet from in here: tell them to go back first.',
 ];
 
+// What Floki knows about the black hole while aboard the ship.
+const GARGANTUA_LINES = [
+  "Gargantua: a black hole far past the planets, beyond the stars, in the top right of the sky. It is not on the destination list; it is the ship's secret. You can fly the visitor into it: inside is the tesseract, and the trip costs 7 years on Earth. Mention it only when asked about it, about black holes or about what else is out there.",
+  'If the visitor wants to go to Gargantua or into the black hole, say so briefly and set "gargantua" to true.',
+];
+
 type GetFlokiPromptParams = { humor: number; place: FlokiPlace };
 
 // Everything Floki knows, and how he answers. Nothing else about Gentrit goes in, so he cannot
@@ -49,8 +55,8 @@ export function getFlokiPrompt({ humor, place }: GetFlokiPromptParams) {
     "- Answer the question asked; never recite his whole profile.",
     "- You are not a general assistant: steer anything off topic back to the ship and the site, in one line.",
     `- At most two short sentences, under ${FLOKI_MAX_REPLY_LENGTH} characters. Plain words, no lists, no markdown, no emojis. Your words are spoken aloud.`,
-    `- Answer with JSON only: {"say": string, "go": one of ${JSON.stringify(destinationIds)} or null, "back": boolean}. Set "go" only when the visitor wants to fly there. Set "back" to true only inside the tesseract, when the visitor wants to leave it.`,
-    ...(place === "tesseract" ? TESSERACT_LINES : []),
+    `- Answer with JSON only: {"say": string, "go": one of ${JSON.stringify(destinationIds)} or null, "gargantua": boolean, "back": boolean}. Set "go" only when the visitor wants to fly there. Set "gargantua" to true only aboard the ship, when the visitor wants to fly into the black hole. Set "back" to true only inside the tesseract, when the visitor wants to leave it.`,
+    ...(place === "tesseract" ? TESSERACT_LINES : GARGANTUA_LINES),
     "Facts about Gentrit:",
     "- Gentrit Halili, nickname Granko. From Pristina, Kosovo, now building his career in Barcelona, Spain.",
     "- Senior software engineer with over 10 years in JavaScript and TypeScript: React and Next.js, React Native, Node.js and backend, GraphQL and API architecture, frontend architecture for apps that scale, and AI-powered products. Has built SaaS platforms, mobile apps and real-time data interfaces. Likes owning a product and building things people use.",

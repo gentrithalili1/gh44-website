@@ -56,6 +56,8 @@ export const messages = {
     radioStopped: "radio off.",
     // Inside the tesseract.
     goingBack: "back to the ship. hold on.",
+    // Aboard: flying into the black hole.
+    toGargantua: "gargantua it is. turning away from the sun.",
     tesseract:
       "the tesseract. every streak of light is a moment, and the shelf is this site's whole history, one book per commit.",
     radioUnavailable: "radio's down. no tracks on board.",

@@ -40,4 +40,11 @@ describe("getFlokiPrompt", () => {
     expect(inside).toContain("inside it together, floating in the tesseract");
     expect(inside).toContain('set "back" to true');
   });
+
+  it("knows about gargantua aboard the ship, and how to fly there", () => {
+    const aboard = getFlokiPrompt({ place: "cockpit", humor: 50 });
+
+    expect(aboard).toContain("Gargantua: a black hole far past the planets");
+    expect(aboard).toContain('set "gargantua" to true');
+  });
 });
