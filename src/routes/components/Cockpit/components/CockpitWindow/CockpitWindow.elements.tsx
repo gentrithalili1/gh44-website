@@ -1,9 +1,3 @@
-// An astronaut's helmet and shoulders: leaving the ship for open space.
-const HELMET_PATH = "M8 1.75a5 5 0 1 1 0 10a5 5 0 0 1 0-10z";
-const VISOR_PATH =
-  "M5.4 5h5.2a1 1 0 0 1 1 1v1a2.6 2.6 0 0 1-2.6 2.6H7a2.6 2.6 0 0 1-2.6-2.6V6a1 1 0 0 1 1-1z";
-const SHOULDERS_PATH = "M2.5 15.25c.7-1.9 2.9-2.9 5.5-2.9s4.8 1 5.5 2.9";
-
 interface PanelIconProps {
   // Which way the chevron points: down to hide the panel, up to bring it back.
   direction: "down" | "up";
@@ -60,19 +54,6 @@ const FRAME_SEAMS = [
   "M18 70 H24",
   "M76 70 H82",
 ] as const;
-
-export function AstronautIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className="size-4.5">
-      <path d={HELMET_PATH} className="fill-none stroke-current stroke-[1.3]" />
-      <path d={VISOR_PATH} className="fill-current opacity-70" />
-      <path
-        d={SHOULDERS_PATH}
-        className="fill-none stroke-current stroke-[1.3] [stroke-linecap:round]"
-      />
-    </svg>
-  );
-}
 
 const GLARE_ID = "cockpit-glass-glare";
 const HULL_SHADE_ID = "cockpit-hull-shade";

@@ -1,0 +1,1 @@
+export { useIsWideScreen } from "./useIsWideScreen";

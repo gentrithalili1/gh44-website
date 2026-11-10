@@ -20,6 +20,7 @@ import {
 } from "./CockpitWindow.elements";
 import { CockpitFloki } from "./components/CockpitFloki";
 import { CockpitStatus } from "./components/CockpitStatus";
+import { SpacewalkDoor } from "./components/SpacewalkDoor";
 import { Tesseract } from "./components/Tesseract";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
@@ -27,6 +28,7 @@ import { CockpitTerminal, type TerminalEgg } from "./components/CockpitTerminal"
 import { useFloki } from "./hooks/useFloki";
 import { useFlokiTalk } from "./hooks/useFlokiTalk";
 import { useFlokiWelcome } from "./hooks/useFlokiWelcome";
+import { useIsWideScreen } from "./hooks/useIsWideScreen";
 import { useTerminal } from "./hooks/useTerminal";
 import { messages } from "./messages";
 
@@ -106,6 +108,8 @@ export function CockpitWindow({
 }: CockpitWindowProps) {
   const titleId = useId();
   const panelId = useId();
+  // The hatch is on the cockpit wall on a wide screen, and in the dock on a phone.
+  const isWideScreen = useIsWideScreen();
   // The visitor can slide the console away for the whole view, and back.
   const [panel, setPanel] = useState<"shown" | "hidden">("shown");
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -302,13 +306,20 @@ export function CockpitWindow({
           </>
         ) : null}
       </div>
+      {/* The hatch on the cockpit wall, on the right-hand pillar beside the side window; it moves
+          with the windshield as the visitor looks around. On a phone it is in the dock. */}
+      {isWideScreen ? (
+        <div className="absolute top-[37%] left-[79%] [translate:calc(-50%+var(--look-x,0)*-8px)_calc(var(--look-y,0)*-5px)] transition-[translate,opacity] duration-500 ease-space group-data-[power=off]/cockpit:opacity-0 motion-reduce:[translate:-50%_0]">
+          <SpacewalkDoor variant="hatch" isLocked={isLocked} onSpacewalk={handleClose} />
+        </div>
+      ) : null}
       {/* Slides out of the way (its own `transform`, apart from the boarding's `translate`). */}
       <div
         id={panelId}
         data-panel={panelPosition}
         inert={isPanelAway}
         aria-hidden={isPanelAway ? true : undefined}
-        className="absolute inset-x-0 bottom-0 max-h-[86%] rounded-t-[50%_1.5rem] border-t-8 border-surface bg-bg-subtle bg-[linear-gradient(to_bottom,var(--surface),var(--bg-subtle)_30%)] shadow-[0_-1px_0_var(--rule),0_-18px_40px_-12px_rgb(0_0_0/0.8)] transition-transform duration-500 ease-space group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in data-[panel=away]:[transform:translateY(calc(100%+1rem))] max-md:data-[panel=docked]:[transform:translateY(calc(100%-7.5rem))] motion-reduce:transition-none md:h-(--console-height) md:max-h-none md:rounded-t-[50%_2.5rem] md:border-t-12"
+        className="absolute inset-x-0 bottom-0 max-h-[86%] rounded-t-[50%_1.5rem] border-t-8 border-surface bg-bg-subtle bg-[linear-gradient(to_bottom,var(--surface),var(--bg-subtle)_30%)] shadow-[0_-1px_0_var(--rule),0_-18px_40px_-12px_rgb(0_0_0/0.8)] transition-transform duration-500 ease-space group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in max-md:data-[panel=away]:[transform:translateY(calc(100%-7.5rem))] max-md:data-[panel=docked]:[transform:translateY(calc(100%-7.5rem))] md:data-[panel=away]:[transform:translateY(calc(100%+1rem))] motion-reduce:transition-none md:h-(--console-height) md:max-h-none md:rounded-t-[50%_2.5rem] md:border-t-12"
       >
         <DashboardLip />
         <DashboardPlates />
@@ -321,11 +332,13 @@ export function CockpitWindow({
               titleId={titleId}
               hasSignal={hasSignal}
               earthYearsPassed={earthYearsPassed}
-              isDocked={isDocked}
+              // Docked by the visitor, or for a launch on a phone: the strip is all that shows.
+              isDocked={isDocked || isPanelAway}
               panelId={panelId}
               isLocked={isLocked}
               onPanelToggle={handlePanelToggle}
               onSpacewalk={handleClose}
+              hasDoor={!isWideScreen}
             />
           </div>
           {/* Docked, the rest of the panel is below the screen's edge: out of reach. */}

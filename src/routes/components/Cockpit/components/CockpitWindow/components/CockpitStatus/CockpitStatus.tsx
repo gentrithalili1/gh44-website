@@ -1,5 +1,6 @@
-import { AstronautIcon, PanelIcon } from "../../CockpitWindow.elements";
+import { PanelIcon } from "../../CockpitWindow.elements";
 import { EarthClock } from "../EarthClock";
+import { SpacewalkDoor } from "../SpacewalkDoor";
 import { messages } from "./messages";
 
 interface CockpitStatusProps {
@@ -15,11 +16,13 @@ interface CockpitStatusProps {
   isLocked: boolean;
   onPanelToggle: () => void;
   onSpacewalk: () => void;
+  // On a phone the hatch is here, in the dock; on a wide screen it is on the cockpit wall.
+  hasDoor: boolean;
 }
 
-// The strip on top of the dashboard: the ship's name, its status and Earth's clock, and the way
-// out on a spacewalk. On a phone it is also the dock: the button beside it folds the panel down
-// to this strip and back.
+// The strip on top of the dashboard: the ship's name, its status and Earth's clock. On a phone
+// it is also the dock, with the hatch out on a spacewalk and the button that folds the panel
+// down to this strip and back.
 export function CockpitStatus({
   titleId,
   hasSignal,
@@ -29,6 +32,7 @@ export function CockpitStatus({
   isLocked,
   onPanelToggle,
   onSpacewalk,
+  hasDoor,
 }: CockpitStatusProps) {
   return (
     // Docked on a phone it sits at the bottom of the screen: its buttons stay clear of the site's
@@ -66,16 +70,9 @@ export function CockpitStatus({
         >
           <PanelIcon direction={isDocked ? "up" : "down"} />
         </button>
-        <button
-          type="button"
-          aria-label={messages.spacewalkLabel}
-          disabled={isLocked}
-          onClick={onSpacewalk}
-          className="flex size-9 items-center justify-center gap-2 rounded-full border border-rule bg-bg-subtle text-xs whitespace-nowrap text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40 md:w-auto md:pr-4 md:pl-3"
-        >
-          <AstronautIcon />
-          <span className="max-md:sr-only">{messages.spacewalk}</span>
-        </button>
+        {hasDoor ? (
+          <SpacewalkDoor variant="compact" isLocked={isLocked} onSpacewalk={onSpacewalk} />
+        ) : null}
       </div>
     </div>
   );
