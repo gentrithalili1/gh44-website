@@ -22,6 +22,8 @@ export const SUN_FRAGMENT_SHADER = /* glsl */ `
   uniform vec3 uHotColor;
   uniform float uTime;
   uniform float uOpacity;
+  // 0 to 1: how hard it flares, after too many pokes.
+  uniform float uFlare;
   varying vec3 vLocal;
   varying vec3 vWorld;
   varying vec3 vNormal;
@@ -39,6 +41,7 @@ export const SUN_FRAGMENT_SHADER = /* glsl */ `
 
     float rim = 1.0 - max(dot(normalize(vNormal), normalize(cameraPosition - vWorld)), 0.0);
     color = mix(color, uCoolColor, pow(rim, 2.5) * 0.55);
+    color = mix(color, uHotColor, uFlare * 0.85);
     gl_FragColor = vec4(color, uOpacity);
   }
 `;

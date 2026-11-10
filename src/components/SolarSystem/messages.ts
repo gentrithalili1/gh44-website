@@ -13,5 +13,6 @@ export const messages = {
   appRing: (app: string) => `gh44 for ${app}`,
   shipName: EXPLORER_NAME,
   shipAction: "open cockpit",
+  sunScold: "floki: please don't.",
   pluto: "pluto · still a planet",
 } as const;
