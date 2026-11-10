@@ -2,41 +2,29 @@ import { DoorIcon } from "./SpacewalkDoor.elements";
 import { messages } from "./messages";
 
 interface SpacewalkDoorProps {
-  // A hatch on the cockpit wall with its name under it, or a round button in the status strip.
-  variant: "hatch" | "compact";
   // After `go`: the hatch stays shut.
   isLocked: boolean;
   onSpacewalk: () => void;
 }
 
-// The way out on a spacewalk: the cockpit's hatch.
-export function SpacewalkDoor({ variant, isLocked, onSpacewalk }: SpacewalkDoorProps) {
-  if (variant === "compact") {
-    return (
-      <button
-        type="button"
-        aria-label={messages.spacewalkLabel}
-        disabled={isLocked}
-        onClick={onSpacewalk}
-        className="flex size-9 items-center justify-center rounded-full border border-rule bg-bg-subtle py-1.5 transition-colors hover:border-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40"
-      >
-        <DoorIcon />
-      </button>
-    );
-  }
-
+// The way out on a spacewalk: a rose card with the cockpit's hatch, its name beside it on a wide
+// screen.
+export function SpacewalkDoor({ isLocked, onSpacewalk }: SpacewalkDoorProps) {
   return (
+    // The whole card is the exit, in rose like a hatch's warning light.
     <button
       type="button"
       aria-label={messages.spacewalkLabel}
       disabled={isLocked}
       onClick={onSpacewalk}
-      className="group/door flex flex-col items-center gap-1.5 rounded-lg p-1.5 text-[0.625rem] tracking-kicker text-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40"
+      className="group/door flex shrink-0 items-center gap-2 rounded-lg border border-rose/35 bg-rose/12 px-3 py-1.5 text-xs text-rose shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] transition-colors hover:border-rose/70 hover:bg-rose/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose disabled:opacity-40 md:pr-4"
     >
-      <span className="block h-16 drop-shadow-[0_4px_10px_rgb(0_0_0/0.7)] transition-transform duration-300 ease-space group-hover/door:scale-105 group-disabled/door:scale-100">
+      <span className="block h-5 transition-transform duration-300 ease-space group-hover/door:scale-110 group-disabled/door:scale-100">
         <DoorIcon />
       </span>
-      <span aria-hidden="true">{messages.spacewalk}</span>
+      <span aria-hidden="true" className="max-md:hidden">
+        {messages.spacewalk}
+      </span>
     </button>
   );
 }

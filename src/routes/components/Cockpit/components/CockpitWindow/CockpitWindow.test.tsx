@@ -63,9 +63,9 @@ describe("CockpitWindow", () => {
     await user.keyboard("{Escape}");
 
     expect(onClose).not.toHaveBeenCalled();
-    // The whole panel slides away so the flight shows: nothing on it is in reach, or pressable.
-    expect(screen.queryByRole("button", { name: "go on a spacewalk" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "go on a spacewalk", hidden: true })).toBeDisabled();
+    // On a phone the panel docks so the flight shows: the strip stays, its exit shut, and the
+    // rest is out of reach.
+    expect(screen.getByRole("button", { name: "go on a spacewalk" })).toBeDisabled();
     expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "command", hidden: true })).toHaveAttribute(
       "readonly",
@@ -94,11 +94,11 @@ describe("CockpitWindow", () => {
     expect(screen.getByRole("region", { name: "radar" })).toBeInTheDocument();
   });
 
-  it("shows the ship's name and its systems", async () => {
+  it("names the ship for screen readers, and shows earth's time", async () => {
     await renderCockpitWindow({ isLocked: false, onClose: vi.fn() });
 
     expect(screen.getByRole("dialog", { name: "gh44 explorer" })).toBeInTheDocument();
-    expect(screen.getByText("systems online")).toBeInTheDocument();
+    expect(screen.getByLabelText(/^earth time: /)).toBeInTheDocument();
   });
 
   it("takes the command line's focus and holds the page behind as a modal dialog", async () => {
@@ -471,7 +471,7 @@ describe("CockpitWindow's Floki", () => {
     expect(
       output.getByText("home. that felt like minutes. 7 years passed on earth."),
     ).toBeInTheDocument();
-    expect(screen.getByText("systems online")).toBeInTheDocument();
+    expect(screen.queryByText("signal detected · gargantua")).not.toBeInTheDocument();
     expect(screen.getByLabelText(new RegExp(`^earth time: .*${yearNow + 7}`))).toBeInTheDocument();
     expect(
       within(screen.getByRole("region", { name: "radar" })).getByText("6/5"),
