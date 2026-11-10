@@ -187,33 +187,6 @@ describe("CockpitRadio", () => {
     expect(getNowPlaying()).toHaveTextContent("shkurte fejza - fluturo pellumb");
   });
 
-  it("lands on dead air past the last track, then starts the list over", async () => {
-    const user = userEvent.setup();
-    const players = stubAudio({ hasTrack: true, autoplay: "allowed" });
-    await renderAt("/");
-    await waitForPlaying(players);
-    await openCockpit(user);
-    await user.click(within(getRadio()).getByRole("button", { name: "previous track" }));
-    expect(getNowPlaying()).toHaveTextContent("shkurte fejza - fluturo pellumb");
-
-    await user.click(within(getRadio()).getByRole("button", { name: "next track" }));
-
-    expect(getNowPlaying()).toHaveTextContent("dead air");
-    expect(
-      within(getRadio()).getByLabelText("a signal in morse: gentrithalili11@gmail.com"),
-    ).toHaveTextContent("--. . -. - .-. .. -");
-    expect(
-      within(getRadio()).queryByRole("button", { name: "stop the radio" }),
-    ).not.toBeInTheDocument();
-
-    await user.click(within(getRadio()).getByRole("button", { name: "next track" }));
-
-    expect(getNowPlaying()).toHaveTextContent("thomas newman - crystalline");
-    expect(
-      await within(getRadio()).findByRole("button", { name: "stop the radio" }),
-    ).toBeInTheDocument();
-  });
-
   it("only picks the track while stopped", async () => {
     const user = userEvent.setup();
     const players = stubAudio({ hasTrack: true, autoplay: "allowed" });

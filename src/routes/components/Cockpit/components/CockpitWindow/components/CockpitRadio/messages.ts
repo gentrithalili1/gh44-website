@@ -9,7 +9,4 @@ export const messages = {
   previousLabel: "previous track",
   nextLabel: "next track",
   playlistLabel: "playlist",
-  // Past the last track: nothing on air, then a signal for whoever stays.
-  deadAir: "dead air",
-  morseLabel: (text: string) => `a signal in morse: ${text}`,
 } as const;

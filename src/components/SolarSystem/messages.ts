@@ -18,12 +18,11 @@ export const messages = {
   sunScoldSpoken: "Please don't poke the sun!",
   fetchBall: "floki's ball",
   endurance: "endurance",
-  // Kept short: these sit near the edges of the screen, where a long name would be cut off.
   voyagers: {
-    voyager1: "voyager 1 · since 1977",
-    voyager2: "voyager 2 · since 1977",
+    voyager1: "voyager 1",
+    voyager2: "voyager 2",
   },
-  millersPlanet: "miller's planet · one hour here, seven years on earth.",
+  millersPlanet: "miller's planet",
   avalon: "avalon · to homestead ii",
   homestead: "homestead ii · 90 years from the avalon",
   blackHole: "gargantua",

@@ -91,12 +91,10 @@
 
   --animate-cockpit-iris: cockpit-iris 450ms var(--ease-space) 550ms both;
   --animate-cockpit-close: cockpit-close 520ms var(--ease-space) forwards;
-  /* The radio's dead air: a signal fades up for whoever waits ten seconds. */
-  --animate-morse-in: morse-in 1500ms var(--ease-space) 10s both;
   /* The black hole's shadow covers the cockpit as the flight in ends, and lifts on return. */
   --animate-jump-black: jump-black 700ms var(--ease-space) 7300ms both;
   /* Inside it, the way back shows after a beat of nothing. */
-  --animate-void-in: morse-in 1400ms var(--ease-space) 1200ms both;
+  --animate-void-in: void-in 1400ms var(--ease-space) 1200ms both;
   --animate-jump-back: jump-back 1100ms var(--ease-space) both;
   --animate-floki-perk: floki-perk 700ms var(--ease-space) both;
   --animate-cockpit-rumble: cockpit-rumble 650ms linear both;
@@ -176,7 +174,7 @@
     }
   }
 
-  @keyframes morse-in {
+  @keyframes void-in {
     from {
       opacity: 0;
     }
