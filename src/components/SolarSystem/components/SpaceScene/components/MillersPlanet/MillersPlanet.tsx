@@ -11,7 +11,7 @@ import { HoverName } from "../HoverName";
 
 // On the way from the Endurance to the black hole, close to it: far out, below the orbit plane
 // and behind the system. Scene units.
-const POSITION: [number, number, number] = [1890, -2180, -3350];
+const POSITION: [number, number, number] = [3024, -3488, -5360];
 const RADIUS = 52;
 const SEGMENTS = 32;
 // The wave: a white ridge part of the way round the water, standing this far out of it, as thick

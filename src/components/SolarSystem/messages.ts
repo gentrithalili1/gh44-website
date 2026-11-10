@@ -23,7 +23,7 @@ export const messages = {
     voyager2: "voyager 2",
   },
   millersPlanet: "miller's planet",
-  avalon: "avalon · to homestead ii",
+  avalon: "avalon",
   homestead: "homestead ii · 90 years from the avalon",
   blackHole: "gargantua",
   blackHoleUnknown: "???",
