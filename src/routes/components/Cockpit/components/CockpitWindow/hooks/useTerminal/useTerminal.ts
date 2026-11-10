@@ -2,19 +2,21 @@ import { useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { useExploration } from "#/hooks/useExploration";
+import { useSecrets } from "#/hooks/useSecrets";
 
 import {
   getWelcomeLines,
+  hasFoundGargantua,
   runCommand,
 } from "../../components/CockpitTerminal/utils/terminalCommands";
 
 import { messages } from "../../components/CockpitTerminal/messages";
 
-// A line on the screen: a command echoed at the prompt, what a command printed, or what the
-// visitor and Floki said to each other.
+// A line on the screen: a command echoed at the prompt, what a command printed, what the
+// visitor and Floki said to each other, or an alert that stands out from the rest.
 export type TerminalLine = {
   id: number;
-  kind: "command" | "output" | "visitor" | "floki";
+  kind: "command" | "output" | "visitor" | "floki" | "alert";
   text: string;
 };
 
@@ -23,10 +25,18 @@ type Screen = { lines: readonly TerminalLine[]; nextLineId: number };
 // Where the visitor is in the command history: typing a new line, or showing an earlier one.
 type HistoryPosition = { status: "typing" } | { status: "browsing"; index: number };
 
-function getWelcomeScreen(): Screen {
+// With a signal, Floki has picked up the black hole and says so.
+function getWelcomeScreen({ hasSignal }: { hasSignal: boolean }): Screen {
   const lines = [
     ...getWelcomeLines().map((text) => ({ kind: "output", text }) as const),
     { kind: "floki", text: messages.floki.greeting } as const,
+    ...(hasSignal
+      ? [
+          { kind: "alert", text: messages.gargantua.alert } as const,
+          { kind: "floki", text: messages.gargantua.signal } as const,
+          { kind: "alert", text: messages.gargantua.invite } as const,
+        ]
+      : []),
   ];
 
   return { lines: lines.map((line, id) => ({ ...line, id })), nextLineId: lines.length };
@@ -54,7 +64,12 @@ export type Terminal = ReturnType<typeof useTerminal>;
 export function useTerminal() {
   const location = useLocation();
   const exploration = useExploration();
-  const [screen, setScreen] = useState(getWelcomeScreen);
+  const secrets = useSecrets();
+  const [screen, setScreen] = useState(() =>
+    getWelcomeScreen({
+      hasSignal: hasFoundGargantua(exploration) && !secrets.hasCrossedHorizon,
+    }),
+  );
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<readonly string[]>([]);
   const [historyPosition, setHistoryPosition] = useState<HistoryPosition>({ status: "typing" });
@@ -63,17 +78,24 @@ export function useTerminal() {
   function run(command: string) {
     const result = runCommand({
       input: command,
-      context: { pathname: location.pathname, visitedIds: exploration.visitedIds },
+      context: {
+        pathname: location.pathname,
+        visitedIds: exploration.visitedIds,
+        hasBall: secrets.hasBall,
+        hasCrossedHorizon: secrets.hasCrossedHorizon,
+      },
     });
     const echo = { kind: "command", text: command.trim() } as const;
     const output = result.kind === "clear" ? [] : result.lines;
+    // An egg is Floki talking.
+    const outputKind = result.kind === "egg" ? "floki" : "output";
 
     setScreen((current) =>
       result.kind === "clear"
         ? { lines: [], nextLineId: current.nextLineId }
         : addLines({
             screen: current,
-            lines: [echo, ...output.map((text) => ({ kind: "output", text }) as const)],
+            lines: [echo, ...output.map((text) => ({ kind: outputKind, text }) as const)],
           }),
     );
     if (command.trim() !== "") setHistory((current) => [...current, command.trim()]);

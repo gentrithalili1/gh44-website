@@ -8,6 +8,8 @@ import { PerspectiveCamera, Vector3 } from "three";
 import { useExplorer } from "#/hooks/useExplorer";
 
 import type { SceneState } from "../../types";
+import { getJumpCenter, getJumpLift, getSceneWarp } from "../../utils/blackHole";
+import { PHONE_MAX_WIDTH } from "../../utils/sceneMath";
 import {
   type CameraAngle,
   type CameraFocus,
@@ -43,7 +45,6 @@ const SHIP_SWING = 0.2;
 // The view widens a little at a flight's fastest (degrees), and a lot through a launch's jump.
 const FLIGHT_FOV_PUSH = 4;
 const WARP_FOV_PUSH = 16;
-
 type Flight = {
   // What the camera is headed for.
   focus: CameraFocus;
@@ -232,14 +233,19 @@ export function useCameraFlight({
     camera.fov =
       CAMERA_FOV +
       Math.sin(Math.PI * flight.progress) * FLIGHT_FOV_PUSH +
-      sceneState.warp * WARP_FOV_PUSH;
+      // The brake dips a launch's warp under 0, on purpose; the jump has no brake.
+      (sceneState.jump > 0 ? getSceneWarp(sceneState) : sceneState.warp) * WARP_FOV_PUSH;
     camera.position.set(...placement.position);
     camera.lookAt(...placement.target);
+    // Flying into the black hole, the view lifts: straight ahead moves from the ship, behind
+    // the console, up into the middle of the windshield.
+    const jumpCenter = getJumpCenter(sceneState.jump);
+    const jumpLift = size.height * getJumpLift(size.width < PHONE_MAX_WIDTH);
     camera.setViewOffset(
       size.width,
       size.height,
-      placement.viewOffset.x,
-      placement.viewOffset.y,
+      placement.viewOffset.x * (1 - jumpCenter),
+      placement.viewOffset.y + (jumpLift - placement.viewOffset.y) * jumpCenter,
       size.width,
       size.height,
     );

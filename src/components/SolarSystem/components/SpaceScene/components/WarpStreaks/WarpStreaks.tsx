@@ -5,6 +5,7 @@ import { Color, DoubleSide, LinearSRGBColorSpace, type Mesh } from "three";
 import { PALETTE } from "#/utils/palette";
 
 import type { SceneState } from "../../types";
+import { getSceneWarp } from "../../utils/blackHole";
 import { createWarpField } from "./utils/warpField";
 import { WARP_FRAGMENT_SHADER, WARP_VERTEX_SHADER } from "./utils/warpShaders";
 
@@ -29,7 +30,7 @@ export function WarpStreaks({ sceneStateRef }: WarpStreaksProps) {
   const meshRef = useRef<Mesh>(null);
 
   useFrame(({ clock }) => {
-    const { warp } = sceneStateRef.current;
+    const warp = getSceneWarp(sceneStateRef.current);
     if (meshRef.current) meshRef.current.visible = warp > 0;
     material.uniforms.uWarp.value = warp;
     material.uniforms.uTime.value = clock.elapsedTime;

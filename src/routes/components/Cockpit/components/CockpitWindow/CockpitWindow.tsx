@@ -2,8 +2,12 @@ import { useId, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import type { CockpitReveal } from "#/hooks/useExplorer";
+import { useExploration } from "#/hooks/useExploration";
+import { findSecret, useSecrets } from "#/hooks/useSecrets";
+import { DESTINATIONS } from "#/utils/destinations";
 import type { Destination } from "#/utils/destinations";
-import { COCKPIT_SHIP_Y } from "#/utils/explorer";
+import { useMusic } from "#/routes/hooks/useMusic";
+import { COCKPIT_SHIP_Y, GARGANTUA_YEARS } from "#/utils/explorer";
 
 import {
   AstronautIcon,
@@ -12,9 +16,10 @@ import {
   ConsoleScreen,
 } from "./CockpitWindow.elements";
 import { CockpitFloki } from "./components/CockpitFloki";
+import { EarthClock } from "./components/EarthClock";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
-import { CockpitTerminal } from "./components/CockpitTerminal";
+import { CockpitTerminal, type TerminalEgg } from "./components/CockpitTerminal";
 import { useFloki } from "./hooks/useFloki";
 import { useFlokiTalk } from "./hooks/useFlokiTalk";
 import { useFlokiWelcome } from "./hooks/useFlokiWelcome";
@@ -64,7 +69,19 @@ interface CockpitWindowProps {
   // The closing cockpit has faded out.
   onClosed: () => void;
   onGo: (destination: Destination) => void;
+  // The trip into the black hole: flying in, the cockpit goes dark; inside there is only black
+  // and the way back.
+  jumpStatus: "idle" | "jumping" | "inside";
+  // Starts that flight; `onArrive` runs once the visitor is back.
+  onJump: (onArrive: () => void) => void;
+  // The way back from inside.
+  onReturn: () => void;
+  // The years that passed on Earth meanwhile.
+  earthYearsPassed: number;
 }
+
+// What plays on the way into the black hole, if the radio is on.
+const JUMP_TRACK_TITLE = "s.t.a.y.";
 
 // Inside the gh44 explorer, full screen: an arched windshield with two struts looks out on the
 // live system, over a graphite console of bezeled screens: the terminal in the middle, Floki on
@@ -78,6 +95,10 @@ export function CockpitWindow({
   onClose,
   onClosed,
   onGo,
+  jumpStatus,
+  onJump,
+  onReturn,
+  earthYearsPassed,
 }: CockpitWindowProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -88,6 +109,15 @@ export function CockpitWindow({
   const floki = useFloki();
   const flokiTalk = useFlokiTalk({ floki, terminal, onGo });
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
+  const [praiseCount, setPraiseCount] = useState(0);
+  const exploration = useExploration();
+  const secrets = useSecrets();
+  // Every planet visited, and the black hole still ahead: the cockpit says so.
+  const hasSignal =
+    exploration.visitedIds.length >= DESTINATIONS.length && !secrets.hasCrossedHorizon;
+  const music = useMusic();
+  // Back from the black hole: the dark lifts and the screens power on again.
+  const [hasReturned, setHasReturned] = useState(false);
 
   // The page behind takes focus again only once the cockpit is no longer open over it.
   function handleClose() {
@@ -129,6 +159,58 @@ export function CockpitWindow({
     onGo(destination);
   }
 
+  // Into the black hole (an easter egg): Floki stops, the radio finds the right track, and on
+  // the other side the terminal says what it cost.
+  function handleJump() {
+    flokiTalk.takeControls();
+    setHasReturned(false);
+    const trackIndex = music.tracks.findIndex((track) => track.title === JUMP_TRACK_TITLE);
+    if (music.status === "playing" && trackIndex >= 0) void music.playTrack(trackIndex);
+    onJump(() => {
+      findSecret("horizon");
+      setHasReturned(true);
+      terminal.print([
+        { kind: "floki", text: messages.jumpArrived(GARGANTUA_YEARS) },
+        { kind: "output", text: messages.jumpProgress },
+      ]);
+    });
+  }
+
+  function getJumpPhase() {
+    switch (jumpStatus) {
+      case "jumping":
+        return "on";
+      case "inside":
+        return "inside";
+      case "idle":
+        return hasReturned ? "back" : undefined;
+      default: {
+        const unknownStatus: never = jumpStatus;
+        return unknownStatus;
+      }
+    }
+  }
+
+  // The way back is the only thing in there: it takes focus as it appears.
+  function focusVoidBack(button: HTMLButtonElement | null) {
+    button?.focus();
+  }
+
+  function handleEgg(egg: TerminalEgg) {
+    switch (egg) {
+      case "praise":
+        setPraiseCount((count) => count + 1);
+        return;
+      case "fetch":
+        findSecret("ball");
+        return;
+      default: {
+        const unknownEgg: never = egg;
+        return unknownEgg;
+      }
+    }
+  }
+
   // The visitor looks around: the windshield shifts a little against the console.
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== "mouse") return;
@@ -158,23 +240,45 @@ export function CockpitWindow({
       onAnimationEnd={handleAnimationEnd}
       data-reveal={reveal}
       data-power={isClosing ? "off" : "on"}
+      data-jump={getJumpPhase()}
       // Clipped, not scrollable: focusing the terminal while the console rises must not scroll it.
       style={COCKPIT_STYLES[reveal]}
       className={`group/cockpit fixed inset-0 z-50 overflow-clip text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing, isLocked })}`}
     >
       <CockpitWindshield />
+      {/* The black hole's shadow takes the whole cockpit at the end of the flight in (a little
+          past its edges: the cockpit is still shaking), and lifts once the ship is back. */}
+      <div className="pointer-events-none absolute -inset-1 z-20 flex flex-col items-center justify-center gap-5 bg-black opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=inside]/cockpit:pointer-events-auto group-data-[jump=inside]/cockpit:opacity-100 group-data-[jump=on]/cockpit:animate-jump-black">
+        {jumpStatus === "inside" ? (
+          <>
+            <p className="animate-void-in text-xs text-faint">{messages.voidLine}</p>
+            <button
+              ref={focusVoidBack}
+              type="button"
+              onClick={onReturn}
+              className="h-10 animate-void-in rounded-full border border-rule px-5 text-xs text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+            >
+              {messages.voidBack}
+            </button>
+          </>
+        ) : null}
+      </div>
       <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4 md:p-6">
         <div className="flex flex-col gap-1">
           <h2 id={titleId} className="text-label font-bold tracking-label">
             {messages.title}
           </h2>
-          <p className="flex items-center gap-2 text-xs text-muted">
+          <p
+            data-signal={hasSignal ? "" : undefined}
+            className="flex items-center gap-2 text-xs text-muted data-signal:text-ochre"
+          >
             <span
               aria-hidden="true"
-              className="size-1.5 animate-light-blink rounded-full bg-sage"
+              className="size-1.5 animate-light-blink rounded-full bg-sage in-data-signal:bg-ochre in-data-signal:shadow-[0_0_6px_var(--ochre)]"
             />
-            {messages.status}
+            {hasSignal ? messages.statusSignal : messages.status}
           </p>
+          <EarthClock yearsPassed={earthYearsPassed} />
         </div>
         <button
           type="button"
@@ -203,6 +307,7 @@ export function CockpitWindow({
               canListen={floki.canListen}
               isConversing={flokiTalk.isConversing}
               isLocked={isLocked}
+              praiseCount={praiseCount}
               onTalk={() => void flokiTalk.talk()}
             />
           </ConsoleScreen>
@@ -235,6 +340,8 @@ export function CockpitWindow({
               shouldFocus={!isGreeting}
               onAsk={(question) => void flokiTalk.ask(question)}
               onGo={handleGo}
+              onEgg={handleEgg}
+              onJump={handleJump}
             />
           </ConsoleScreen>
         </div>

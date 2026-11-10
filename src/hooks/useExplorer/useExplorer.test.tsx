@@ -156,4 +156,32 @@ describe("useExplorer", () => {
     act(() => other.result.current.openCockpit());
     expect(other.result.current.cockpit).toMatchObject({ isGreeting: false });
   });
+
+  it("flies into the black hole with a ship, waits inside, and comes back years later", () => {
+    const { result } = renderExplorer();
+    act(() => {
+      result.current.boardShip();
+    });
+    let arrivals = 0;
+
+    act(() => result.current.startJump(() => arrivals++));
+    expect(result.current.jump).toEqual({ status: "jumping" });
+
+    act(() => result.current.reachHorizon());
+    expect(result.current.jump).toEqual({ status: "inside" });
+    expect(arrivals).toBe(0);
+
+    act(() => result.current.endJump());
+    expect(result.current.jump).toEqual({ status: "idle" });
+    expect(arrivals).toBe(1);
+    expect(result.current.earthYearsPassed).toBe(7);
+  });
+
+  it("is inside the black hole at once without a ship", () => {
+    const { result } = renderExplorer();
+
+    act(() => result.current.startJump(() => {}));
+
+    expect(result.current.jump).toEqual({ status: "inside" });
+  });
 });

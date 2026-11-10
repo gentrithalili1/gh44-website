@@ -1,13 +1,18 @@
 import { Billboard } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
 import { Color, type Group, LinearSRGBColorSpace, type ShaderMaterial } from "three";
 
 import { SUN_GLOW_RADIUS, SUN_RADIUS } from "#/components/SolarSystem/utils/space";
 import { PALETTE } from "#/utils/palette";
 
+import { messages } from "#/components/SolarSystem/messages";
+import { useFlokiLine } from "#/hooks/useFlokiLine";
+
 import { setGroupOpacity } from "../../utils/groupOpacity";
-import { damp, FADED_OPACITY } from "../../utils/sceneMath";
+import { damp, FADED_OPACITY, isDragRelease } from "../../utils/sceneMath";
+import { HoverName } from "../HoverName";
+import { getFlareLevel } from "./utils/sunPokes";
 import {
   CORONA_FRAGMENT_SHADER,
   CORONA_VERTEX_SHADER,
@@ -33,6 +38,9 @@ const SPIN_PERIOD = 240;
 // The sun lights every planet from its center, as strongly near as far. Lambert surfaces reflect
 // a 1/pi share of it: with the ambient light, the side facing the sun shows its palette color.
 const LIGHT_INTENSITY = Math.PI * 0.85;
+// A flare swells the glow by this share and brightens it, up to full.
+const FLARE_GROWTH = 0.45;
+const SCOLD_POSITION: [number, number, number] = [0, SUN_RADIUS, 0];
 
 // A palette color with its sRGB channels as written: the shaders output them as they are.
 function getShaderColor(hex: string) {
@@ -44,7 +52,8 @@ interface SunProps {
 }
 
 // gh44: everything revolves around it, and it lights the planets. Its surface boils and its
-// corona reaches out in slow streamers. Decorative: no label, no events.
+// corona reaches out in slow streamers. Decorative, with no label; poked, it flares, and Floki
+// objects out loud (an easter egg).
 export function Sun({ isPlanetOpen }: SunProps) {
   // Passed through the constructor, so each material keeps its uniforms object.
   const [surface] = useState(() => ({
@@ -58,6 +67,7 @@ export function Sun({ isPlanetOpen }: SunProps) {
       },
       uTime: { value: 0 },
       uOpacity: { value: 1 },
+      uFlare: { value: 0 },
     },
   }));
   const [corona] = useState(() => ({
@@ -76,10 +86,22 @@ export function Sun({ isPlanetOpen }: SunProps) {
   const surfaceRef = useRef<ShaderMaterial>(null);
   const coronaRef = useRef<ShaderMaterial>(null);
   const opacityRef = useRef(1);
+  const flokiLine = useFlokiLine();
+  // When the last flare went off, in seconds of the scene's clock.
+  const flaredAtRef = useRef<number | null>(null);
+  const nowRef = useRef(0);
+  const [isScolded, setIsScolded] = useState(false);
 
   useFrame(({ clock }, delta) => {
+    nowRef.current = clock.elapsedTime;
+    const flare = getFlareLevel({ flaredAt: flaredAtRef.current, now: clock.elapsedTime });
+    if (flare === 0 && flaredAtRef.current !== null) {
+      flaredAtRef.current = null;
+      setIsScolded(false);
+    }
+    surface.uniforms.uFlare.value = flare;
     const pulse = 1 + (Math.sin(clock.elapsedTime * PULSE_SPEED) * PULSE_AMOUNT) / SUN_GLOW_RADIUS;
-    glowRef.current?.scale.setScalar(pulse);
+    glowRef.current?.scale.setScalar(pulse * (1 + flare * FLARE_GROWTH));
     if (globeRef.current) {
       globeRef.current.rotation.y = (Math.PI * 2 * clock.elapsedTime) / SPIN_PERIOD;
     }
@@ -93,8 +115,21 @@ export function Sun({ isPlanetOpen }: SunProps) {
     corona.uniforms.uTime.value = clock.elapsedTime;
     // The fade sets each material's opacity; the shaders read it here.
     if (surfaceRef.current) surface.uniforms.uOpacity.value = surfaceRef.current.opacity;
-    if (coronaRef.current) corona.uniforms.uOpacity.value = coronaRef.current.opacity;
+    if (coronaRef.current) {
+      const { opacity } = coronaRef.current;
+      corona.uniforms.uOpacity.value = opacity + (1 - GLOW_OPACITY) * flare * opacityRef.current;
+    }
   });
+
+  function handleClick(event: ThreeEvent<MouseEvent>) {
+    if (isDragRelease(event.delta)) return;
+    event.stopPropagation();
+    // One flare at a time: poking a flaring sun does nothing more.
+    if (flaredAtRef.current !== null) return;
+    flaredAtRef.current = nowRef.current;
+    setIsScolded(true);
+    void flokiLine.say(messages.sunScoldSpoken);
+  }
 
   return (
     <group ref={groupRef}>
@@ -113,11 +148,13 @@ export function Sun({ isPlanetOpen }: SunProps) {
         </group>
       </Billboard>
       <group ref={globeRef}>
-        <mesh>
+        {/* With a planet open, a click on the sun still goes back home. */}
+        <mesh onClick={isPlanetOpen ? undefined : handleClick}>
           <sphereGeometry args={[SUN_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS / 2]} />
           <shaderMaterial ref={surfaceRef} args={[surface]} transparent />
         </mesh>
       </group>
+      {isScolded ? <HoverName name={messages.sunScold} position={SCOLD_POSITION} /> : null}
       <pointLight intensity={LIGHT_INTENSITY} decay={0} />
     </group>
   );

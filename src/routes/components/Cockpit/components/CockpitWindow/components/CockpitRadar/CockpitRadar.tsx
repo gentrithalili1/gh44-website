@@ -1,9 +1,10 @@
 import { useLocation } from "@tanstack/react-router";
 
 import { useExploration } from "#/hooks/useExploration";
+import { useSecrets } from "#/hooks/useSecrets";
 import { DESTINATIONS } from "#/utils/destinations";
 
-import { RadarBlip, RadarFace } from "./CockpitRadar.elements";
+import { RadarBall, RadarBlip, RadarFace, RadarSignal } from "./CockpitRadar.elements";
 import { messages } from "./messages";
 import { getRadarBlips } from "./utils/radarBlips";
 
@@ -14,13 +15,23 @@ const RADAR_BLIPS = getRadarBlips();
 export function CockpitRadar() {
   const location = useLocation();
   const exploration = useExploration();
+  const secrets = useSecrets();
 
-  const counts = { visited: exploration.visitedIds.length, total: DESTINATIONS.length };
+  // Through the black hole and back counts as one more than there is.
+  const counts = {
+    visited: exploration.visitedIds.length + (secrets.hasCrossedHorizon ? 1 : 0),
+    total: DESTINATIONS.length,
+  };
   const next = DESTINATIONS.find(({ name }) => !exploration.visitedIds.includes(name));
+  const hasSignal = next === undefined;
+  // The signal stands out until the visitor has been there.
+  const isCalling = hasSignal && !secrets.hasCrossedHorizon;
   const rows = [
-    { term: messages.route, value: location.pathname },
-    { term: messages.next, value: next?.name ?? messages.allVisited },
-    { term: messages.visited, value: messages.progress(counts) },
+    { term: messages.route, value: location.pathname, isCalling: false },
+    hasSignal
+      ? { term: messages.signal, value: messages.beyond, isCalling }
+      : { term: messages.next, value: next.name, isCalling: false },
+    { term: messages.visited, value: messages.progress(counts), isCalling: false },
   ];
 
   return (
@@ -40,13 +51,20 @@ export function CockpitRadar() {
             isVisited={exploration.visitedIds.includes(blip.id)}
           />
         ))}
+        {hasSignal ? <RadarSignal isReached={secrets.hasCrossedHorizon} /> : null}
+        {secrets.hasBall ? <RadarBall /> : null}
       </svg>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 md:gap-2">
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-[0.6875rem] tabular-nums md:gap-y-1 md:text-xs">
           {rows.map((row) => (
             <div key={row.term} className="col-span-2 grid grid-cols-subgrid">
               <dt className="text-muted">{row.term}</dt>
-              <dd className="truncate text-right text-foreground">{row.value}</dd>
+              <dd
+                data-calling={row.isCalling ? "" : undefined}
+                className="truncate text-right text-foreground data-calling:text-ochre"
+              >
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>

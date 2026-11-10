@@ -8,7 +8,8 @@ interface HoverNameProps {
   position?: [number, number, number];
 }
 
-// A small name tag above whatever is hovered in the scene: a moon, a satellite or a ring band.
+// A small name tag above whatever is hovered in the scene: a moon, a satellite, a ring band or
+// something found far out.
 export function HoverName({ name, position }: HoverNameProps) {
   return (
     <Html

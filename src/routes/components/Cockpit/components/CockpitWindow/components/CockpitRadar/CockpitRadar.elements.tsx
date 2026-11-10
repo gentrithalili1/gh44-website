@@ -49,3 +49,34 @@ export function RadarBlip({ x, y, isVisited }: RadarBlipProps) {
     />
   );
 }
+
+// Floki's ball, once `fetch` threw it: a small rose dot circling the middle of the scope.
+export function RadarBall() {
+  return (
+    <g className="motion-safe:animate-radar-sweep">
+      <circle cx={0} cy={-22} r={1.6} className="fill-rose" />
+    </g>
+  );
+}
+
+interface RadarSignalProps {
+  isReached: boolean;
+}
+
+// The black hole, once every planet is visited: a blip at the edge of the scope, past every
+// orbit, sending out rings until the visitor has been there.
+export function RadarSignal({ isReached }: RadarSignalProps) {
+  return (
+    <g>
+      {isReached ? null : (
+        <circle
+          cx={32}
+          cy={-33}
+          r={2.2}
+          className="origin-center fill-none stroke-ochre [transform-box:fill-box] [vector-effect:non-scaling-stroke] motion-safe:animate-signal-ping"
+        />
+      )}
+      <circle cx={32} cy={-33} r={2.6} className="fill-ochre" />
+    </g>
+  );
+}

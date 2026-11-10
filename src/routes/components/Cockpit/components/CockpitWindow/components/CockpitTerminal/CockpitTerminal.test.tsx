@@ -10,12 +10,21 @@ import { CockpitTerminal } from "./CockpitTerminal";
 
 // The terminal with its screen, as the cockpit gives it one.
 function TerminalWithScreen(
-  props: Omit<ComponentProps<typeof CockpitTerminal>, "terminal" | "onAsk"> & {
+  props: Omit<ComponentProps<typeof CockpitTerminal>, "terminal" | "onAsk" | "onEgg" | "onJump"> & {
     onAsk?: (question: string) => void;
+    onEgg?: ComponentProps<typeof CockpitTerminal>["onEgg"];
   },
 ) {
   const terminal = useTerminal();
-  return <CockpitTerminal {...props} terminal={terminal} onAsk={props.onAsk ?? vi.fn()} />;
+  return (
+    <CockpitTerminal
+      {...props}
+      terminal={terminal}
+      onAsk={props.onAsk ?? vi.fn()}
+      onEgg={props.onEgg ?? vi.fn()}
+      onJump={vi.fn()}
+    />
+  );
 }
 
 function getOutput() {
@@ -29,6 +38,21 @@ describe("CockpitTerminal", () => {
     });
 
     expect(getOutput().getByText("floki here, how can I help?")).toBeInTheDocument();
+  });
+
+  it("lets floki answer good boy, and reports the egg", async () => {
+    const user = userEvent.setup();
+    const onEgg = vi.fn();
+    await renderInRouter({
+      ui: <TerminalWithScreen isLocked={false} shouldFocus onGo={vi.fn()} onEgg={onEgg} />,
+    });
+
+    await user.type(screen.getByRole("textbox", { name: "command" }), "good boy{Enter}");
+
+    expect(
+      getOutput().getByText("ears up. tail would wag, if they'd built one."),
+    ).toBeInTheDocument();
+    expect(onEgg).toHaveBeenCalledWith("praise");
   });
 
   it("hands floki <question> to floki", async () => {

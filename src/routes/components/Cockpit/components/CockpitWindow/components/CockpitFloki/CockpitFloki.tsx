@@ -12,6 +12,8 @@ interface CockpitFlokiProps {
   // Talk was tapped and Floki keeps listening after each answer until it ends.
   isConversing: boolean;
   isLocked: boolean;
+  // How many times he has been called a good boy: his ears perk up each time.
+  praiseCount: number;
   onTalk: () => void;
 }
 
@@ -25,6 +27,7 @@ export function CockpitFloki({
   canListen,
   isConversing,
   isLocked,
+  praiseCount,
   onTalk,
 }: CockpitFlokiProps) {
   const isActive = isConversing || status === "listening" || status === "speaking";
@@ -35,7 +38,11 @@ export function CockpitFloki({
       className="flex min-h-0 flex-1 flex-col justify-between gap-2 md:justify-start md:gap-3"
     >
       <div aria-hidden="true" className="shrink-0 md:flex md:min-h-0 md:flex-1 md:justify-center">
-        <FlokiHead status={status} grille={<FlokiSignal status={status} getLevel={getLevel} />} />
+        <FlokiHead
+          status={status}
+          praiseCount={praiseCount}
+          grille={<FlokiSignal status={status} getLevel={getLevel} />}
+        />
       </div>
       <div className="flex min-w-0 flex-col md:flex-row md:items-end md:gap-3">
         <div className="min-w-0 md:flex-1">

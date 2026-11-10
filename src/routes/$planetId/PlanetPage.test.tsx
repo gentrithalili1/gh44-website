@@ -84,7 +84,7 @@ describe("PlanetPage", () => {
   });
 
   it("shows the 404 for a planet that does not exist", async () => {
-    await renderAt("/pluto");
+    await renderAt("/nowhere");
 
     expect(screen.getByRole("heading", { level: 1, name: "404" })).toBeInTheDocument();
   });

@@ -11,6 +11,7 @@ import {
   VisitorPrompt,
 } from "./CockpitTerminal.elements";
 import { messages } from "./messages";
+import type { TerminalEgg } from "./utils/terminalCommands";
 import { getLineSegments } from "./utils/terminalLinks";
 
 interface CockpitTerminalProps {
@@ -22,6 +23,10 @@ interface CockpitTerminalProps {
   // `floki <question>`: Floki answers in the terminal.
   onAsk: (question: string) => void;
   onGo: (destination: Destination) => void;
+  // A secret command set something off outside the terminal.
+  onEgg: (egg: TerminalEgg) => void;
+  // `go gargantua`, once it is a destination.
+  onJump: () => void;
 }
 
 // The terminal on the center screen, the ship's command line. Every destination it prints is a
@@ -32,6 +37,8 @@ export function CockpitTerminal({
   shouldFocus,
   onAsk,
   onGo,
+  onEgg,
+  onJump,
 }: CockpitTerminalProps) {
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
@@ -54,6 +61,12 @@ export function CockpitTerminal({
         return;
       case "ask":
         onAsk(result.question);
+        return;
+      case "egg":
+        onEgg(result.egg);
+        return;
+      case "jump":
+        onJump();
         return;
       default: {
         const unknownResult: never = result;
@@ -128,11 +141,38 @@ export function CockpitTerminal({
         );
       case "output":
         return renderOutput(line);
+      case "alert":
+        return renderAlert(line);
       default: {
         const unknownKind: never = line.kind;
         return unknownKind;
       }
     }
+  }
+
+  // An alert stands out; the black hole's name in it flies there.
+  function renderAlert(line: TerminalLine) {
+    const { name } = messages.gargantua;
+    const [before, after] = line.text.split(name);
+
+    return (
+      <span className="font-medium text-ochre">
+        {before}
+        {after === undefined ? null : (
+          <>
+            <button
+              type="button"
+              disabled={isLocked}
+              onClick={() => handleRun(`go ${name}`)}
+              className="rounded-xs underline decoration-ochre/50 decoration-dotted underline-offset-4 transition-colors hover:decoration-ochre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ochre motion-safe:animate-light-blink"
+            >
+              {name}
+            </button>
+            {after}
+          </>
+        )}
+      </span>
+    );
   }
 
   function renderOutput(line: TerminalLine) {

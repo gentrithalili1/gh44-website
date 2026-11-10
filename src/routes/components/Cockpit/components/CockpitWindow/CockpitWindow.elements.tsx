@@ -182,7 +182,7 @@ export function ConsoleScreen({
         <span
           aria-hidden="true"
           style={coverStyle}
-          className="pointer-events-none absolute inset-0 z-10 bg-night opacity-0 group-data-[power=off]/cockpit:animate-screen-off group-data-[power=on]/cockpit:animate-screen-on motion-reduce:animate-none after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-sage after:opacity-0 group-data-[power=on]/cockpit:after:animate-screen-line motion-reduce:after:animate-none"
+          className="pointer-events-none absolute inset-0 z-10 bg-night opacity-0 group-data-[jump=inside]/cockpit:animate-none group-data-[jump=inside]/cockpit:opacity-100 group-data-[jump=on]/cockpit:animate-screen-jump group-data-[power=off]/cockpit:animate-screen-off group-data-[power=on]/cockpit:animate-screen-on motion-reduce:animate-none after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-sage after:opacity-0 group-data-[power=on]/cockpit:after:animate-screen-line motion-reduce:after:animate-none"
         />
       </div>
     </div>

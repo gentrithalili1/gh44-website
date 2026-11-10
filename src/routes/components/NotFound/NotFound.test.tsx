@@ -6,7 +6,7 @@ import { renderAt } from "#/test/renderAt";
 
 describe("NotFound", () => {
   it("shows the lost planet, dinosaurs and all", async () => {
-    await renderAt("/pluto");
+    await renderAt("/nowhere");
 
     expect(screen.getByRole("heading", { level: 1, name: "404" })).toBeInTheDocument();
     expect(

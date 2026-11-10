@@ -8,14 +8,23 @@ import { useBoot } from "#/hooks/useBoot";
 import { useExplorer } from "#/hooks/useExplorer";
 import { SOLAR_SYSTEM } from "#/utils/planets";
 
+import { BlackHole } from "./components/BlackHole";
+import { Avalon } from "./components/Avalon";
+import { Endurance } from "./components/Endurance";
+import { FetchBall } from "./components/FetchBall";
+import { Homestead } from "./components/Homestead";
 import { LabelNudges } from "./components/LabelNudges";
+import { MillersPlanet } from "./components/MillersPlanet";
 import { Orbits } from "./components/Orbits";
+import { Pluto } from "./components/Pluto";
 import { SceneCamera } from "./components/SceneCamera";
 import { SceneClock } from "./components/SceneClock";
 import { ScenePlanet } from "./components/ScenePlanet";
 import { Ships } from "./components/Ships";
 import { Stars } from "./components/Stars";
 import { Sun } from "./components/Sun";
+import { SystemGroup } from "./components/SystemGroup";
+import { Voyagers } from "./components/Voyagers";
 import { WarpStreaks } from "./components/WarpStreaks";
 import { CAMERA_FOV } from "./hooks/useCameraFlight";
 import { usePageVisible } from "./hooks/usePageVisible";
@@ -50,6 +59,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
     shipPose: getShipPose(SHIP_ORBIT.phase),
     cameraZoom: 1,
     warp: 0,
+    jump: 0,
   });
 
   // The open cockpit steps the system back, like an open planet.
@@ -83,29 +93,39 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
           isCruising={isCockpitOpen}
           sceneStateRef={sceneStateRef}
         />
+        <BlackHole sceneStateRef={sceneStateRef} />
         <WarpStreaks sceneStateRef={sceneStateRef} />
-        <Sun isPlanetOpen={isSystemFaded} />
-        <Orbits isPlanetOpen={isSystemFaded} />
-        {labelList
-          ? SOLAR_SYSTEM.map((planet) => (
-              <ScenePlanet
-                key={planet.id}
-                planet={planet}
-                openPlanetId={openPlanetId}
-                isCockpitOpen={isCockpitOpen}
-                sceneStateRef={sceneStateRef}
-                labelList={labelList}
-              />
-            ))
-          : null}
-        {labelList ? (
-          <LabelNudges
-            labelList={labelList}
-            openPlanetId={openPlanetId}
-            sceneStateRef={sceneStateRef}
-          />
-        ) : null}
-        <Ships openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
+        <SystemGroup sceneStateRef={sceneStateRef}>
+          <Sun isPlanetOpen={isSystemFaded} />
+          <Orbits isPlanetOpen={isSystemFaded} />
+          <Pluto isFaded={isSystemFaded} sceneStateRef={sceneStateRef} />
+          <Endurance isFaded={openPlanetId !== undefined} />
+          <MillersPlanet isFaded={openPlanetId !== undefined} />
+          <Avalon isFaded={openPlanetId !== undefined} />
+          <Homestead isFaded={openPlanetId !== undefined} />
+          <Voyagers isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
+          <FetchBall isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
+          {labelList
+            ? SOLAR_SYSTEM.map((planet) => (
+                <ScenePlanet
+                  key={planet.id}
+                  planet={planet}
+                  openPlanetId={openPlanetId}
+                  isCockpitOpen={isCockpitOpen}
+                  sceneStateRef={sceneStateRef}
+                  labelList={labelList}
+                />
+              ))
+            : null}
+          {labelList ? (
+            <LabelNudges
+              labelList={labelList}
+              openPlanetId={openPlanetId}
+              sceneStateRef={sceneStateRef}
+            />
+          ) : null}
+          <Ships openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
+        </SystemGroup>
       </Canvas>
       <nav aria-label={messages.planetsLabel} className="pointer-events-none absolute inset-0">
         <ul ref={setLabelList} />

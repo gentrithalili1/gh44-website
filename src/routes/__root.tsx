@@ -12,7 +12,6 @@ import { findPlanet } from "#/utils/planets";
 import appCss from "../styles.css?url";
 import { BootScreen } from "./components/BootScreen";
 import { Cockpit } from "./components/Cockpit";
-import { LockScreen } from "./components/LockScreen";
 import { NotFound } from "./components/NotFound";
 import { PageLayer } from "./components/PageLayer";
 import { MusicProvider } from "./hooks/useMusic";
@@ -31,8 +30,6 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: SPACE_COLORS.background },
       { title: messages.siteTitle },
-      // Temporary, while the lock screen is up.
-      { name: "robots", content: "noindex" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -83,22 +80,20 @@ function RootLayout() {
       style={getPlanetStyle(planet)}
       className="group/root fixed inset-0 bg-background transition-colors duration-900 ease-space"
     >
-      <LockScreen>
-        <MusicProvider>
-          <ExplorerProvider>
-            <RocketLaunchProvider>
-              <BootProvider>
-                <SolarSystem openPlanetId={planet?.id} />
-                <PageLayer>
-                  <Outlet />
-                </PageLayer>
-                <Cockpit />
-                <BootScreen />
-              </BootProvider>
-            </RocketLaunchProvider>
-          </ExplorerProvider>
-        </MusicProvider>
-      </LockScreen>
+      <MusicProvider>
+        <ExplorerProvider>
+          <RocketLaunchProvider>
+            <BootProvider>
+              <SolarSystem openPlanetId={planet?.id} />
+              <PageLayer>
+                <Outlet />
+              </PageLayer>
+              <Cockpit />
+              <BootScreen />
+            </BootProvider>
+          </RocketLaunchProvider>
+        </ExplorerProvider>
+      </MusicProvider>
     </div>
   );
 }

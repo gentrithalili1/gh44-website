@@ -46,6 +46,8 @@
   --animate-screen-line: screen-line 520ms cubic-bezier(0.33, 1, 0.68, 1)
     calc(var(--power-delay, 0ms) + var(--screen, 0) * 110ms) both;
   --animate-screen-off: screen-off 140ms linear calc(var(--screen, 0) * 30ms) both;
+  /* Near the black hole the screens give out, one after another. */
+  --animate-screen-jump: screen-off 220ms steps(3, end) calc(6800ms + var(--screen, 0) * 130ms) both;
 
   @keyframes boot-type {
     from {
@@ -89,6 +91,14 @@
 
   --animate-cockpit-iris: cockpit-iris 450ms var(--ease-space) 550ms both;
   --animate-cockpit-close: cockpit-close 520ms var(--ease-space) forwards;
+  /* The black hole's shadow covers the cockpit as the flight in ends, and lifts on return. */
+  --animate-jump-black: jump-black 700ms var(--ease-space) 7300ms both;
+  /* Inside it, the way back shows after a beat of nothing. */
+  --animate-void-in: void-in 1400ms var(--ease-space) 1200ms both;
+  --animate-jump-back: jump-back 1100ms var(--ease-space) both;
+  /* The black hole's signal on the radar: a ring going out from its blip. */
+  --animate-signal-ping: signal-ping 1800ms var(--ease-space) infinite;
+  --animate-floki-perk: floki-perk 700ms var(--ease-space) both;
   --animate-cockpit-rumble: cockpit-rumble 650ms linear both;
   /* Boarding: the hull closes in round the window and the console rises as the iris opens, then
      the screens power on. Leaving runs it backward. */
@@ -151,6 +161,48 @@
     }
     100% {
       translate: 1px -1px;
+    }
+  }
+
+  @keyframes jump-black {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes jump-back {
+    from {
+      opacity: 1;
+    }
+  }
+
+  @keyframes signal-ping {
+    to {
+      scale: 4.5;
+      opacity: 0;
+    }
+  }
+
+  @keyframes void-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Floki's ears, on being called a good boy. */
+  @keyframes floki-perk {
+    0%,
+    100% {
+      scale: 1 1;
+    }
+    30% {
+      scale: 1.06 1.22;
+    }
+    55% {
+      scale: 1 1.04;
+    }
+    75% {
+      scale: 1.03 1.14;
     }
   }
 

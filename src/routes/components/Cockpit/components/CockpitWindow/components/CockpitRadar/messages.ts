@@ -6,5 +6,7 @@ export const messages = {
   next: "next",
   visited: "visited",
   progress: ({ visited, total }: { visited: number; total: number }) => `${visited}/${total}`,
-  allVisited: "all visited",
+  // The black hole, once every planet is visited: a signal off the chart, in place of `next`.
+  signal: "signal",
+  beyond: "gargantua",
 } as const;

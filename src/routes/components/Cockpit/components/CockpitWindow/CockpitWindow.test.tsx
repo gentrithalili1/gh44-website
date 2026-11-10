@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MusicProvider } from "#/routes/hooks/useMusic";
@@ -33,6 +34,10 @@ async function renderCockpitWindow({
           onClose={onClose}
           onClosed={vi.fn()}
           onGo={vi.fn()}
+          jumpStatus="idle"
+          onJump={vi.fn()}
+          onReturn={vi.fn()}
+          earthYearsPassed={0}
         />
       </MusicProvider>
     ),
@@ -94,8 +99,18 @@ describe("CockpitWindow", () => {
   });
 });
 
-// The whole cockpit, opened by the visitor, for Floki's conversations.
+type TestJump = { status: "idle" | "inside"; onArrive: (() => void) | null; years: number };
+
+// The whole cockpit, opened by the visitor, for Floki's conversations. Without a scene, as with
+// reduced motion: a trip into the black hole puts the visitor inside at once.
 function FlokiCockpit({ onGo, isGreeting = false }: { onGo: () => void; isGreeting?: boolean }) {
+  const [jump, setJump] = useState<TestJump>({ status: "idle", onArrive: null, years: 0 });
+
+  function handleReturn() {
+    jump.onArrive?.();
+    setJump({ status: "idle", onArrive: null, years: jump.years + 7 });
+  }
+
   return (
     <MusicProvider>
       <CockpitWindow
@@ -103,10 +118,14 @@ function FlokiCockpit({ onGo, isGreeting = false }: { onGo: () => void; isGreeti
         isGreeting={isGreeting}
         onBoard={vi.fn()}
         isClosing={false}
-        isLocked={false}
+        isLocked={jump.status !== "idle"}
         onClose={vi.fn()}
         onClosed={vi.fn()}
         onGo={onGo}
+        jumpStatus={jump.status}
+        onJump={(onArrive) => setJump({ ...jump, status: "inside", onArrive })}
+        onReturn={handleReturn}
+        earthYearsPassed={jump.years}
       />
     </MusicProvider>
   );
@@ -124,6 +143,7 @@ async function typeCommand(command: string) {
 describe("CockpitWindow's Floki", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    sessionStorage.clear();
   });
 
   it("prints floki's answer to a question", async () => {
@@ -394,5 +414,39 @@ describe("CockpitWindow's Floki", () => {
     await user.click(screen.getByRole("button", { name: "ask floki" }));
 
     await waitFor(() => expect(recognizers.length).toBeGreaterThan(0));
+  });
+
+  it("flies into gargantua once every planet is visited, and counts it on return", async () => {
+    sessionStorage.setItem(
+      "gh44-explorer-visits",
+      JSON.stringify(["me", "gh44-confirm", "work", "gh44-theme", "gh44-brain"]),
+    );
+    const user = userEvent.setup();
+    await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
+    const output = within(screen.getByRole("log", { name: "terminal output" }));
+    expect(
+      output.getByText("!! signal detected. not a planet. not on any chart."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("signal detected · gargantua")).toBeInTheDocument();
+
+    // The name in the alert is the way there.
+    await user.click(output.getByRole("button", { name: "gargantua" }));
+
+    expect(screen.getByText("nothing in here. not even light.")).toBeInTheDocument();
+    const back = screen.getByRole("button", { name: "go back" });
+    expect(back).toHaveFocus();
+    const yearNow = new Date().getFullYear();
+    expect(screen.getByLabelText(new RegExp(`^earth time: .*${yearNow}`))).toBeInTheDocument();
+
+    await user.click(back);
+
+    expect(screen.queryByRole("button", { name: "go back" })).not.toBeInTheDocument();
+    expect(output.getByText("that took 8 seconds. 7 years passed on earth.")).toBeInTheDocument();
+    expect(screen.getByText("systems online")).toBeInTheDocument();
+    expect(screen.getByLabelText(new RegExp(`^earth time: .*${yearNow + 7}`))).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("region", { name: "radar" })).getByText("6/5"),
+    ).toBeInTheDocument();
+    expect(sessionStorage.getItem("gh44-explorer-secrets")).toBe('["horizon"]');
   });
 });

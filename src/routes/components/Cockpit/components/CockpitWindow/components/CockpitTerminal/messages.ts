@@ -61,5 +61,28 @@ export const messages = {
     rateLimited: "cooling down. too many questions for now. the terminal still works.",
     unavailable: "comms down. the terminal still works.",
   },
+  // The black hole: only a destination once every planet is visited.
+  gargantua: {
+    name: "gargantua",
+    // What the terminal shows once every planet is visited, until the visitor has been there.
+    alert: "!! signal detected. not a planet. not on any chart.",
+    signal: "that's all five planets. one thing left out there, and it bends light.",
+    // The name in it is a link: it runs `go gargantua`.
+    invite: "new destination unlocked: gargantua",
+    confirm: ["destination: gargantua", "route: unknown", "turning away from the sun. first time."],
+  },
+  // Commands help never lists.
+  secrets: {
+    sudo: ["nice try.", "this incident will be reported to floki."],
+    rm: ["deleting the solar system...", "permission denied. the sun is load-bearing."],
+    rmUsage: "rm what? be brave.",
+    gitBlame: ["gentrit. always gentrit."],
+    gitOther: ["working tree clean. space is tidy."],
+    answer: ["the answer. the question is still loading."],
+    praise: ["ears up. tail would wag, if they'd built one."],
+    goodWhat: "good what? finish the sentence.",
+    fetch: ["ball's away. tracking it on the radar."],
+    fetchAgain: ["it's still out there. your turn."],
+  },
   commandNotFound: (name: string) => [`command not found: ${name}`, "type help for commands."],
 } as const;
