@@ -100,6 +100,15 @@ const COMMANDS: Readonly<Record<string, Command>> = {
   floki: { ...messages.commands.floki, run: floki },
 };
 
+// Commands help never lists: found by trying them.
+const SECRET_COMMANDS: Readonly<Record<string, Command["run"]>> = {
+  sudo: () => print(messages.secrets.sudo),
+  rm: ({ args }) => print(args.length === 0 ? [messages.secrets.rmUsage] : messages.secrets.rm),
+  git: ({ args }) =>
+    print(args[0] === "blame" ? messages.secrets.gitBlame : messages.secrets.gitOther),
+  "42": () => print(messages.secrets.answer),
+};
+
 // What the terminal shows when the cockpit opens.
 export function getWelcomeLines() {
   return [messages.welcome, getDestinationList()];
@@ -110,7 +119,9 @@ export function runCommand({ input, context }: { input: string; context: Command
   const [name, ...args] = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (name === undefined) return print([]);
   const command = Object.hasOwn(COMMANDS, name) ? COMMANDS[name] : undefined;
-  if (!command) return print(messages.commandNotFound(name));
+  if (command) return command.run({ args, context });
+  const secret = Object.hasOwn(SECRET_COMMANDS, name) ? SECRET_COMMANDS[name] : undefined;
+  if (!secret) return print(messages.commandNotFound(name));
 
-  return command.run({ args, context });
+  return secret({ args, context });
 }

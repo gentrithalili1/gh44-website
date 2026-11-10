@@ -61,5 +61,14 @@ export const messages = {
     rateLimited: "cooling down. too many questions for now. the terminal still works.",
     unavailable: "comms down. the terminal still works.",
   },
+  // Commands help never lists.
+  secrets: {
+    sudo: ["nice try.", "this incident will be reported to floki."],
+    rm: ["deleting the solar system...", "permission denied. the sun is load-bearing."],
+    rmUsage: "rm what? be brave.",
+    gitBlame: ["gentrit. always gentrit."],
+    gitOther: ["working tree clean. space is tidy."],
+    answer: ["the answer. the question is still loading."],
+  },
   commandNotFound: (name: string) => [`command not found: ${name}`, "type help for commands."],
 } as const;

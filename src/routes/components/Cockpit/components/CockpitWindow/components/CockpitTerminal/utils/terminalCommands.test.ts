@@ -125,6 +125,39 @@ describe("runCommand", () => {
     });
   });
 
+  it("answers the commands help never lists", () => {
+    expect(runCommand({ input: "sudo make me a sandwich", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["nice try.", "this incident will be reported to floki."],
+    });
+    expect(runCommand({ input: "rm -rf /", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["deleting the solar system...", "permission denied. the sun is load-bearing."],
+    });
+    expect(runCommand({ input: "rm", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["rm what? be brave."],
+    });
+    expect(runCommand({ input: "git blame", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["gentrit. always gentrit."],
+    });
+    expect(runCommand({ input: "git status", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["working tree clean. space is tidy."],
+    });
+    expect(runCommand({ input: "42", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["the answer. the question is still loading."],
+    });
+  });
+
+  it("keeps the secret commands out of help", () => {
+    const result = runCommand({ input: "help", context: AT_HOME });
+
+    expect(result.kind === "print" && result.lines.join("\n")).not.toMatch(/sudo|git|42/);
+  });
+
   it("prints nothing for an empty line", () => {
     expect(runCommand({ input: "   ", context: AT_HOME })).toEqual({ kind: "print", lines: [] });
   });
