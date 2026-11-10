@@ -4,7 +4,7 @@ import type { RingBand } from "#/components/SolarSystem/utils/rings";
 
 import type { HoverChange } from "../../types";
 import { RING_TILT } from "../../utils/ringPlane";
-import { HoverName } from "../HoverName";
+import { HoverName } from "#/components/SolarSystem/components/SpaceScene/components/HoverName";
 import { RingBandMesh } from "./components/RingBandMesh";
 
 interface RingsProps {

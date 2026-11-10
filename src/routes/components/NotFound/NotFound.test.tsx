@@ -6,7 +6,7 @@ import { renderAt } from "#/test/renderAt";
 
 describe("NotFound", () => {
   it("shows the lost planet, dinosaurs and all", async () => {
-    await renderAt("/pluto");
+    await renderAt("/nowhere");
 
     expect(screen.getByRole("heading", { level: 1, name: "404" })).toBeInTheDocument();
     expect(
@@ -14,6 +14,15 @@ describe("NotFound", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("img", { name: "a lost planet with three dinosaurs on it" }),
+    ).toBeInTheDocument();
+  });
+
+  it("gives pluto its own verdict", async () => {
+    await renderAt("/pluto");
+
+    expect(screen.getByRole("heading", { level: 1, name: "pluto" })).toBeInTheDocument();
+    expect(
+      screen.getByText("demoted in 2006. still no page. the dinosaurs voted."),
     ).toBeInTheDocument();
   });
 

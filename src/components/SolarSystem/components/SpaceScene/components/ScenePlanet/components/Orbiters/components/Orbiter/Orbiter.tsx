@@ -15,7 +15,7 @@ import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
 import { getSurfaceHex } from "#/components/SolarSystem/utils/surfaceColor";
 
 import type { HoverChange } from "../../../../types";
-import { HoverName } from "../../../HoverName";
+import { HoverName } from "#/components/SolarSystem/components/SpaceScene/components/HoverName";
 
 const MOON_SEGMENTS = 24;
 const PAST_MOON_OPACITY = 0.75;

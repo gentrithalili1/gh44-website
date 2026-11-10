@@ -10,6 +10,7 @@ import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { LabelNudges } from "./components/LabelNudges";
 import { Orbits } from "./components/Orbits";
+import { Pluto } from "./components/Pluto";
 import { SceneCamera } from "./components/SceneCamera";
 import { SceneClock } from "./components/SceneClock";
 import { ScenePlanet } from "./components/ScenePlanet";
@@ -86,6 +87,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         <WarpStreaks sceneStateRef={sceneStateRef} />
         <Sun isPlanetOpen={isSystemFaded} />
         <Orbits isPlanetOpen={isSystemFaded} />
+        <Pluto isFaded={isSystemFaded} sceneStateRef={sceneStateRef} />
         {labelList
           ? SOLAR_SYSTEM.map((planet) => (
               <ScenePlanet
