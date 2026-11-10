@@ -10,7 +10,8 @@ export type OrbiterCrater = { x: number; y: number; radius: number };
 
 type OrbiterBase = {
   id: string;
-  label: string;
+  // Named on hover; Earth's moon stays unnamed.
+  label?: string;
   color: PaletteColor;
   shade: Shade;
   isHighlighted: boolean;
@@ -99,7 +100,6 @@ export function getOrbiters(planet: PlanetBody): Orbiter[] {
       return [
         {
           id: "moon",
-          label: messages.earthMoon,
           kind: "moon",
           color: "neutral",
           shade: "soft",

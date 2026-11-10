@@ -2,7 +2,6 @@ import { EXPLORER_NAME } from "#/utils/explorer";
 
 export const messages = {
   planetsLabel: "planets",
-  earthMoon: "the moon",
   marsMoons: { phobos: "phobos · resolve", deimos: "deimos · reject" },
   brainAgents: {
     implementer: "implementer",

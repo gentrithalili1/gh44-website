@@ -23,7 +23,7 @@ describe("LaunchDemo", () => {
 
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     // Announced to screen readers.
-    expect(screen.getByText("launched. it's not coming back.")).toHaveAttribute("role", "status");
+    expect(screen.getByText("launched. it's orbiting mars now.")).toHaveAttribute("role", "status");
   });
 
   it("aborts on cancel, and says so", async () => {

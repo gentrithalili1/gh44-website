@@ -11,7 +11,6 @@ import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
 import { getRingBands, getUprightRing } from "#/components/SolarSystem/utils/rings";
 import { getOrbitPosition, getPlanetState } from "#/components/SolarSystem/utils/space";
 import type { SolarPlanet } from "#/utils/planets";
-import type { ThemeToolId } from "#/utils/themeTools";
 
 import type { SceneState } from "../../types";
 import { setGroupOpacity } from "../../utils/groupOpacity";
@@ -83,9 +82,7 @@ export function ScenePlanet({
   const uprightRing = getUprightRing(planet);
   const isSitePlanet = planet.kind === "site";
   const isHovered = hoverSources.size > 0;
-  // An open gh44-theme still takes ring band clicks: each opens its app's tab.
-  const isRingBandHovered = ringBands.some((band) => hoverSources.has(band.id));
-  useCursor(isHovered && (state === "idle" || (state === "current" && isRingBandHovered)));
+  useCursor(isHovered && state === "idle");
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -132,17 +129,6 @@ export function ScenePlanet({
     void navigate({ to: "/$planetId", params: { planetId: planet.id } });
   }
 
-  function handleRingBandClick(app: ThemeToolId) {
-    if (state === "faded" || planet.kind !== "site") return;
-    // On the open planet a band switches tabs, like the tabs themselves: no new history entry.
-    void navigate({
-      to: "/$planetId",
-      params: { planetId: planet.id },
-      search: { app },
-      replace: state === "current",
-    });
-  }
-
   function handleClick(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
     if (isDragRelease(event.delta)) return;
@@ -165,11 +151,7 @@ export function ScenePlanet({
         onPlanetClick={handleOpen}
         sceneStateRef={sceneStateRef}
       />
-      <Rings
-        bands={ringBands}
-        onHoverChange={handleHoverChange}
-        onBandClick={handleRingBandClick}
-      />
+      <Rings bands={ringBands} onHoverChange={handleHoverChange} />
       {planet.features.hasRocket ? (
         <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
       ) : null}

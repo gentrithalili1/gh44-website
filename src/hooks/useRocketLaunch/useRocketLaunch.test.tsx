@@ -23,6 +23,18 @@ describe("useRocketLaunch", () => {
     expect(result.current.launchId).toBe(2);
   });
 
+  it("keeps every launched rocket in orbit, up to 8", () => {
+    const { result } = renderLaunch();
+
+    for (let launch = 0; launch < 10; launch++) {
+      act(() => result.current.ask());
+      act(() => result.current.launch());
+    }
+    act(() => result.current.launch());
+
+    expect(result.current.orbitingIds).toEqual([3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
   it("takes the rocket down on abort", () => {
     const { result } = renderLaunch();
 
@@ -30,6 +42,7 @@ describe("useRocketLaunch", () => {
     act(() => result.current.abort());
 
     expect(isRocketOnStage(result.current.status)).toBe(false);
+    expect(result.current.orbitingIds).toEqual([]);
   });
 
   it("shows no rocket without a provider", () => {

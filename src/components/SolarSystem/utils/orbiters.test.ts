@@ -18,7 +18,8 @@ describe("getOrbiters", () => {
     );
 
     expect(rest).toEqual([]);
-    expect(moon).toMatchObject({ kind: "moon", label: "the moon" });
+    expect(moon).toMatchObject({ kind: "moon" });
+    expect(moon?.label).toBeUndefined();
     for (const other of others) expect(other.speed).toBeGreaterThan(moon?.speed ?? Infinity);
   });
 

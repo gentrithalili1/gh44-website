@@ -4,6 +4,6 @@ export const messages = {
   description: "this calls await confirm(). launch resolves it, abort rejects it.",
   confirm: "launch",
   cancel: "abort",
-  launched: "launched. it's not coming back.",
+  launched: "launched. it's orbiting mars now.",
   aborted: "aborted. the rocket is relieved.",
 } as const;

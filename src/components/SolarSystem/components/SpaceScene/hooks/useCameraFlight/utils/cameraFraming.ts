@@ -62,7 +62,7 @@ function getFreeBox({ width, height }: Viewport) {
       size: Math.min(width, height * PHONE_FREE_HEIGHT),
     };
   }
-  const freeWidth = Math.max(width - PANEL_WIDTH, 0);
+  const freeWidth = width * (1 - PANEL_WIDTH);
   const boxWidth = Math.min(width * DESKTOP_FREE_WIDTH, freeWidth);
 
   return {
@@ -95,7 +95,7 @@ export function getPlanetReach(planet: PlanetBody) {
   const orbiterReaches = getOrbiters(planet).map((orbiter) => orbiter.orbitRadius + orbiter.radius);
   const ringReaches = getRingBands(planet).map((band) => band.outerRadius);
   const uprightRingReach = getUprightRing(planet)?.outerRadius ?? 0;
-  // The rocket stands on top of the planet before it lifts off.
+  // The rocket stands on top of the planet before it lifts off; its orbits stay inside the moons'.
   const rocketReach = planet.features.hasRocket ? planet.size + ROCKET_HEIGHT : 0;
 
   return Math.max(planet.size, rocketReach, uprightRingReach, ...orbiterReaches, ...ringReaches);

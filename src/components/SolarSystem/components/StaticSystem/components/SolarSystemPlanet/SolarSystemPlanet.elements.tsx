@@ -39,7 +39,7 @@ export function PlanetOrbiter({ orbiter, x, y }: PlanetOrbiterProps) {
             />
           ))
         : null}
-      <title>{orbiter.label}</title>
+      {orbiter.label ? <title>{orbiter.label}</title> : null}
     </g>
   );
 }

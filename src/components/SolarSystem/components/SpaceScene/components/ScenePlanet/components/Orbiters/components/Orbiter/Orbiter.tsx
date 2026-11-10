@@ -126,7 +126,7 @@ export function Orbiter({ orbiter, onHoverChange, onPlanetClick, sceneStateRef }
         />
         <meshBasicMaterial colorWrite={false} depthWrite={false} />
       </mesh>
-      {isHovered ? <HoverName name={orbiter.label} /> : null}
+      {isHovered && orbiter.label ? <HoverName name={orbiter.label} /> : null}
     </mesh>
   );
 }

@@ -1,13 +1,15 @@
-import { createContext, use, useState } from "react";
+import { createContext, use, useReducer } from "react";
 
-// How gh44-confirm's demo launch goes: asking puts a rocket on Mars' pad, launched flies it off
-// the planet, aborted takes it down.
+// How gh44-confirm's demo launch goes: asking puts a rocket on Mars' pad, launched flies it into
+// orbit, aborted takes it down.
 export type LaunchStatus = "idle" | "asking" | "launched" | "aborted";
 
 type RocketLaunch = {
   status: LaunchStatus;
   // A new rocket stands on the pad for every launch.
   launchId: number;
+  // Every launched rocket stays in orbit around Mars, the oldest leaving past the cap.
+  orbitingIds: number[];
   ask: () => void;
   launch: () => void;
   abort: () => void;
@@ -17,10 +19,13 @@ type RocketLaunch = {
 const NO_LAUNCH: RocketLaunch = {
   status: "idle",
   launchId: 0,
+  orbitingIds: [],
   ask: () => {},
   launch: () => {},
   abort: () => {},
 };
+
+const MAX_ORBITING_ROCKETS = 8;
 
 const RocketLaunchContext = createContext<RocketLaunch>(NO_LAUNCH);
 
@@ -28,20 +33,41 @@ interface RocketLaunchProviderProps {
   children: React.ReactNode;
 }
 
+type LaunchState = Pick<RocketLaunch, "status" | "launchId" | "orbitingIds">;
+type LaunchAction = "ask" | "launch" | "abort";
+
+const INITIAL_STATE: LaunchState = { status: "idle", launchId: 0, orbitingIds: [] };
+
+// The demo calls launch after awaiting the dialog: the reducer reads the state as it is then.
+function launchReducer(state: LaunchState, action: LaunchAction): LaunchState {
+  switch (action) {
+    case "ask":
+      return { ...state, status: "asking", launchId: state.launchId + 1 };
+    case "launch":
+      if (state.status !== "asking") return state;
+      return {
+        ...state,
+        status: "launched",
+        orbitingIds: [...state.orbitingIds, state.launchId].slice(-MAX_ORBITING_ROCKETS),
+      };
+    case "abort":
+      return { ...state, status: "aborted" };
+    default: {
+      const unknownAction: never = action;
+      return unknownAction;
+    }
+  }
+}
+
 // The launch is the panel's demo, and the rocket flies in the scene: both read it from here.
 export function RocketLaunchProvider({ children }: RocketLaunchProviderProps) {
-  const [status, setStatus] = useState<LaunchStatus>("idle");
-  const [launchId, setLaunchId] = useState(0);
+  const [state, dispatch] = useReducer(launchReducer, INITIAL_STATE);
 
   const rocketLaunch: RocketLaunch = {
-    status,
-    launchId,
-    ask: () => {
-      setStatus("asking");
-      setLaunchId((id) => id + 1);
-    },
-    launch: () => setStatus("launched"),
-    abort: () => setStatus("aborted"),
+    ...state,
+    ask: () => dispatch("ask"),
+    launch: () => dispatch("launch"),
+    abort: () => dispatch("abort"),
   };
 
   return <RocketLaunchContext value={rocketLaunch}>{children}</RocketLaunchContext>;
