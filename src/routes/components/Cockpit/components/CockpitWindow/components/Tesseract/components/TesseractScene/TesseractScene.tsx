@@ -4,6 +4,8 @@ import { type Group, MathUtils } from "three";
 
 import { PALETTE } from "#/utils/palette";
 
+import type { FlokiStatus } from "../../../../hooks/useFloki";
+
 import { CommitShelf } from "./components/CommitShelf";
 import { getShelfSize } from "./components/CommitShelf/utils/shelfBooks";
 import { FlokiDog } from "./components/FlokiDog";
@@ -13,33 +15,27 @@ import type { Sightline } from "./components/Lattice/utils/latticeBeams";
 // The camera looks in from just outside the open cell, a little above Floki's middle.
 const CAMERA = { position: [0, 1.1, 9.6], fov: 50, near: 0.1, far: 120 } as const;
 // It looks a little under him, which lifts him and leaves room for the shelf.
-const LOOK_AT = [0, -0.7, 0] as const;
+const LOOK_AT = [0, -0.25, 0] as const;
 // No beam of the lattice comes this close to the line from behind Floki to the camera.
 const SIGHTLINE: Sightline = { from: [0, -1, -2], to: [0, 1.1, 9.6], clearance: 3.3 };
 // It sways a little, and leans with the pointer: scene units.
 const SWAY = { amount: 0.5, speed: 0.11, pointer: 0.9, lambda: 2 } as const;
 // Floki floats in the middle of the cell, his middle at the cell's: he bobs and turns slowly.
-const DOG = { scale: 1.6, drop: -1.75 } as const;
+const DOG = { scale: 1.6, drop: -1.2 } as const;
 const FLOAT = { bob: 0.12, bobSpeed: 0.6, turn: 0.22, turnSpeed: 0.27, tip: 0.06 } as const;
-// The shelf hangs under him, toward the camera, tipped up to face it.
-const SHELF = { position: [0, -1.75, 3.6], tip: -0.5, fill: 0.9 } as const;
+// The shelf hangs under him, toward the camera, tipped up to face it, clear of the talk box.
+const SHELF = { position: [0, -1.3, 3.2], tip: -0.5, fill: 0.62, scale: 0.74 } as const;
 const HALF_FOV = MathUtils.degToRad(CAMERA.fov / 2);
 
 interface FloatingSceneProps {
   commitCount: number;
   selectedIndex: number;
-  isHappy: boolean;
+  // What Floki is doing: he perks up while he listens and speaks.
+  flokiStatus: FlokiStatus;
   onSelect: (index: number) => void;
-  onPick: (index: number) => void;
 }
 
-function FloatingScene({
-  commitCount,
-  selectedIndex,
-  isHappy,
-  onSelect,
-  onPick,
-}: FloatingSceneProps) {
+function FloatingScene({ commitCount, selectedIndex, flokiStatus, onSelect }: FloatingSceneProps) {
   const dogRef = useRef<Group>(null);
   const size = useThree((state) => state.size);
 
@@ -47,7 +43,7 @@ function FloatingScene({
   const shelfDistance = CAMERA.position[2] - SHELF.position[2];
   const visibleWidth = 2 * shelfDistance * Math.tan(HALF_FOV) * (size.width / size.height);
   const shelfScale = Math.min(
-    1,
+    SHELF.scale,
     (visibleWidth * SHELF.fill) / getShelfSize({ count: commitCount }).width,
   );
 
@@ -84,15 +80,10 @@ function FloatingScene({
       <directionalLight color={PALETTE.sky.soft} intensity={2.4} position={[-4, 3, -6]} />
       <Lattice sightline={SIGHTLINE} />
       <group ref={dogRef} scale={DOG.scale}>
-        <FlokiDog isHappy={isHappy} />
+        <FlokiDog status={flokiStatus} />
       </group>
       <group position={[...SHELF.position]} rotation-x={SHELF.tip} scale={shelfScale}>
-        <CommitShelf
-          count={commitCount}
-          selectedIndex={selectedIndex}
-          onSelect={onSelect}
-          onPick={onPick}
-        />
+        <CommitShelf count={commitCount} selectedIndex={selectedIndex} onSelect={onSelect} />
       </group>
     </>
   );

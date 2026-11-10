@@ -54,6 +54,10 @@ export const messages = {
     radioPlaying: ({ title, artist }: { title: string; artist: string }) =>
       `on the radio: ${title} by ${artist}.`,
     radioStopped: "radio off.",
+    // Inside the tesseract.
+    goingBack: "back to the ship. hold on.",
+    tesseract:
+      "the tesseract. every streak of light is a moment, and the shelf is this site's whole history, one book per commit.",
     radioUnavailable: "radio's down. no tracks on board.",
     questionLimit:
       "that's my limit for this trip. reopen the cockpit to start over, or use the terminal.",

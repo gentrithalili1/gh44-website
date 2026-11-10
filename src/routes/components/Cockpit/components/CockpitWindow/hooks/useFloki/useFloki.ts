@@ -8,7 +8,7 @@ import { askFloki, MAX_TURN_LENGTH } from "./askFloki";
 import { type FlokiHearing, useFlokiListening } from "./hooks/useFlokiListening";
 import { useFlokiSignal } from "./hooks/useFlokiSignal";
 import { useFlokiVoice } from "./hooks/useFlokiVoice";
-import type { AskFlokiOutcome, FlokiTurn } from "./types";
+import type { AskFlokiOutcome, FlokiPlace, FlokiTurn } from "./types";
 import { type FlokiMusicAction, getFlokiCommand } from "./utils/flokiCommand";
 
 // Floki's humor setting until the visitor changes it, in percent.
@@ -35,6 +35,9 @@ export type FlokiOutcome =
   // A radio order: carried out once he has said it (playRadio, stopRadio).
   | { status: "radioPlaying"; track: Track; trackIndex: number }
   | { status: "radioStopped" }
+  // Inside the tesseract: he leads the way back, or says what the place is.
+  | { status: "returning"; say: string | undefined }
+  | { status: "explainingPlace" }
   // Stopped while he was thinking: nothing to say or do.
   | { status: "cancelled" }
   | { status: "failed"; reason: FlokiFailureReason };
@@ -42,12 +45,14 @@ export type FlokiOutcome =
 async function requestAnswer({
   turns,
   humor,
+  place,
 }: {
   turns: readonly FlokiTurn[];
   humor: number;
+  place: FlokiPlace;
 }): Promise<AskFlokiOutcome> {
   try {
-    return await askFloki({ data: { turns, humor } });
+    return await askFloki({ data: { turns, humor, place } });
   } catch {
     // The server could not be reached, or refused the question.
     return { status: "failed", reason: "unavailable" };
@@ -60,7 +65,12 @@ async function requestAnswer({
 // The component prints, speaks and flies.
 export type Floki = ReturnType<typeof useFloki>;
 
-export function useFloki() {
+type UseFlokiParams = {
+  // Where he and the visitor are; aboard the ship unless told otherwise.
+  place?: FlokiPlace;
+};
+
+export function useFloki({ place = "cockpit" }: UseFlokiParams = {}) {
   const signal = useFlokiSignal();
   const voice = useFlokiVoice({ playVoice: signal.playVoice });
   const listening = useFlokiListening();
@@ -115,7 +125,7 @@ export function useFloki() {
     prepareAudio();
     // A new question cuts him off.
     voice.stop();
-    const command = getFlokiCommand({ text: question, tracks: music.tracks });
+    const command = getFlokiCommand({ text: question, tracks: music.tracks, place });
     switch (command?.kind) {
       case "go":
         return { status: "navigating", destination: command.destination };
@@ -126,6 +136,10 @@ export function useFloki() {
         return getMusicOutcome(command.action);
       case "track":
         return getRadioTrack(command.trackIndex);
+      case "back":
+        return { status: "returning", say: undefined };
+      case "place":
+        return { status: "explainingPlace" };
       case undefined:
         break;
       default: {
@@ -145,14 +159,16 @@ export function useFloki() {
     const outcome = await requestAnswer({
       turns: [...turns.slice(-HISTORY_TURNS), visitorTurn],
       humor,
+      place,
     });
     music.release();
     if (questionId !== questionIdRef.current) return { status: "cancelled" };
     setRequestStatus("idle");
     if (outcome.status === "failed") return outcome;
 
-    const { say, go } = outcome.reply;
+    const { say, go, back } = outcome.reply;
     setTurns((current) => [...current, visitorTurn, { role: "floki", text: say }]);
+    if (back && place === "tesseract") return { status: "returning", say };
 
     return {
       status: "answered",

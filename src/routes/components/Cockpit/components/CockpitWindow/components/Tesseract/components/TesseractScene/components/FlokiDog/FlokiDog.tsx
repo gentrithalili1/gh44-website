@@ -4,6 +4,7 @@ import { Color, type Group, MathUtils, SRGBColorSpace } from "three";
 
 import { PALETTE, SPACE_COLORS } from "#/utils/palette";
 
+import type { FlokiStatus } from "../../../../../../hooks/useFloki";
 import {
   BODY_PARTS,
   type DogPart,
@@ -84,14 +85,16 @@ function Fur({ part, color }: FurProps) {
 }
 
 interface FlokiDogProps {
-  // Something he likes just happened (a book was picked): his tail goes.
-  isHappy: boolean;
+  // What he is doing: his tail goes while he listens and speaks, and he pants faster talking.
+  status: FlokiStatus;
 }
 
 // Floki himself: a black German shepherd sitting upright, ears up, amber eyes, tongue out, in
 // his harness with its lights and his name on the chest. He breathes and pants, his head
-// follows the pointer, and his tail wags when he is happy. Decorative: no events.
-export function FlokiDog({ isHappy }: FlokiDogProps) {
+// follows the pointer, and his tail wags while he listens and speaks. Decorative: no events.
+export function FlokiDog({ status }: FlokiDogProps) {
+  const isHappy = status === "listening" || status === "speaking";
+  const pantSpeed = status === "speaking" ? PANT.speed * 2 : PANT.speed;
   const [fur] = useState(getFurColor);
   const [plate] = useState(drawNamePlate);
   const chestRef = useRef<Group>(null);
@@ -105,7 +108,7 @@ export function FlokiDog({ isHappy }: FlokiDogProps) {
     const time = clock.elapsedTime;
     chestRef.current?.scale.setScalar(1 + Math.sin(time * BREATH.speed) * BREATH.amount);
     if (tongueRef.current) {
-      tongueRef.current.scale.y = 1 + Math.sin(time * PANT.speed) * PANT.amount;
+      tongueRef.current.scale.y = 1 + Math.sin(time * pantSpeed) * PANT.amount;
     }
     const head = headRef.current;
     if (head) {

@@ -7,6 +7,7 @@ describe("parseFlokiReply", () => {
     expect(parseFlokiReply('{"say": " Course set. ", "go": "work"}')).toEqual({
       say: "Course set.",
       go: "work",
+      back: false,
     });
   });
 
@@ -14,6 +15,7 @@ describe("parseFlokiReply", () => {
     expect(parseFlokiReply('{"say": "Off we go.", "go": "pluto"}')).toEqual({
       say: "Off we go.",
       go: undefined,
+      back: false,
     });
   });
 
@@ -27,6 +29,13 @@ describe("parseFlokiReply", () => {
     const reply = parseFlokiReply(JSON.stringify({ say: "a".repeat(400) }));
 
     expect(reply?.say).toHaveLength(280);
+  });
+});
+
+describe("parseFlokiReply, inside the tesseract", () => {
+  it("reads the way back only when it is plainly true", () => {
+    expect(parseFlokiReply('{"say":"Back we go.","go":null,"back":true}')?.back).toBe(true);
+    expect(parseFlokiReply('{"say":"Still here.","go":null,"back":"yes"}')?.back).toBe(false);
   });
 });
 

@@ -4,6 +4,7 @@ import { PLANETS } from "#/utils/planets";
 import { isCurrentRole, ROLES } from "#/utils/roles";
 
 import { messages } from "../../../components/CockpitTerminal/messages";
+import type { FlokiPlace } from "../types";
 
 // Floki's answers stay short enough to say in a breath.
 export const FLOKI_MAX_REPLY_LENGTH = 280;
@@ -17,9 +18,19 @@ function getPlanetLine(planet: (typeof PLANETS)[number]) {
   return `- ${planet.id} (${planet.realPlanet}): ${planet.title}. ${planet.sub}. ${planet.lede}`;
 }
 
+// What Floki knows about where he is while he and the visitor are inside the black hole.
+const TESSERACT_LINES = [
+  "Right now: you and the visitor flew the explorer into Gargantua, the black hole past the planets, and you are inside it together, floating in the tesseract. You are there in person, as the black German Shepherd you are, in your harness.",
+  "The tesseract: a lattice of beams of light crossing in every direction; every streak in a beam is a moment in time laid out as a place. The shelf under you holds one book for every commit of this website, oldest to newest: its whole history. Pointing at a book shows that commit.",
+  "Time runs slow in here: the trip costs 7 years on Earth, and the cockpit's Earth clock shows it once you are back.",
+  'If the visitor asks what this is or where you are, explain it from these lines. If they want to leave or go back to the ship, say so briefly and set "back" to true. You cannot fly to a planet from in here: tell them to go back first.',
+];
+
+type GetFlokiPromptParams = { humor: number; place: FlokiPlace };
+
 // Everything Floki knows, and how he answers. Nothing else about Gentrit goes in, so he cannot
 // make it up from here.
-export function getFlokiPrompt({ humor }: { humor: number }) {
+export function getFlokiPrompt({ humor, place }: GetFlokiPromptParams) {
   const destinationIds = DESTINATIONS.map(({ name }) => name);
   const commands = Object.values(messages.commands).map(
     ({ usage, description }) => `- ${usage}: ${description}`,
@@ -38,7 +49,8 @@ export function getFlokiPrompt({ humor }: { humor: number }) {
     "- Answer the question asked; never recite his whole profile.",
     "- You are not a general assistant: steer anything off topic back to the ship and the site, in one line.",
     `- At most two short sentences, under ${FLOKI_MAX_REPLY_LENGTH} characters. Plain words, no lists, no markdown, no emojis. Your words are spoken aloud.`,
-    `- Answer with JSON only: {"say": string, "go": one of ${JSON.stringify(destinationIds)} or null}. Set "go" only when the visitor wants to fly there.`,
+    `- Answer with JSON only: {"say": string, "go": one of ${JSON.stringify(destinationIds)} or null, "back": boolean}. Set "go" only when the visitor wants to fly there. Set "back" to true only inside the tesseract, when the visitor wants to leave it.`,
+    ...(place === "tesseract" ? TESSERACT_LINES : []),
     "Facts about Gentrit:",
     "- Gentrit Halili, nickname Granko. From Pristina, Kosovo, now building his career in Barcelona, Spain.",
     "- Senior software engineer with over 10 years in JavaScript and TypeScript: React and Next.js, React Native, Node.js and backend, GraphQL and API architecture, frontend architecture for apps that scale, and AI-powered products. Has built SaaS platforms, mobile apps and real-time data interfaces. Likes owning a product and building things people use.",

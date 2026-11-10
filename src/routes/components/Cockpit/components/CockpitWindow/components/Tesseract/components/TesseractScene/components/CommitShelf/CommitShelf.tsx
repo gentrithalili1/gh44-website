@@ -22,13 +22,11 @@ interface CommitShelfProps {
   // The book in view, from 0.
   selectedIndex: number;
   onSelect: (index: number) => void;
-  // A book was clicked: the message goes back.
-  onPick: (index: number) => void;
 }
 
-// The shelf in the tesseract: one book per commit. The book under the pointer is the one in
-// view; clicking it sends the message back.
-export function CommitShelf({ count, selectedIndex, onSelect, onPick }: CommitShelfProps) {
+// The shelf in the tesseract: one book per commit. The book under the pointer (or tapped) is
+// the one in view.
+export function CommitShelf({ count, selectedIndex, onSelect }: CommitShelfProps) {
   const [positions] = useState(() => getBookPositions({ count }));
   const [size] = useState(() => getShelfSize({ count }));
   const booksRef = useRef<InstancedMesh>(null);
@@ -57,15 +55,9 @@ export function CommitShelf({ count, selectedIndex, onSelect, onPick }: CommitSh
     }
   }
 
-  // A click between two books still picks: the one in view.
-  function handleClick(event: ThreeEvent<MouseEvent>) {
-    event.stopPropagation();
-    onPick(event.instanceId ?? selectedIndex);
-  }
-
   return (
     <group>
-      <mesh position-z={-BOOK.depth} onClick={handleClick}>
+      <mesh position-z={-BOOK.depth}>
         <boxGeometry args={[size.width, size.height, BOOK.depth / 2]} />
         <meshBasicMaterial color={SPACE_COLORS.background} />
       </mesh>
@@ -73,7 +65,7 @@ export function CommitShelf({ count, selectedIndex, onSelect, onPick }: CommitSh
         ref={booksRef}
         args={[undefined, undefined, count]}
         onPointerMove={handlePointerMove}
-        onClick={handleClick}
+        onPointerDown={handlePointerMove}
       >
         <boxGeometry args={[BOOK.width, BOOK.height, BOOK.depth]} />
         <meshBasicMaterial />

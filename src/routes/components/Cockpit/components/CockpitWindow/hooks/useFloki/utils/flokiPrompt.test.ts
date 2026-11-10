@@ -6,7 +6,7 @@ import { getFlokiPrompt } from "./flokiPrompt";
 
 describe("getFlokiPrompt", () => {
   it("knows every planet, the current role and the terminal commands", () => {
-    const prompt = getFlokiPrompt({ humor: 60 });
+    const prompt = getFlokiPrompt({ place: "cockpit", humor: 60 });
 
     for (const planet of PLANETS) expect(prompt).toContain(`- ${planet.id} (`);
     expect(prompt).toContain("Senior Frontend Engineer at JOIN, 2026-02 to now");
@@ -14,7 +14,7 @@ describe("getFlokiPrompt", () => {
   });
 
   it("knows who he is and who his captain is, without made-up memories", () => {
-    const prompt = getFlokiPrompt({ humor: 60 });
+    const prompt = getFlokiPrompt({ place: "cockpit", humor: 60 });
 
     expect(prompt).toContain("late black German Shepherd");
     expect(prompt).toContain("You have none of his memories");
@@ -22,13 +22,22 @@ describe("getFlokiPrompt", () => {
   });
 
   it("knows how the visitor works the radio, and what it plays", () => {
-    const prompt = getFlokiPrompt({ humor: 60 });
+    const prompt = getFlokiPrompt({ place: "cockpit", humor: 60 });
 
     expect(prompt).toContain("stop the music, next, previous or play <track>");
     expect(prompt).toContain("s.t.a.y. by hans zimmer");
   });
 
   it("carries the humor setting", () => {
-    expect(getFlokiPrompt({ humor: 25 })).toContain("Humor setting: 25%.");
+    expect(getFlokiPrompt({ place: "cockpit", humor: 25 })).toContain("Humor setting: 25%.");
+  });
+
+  it("tells floki where he is, and how to leave, only inside the tesseract", () => {
+    const aboard = getFlokiPrompt({ place: "cockpit", humor: 50 });
+    const inside = getFlokiPrompt({ place: "tesseract", humor: 50 });
+
+    expect(aboard).not.toContain("tesseract: a lattice");
+    expect(inside).toContain("inside it together, floating in the tesseract");
+    expect(inside).toContain('set "back" to true');
   });
 });

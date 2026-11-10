@@ -108,8 +108,8 @@ export function CockpitWindow({
   const [returnFocusTo] = useState(() => document.activeElement);
   const terminal = useTerminal();
   // The ship's computer: he answers in the terminal, and his screen shows him.
-  const floki = useFloki();
-  const flokiTalk = useFlokiTalk({ floki, terminal, onGo });
+  const floki = useFloki({ place: jumpStatus === "inside" ? "tesseract" : "cockpit" });
+  const flokiTalk = useFlokiTalk({ floki, terminal, onGo, onBack: onReturn });
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
   const [praiseCount, setPraiseCount] = useState(0);
   const exploration = useExploration();
@@ -178,6 +178,12 @@ export function CockpitWindow({
         { kind: "output", text: messages.jumpProgress },
       ]);
     });
+  }
+
+  // Typed to Floki inside the tesseract: kept in the terminal like what is said out loud.
+  function handleTesseractAsk(question: string) {
+    terminal.print([{ kind: "visitor", text: question }]);
+    void flokiTalk.ask(question);
   }
 
   function getJumpPhase() {
@@ -254,7 +260,15 @@ export function CockpitWindow({
           past its edges: the cockpit is still shaking), and lifts once the ship is back. */}
       <div className="pointer-events-none absolute -inset-1 z-20 flex flex-col items-center justify-center gap-5 bg-black opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=inside]/cockpit:pointer-events-auto group-data-[jump=inside]/cockpit:opacity-100 group-data-[jump=on]/cockpit:animate-jump-black">
         {jumpStatus === "inside" && spaceMode === "scene" ? (
-          <Tesseract onReturn={onReturn} />
+          <Tesseract
+            flokiStatus={floki.status}
+            canListen={floki.canListen}
+            isConversing={flokiTalk.isConversing}
+            lines={terminal.lines}
+            onAsk={handleTesseractAsk}
+            onTalk={() => void flokiTalk.talk()}
+            onReturn={onReturn}
+          />
         ) : null}
         {jumpStatus === "inside" && spaceMode === "static" ? (
           <>
