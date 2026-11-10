@@ -26,6 +26,5 @@ export const messages = {
   avalon: "avalon",
   homestead: "homestead ii · 90 years from the avalon",
   blackHole: "gargantua",
-  blackHoleUnknown: "???",
   pluto: "pluto · still a planet",
 } as const;

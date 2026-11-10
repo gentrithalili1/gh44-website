@@ -49,17 +49,18 @@ function getDestinationList() {
   return messages.destinationList(DESTINATIONS.map((destination) => destination.name));
 }
 
-// Every planet is visited: the black hole shows itself.
+// Every planet is visited: the cockpit announces the black hole.
 export function hasFoundGargantua({ visitedIds }: Pick<CommandContext, "visitedIds">) {
   return visitedIds.length >= DESTINATIONS.length;
 }
 
-function go({ args, context }: CommandParams): CommandResult {
+function go({ args }: CommandParams): CommandResult {
   const [name] = args;
   if (name === undefined) {
     return print([messages.usage(messages.commands.go.usage), getDestinationList()]);
   }
-  if (name === messages.gargantua.name && hasFoundGargantua(context)) {
+  // Always open to whoever knows the name, though no list shows it.
+  if (name === messages.gargantua.name) {
     return { kind: "jump", lines: messages.gargantua.confirm };
   }
 

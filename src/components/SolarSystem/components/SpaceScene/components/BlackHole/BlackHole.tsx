@@ -198,10 +198,7 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
         <meshBasicMaterial colorWrite={false} depthWrite={false} />
       </mesh>
       {isHovered || isCalling ? (
-        <HoverName
-          name={isFound ? messages.blackHole : messages.blackHoleUnknown}
-          position={NAME_POSITION}
-        />
+        <HoverName name={messages.blackHole} position={NAME_POSITION} />
       ) : null}
     </group>
   );
