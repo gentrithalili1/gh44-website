@@ -63,16 +63,16 @@ describe("CockpitWindow", () => {
     await user.keyboard("{Escape}");
 
     expect(onClose).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "go on a spacewalk" })).toBeDisabled();
-    // The panel slides away so the flight shows: the terminal is out of reach, and read-only.
-    expect(screen.getByRole("button", { name: "show panel" })).toBeDisabled();
+    // The whole panel slides away so the flight shows: nothing on it is in reach, or pressable.
+    expect(screen.queryByRole("button", { name: "go on a spacewalk" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "go on a spacewalk", hidden: true })).toBeDisabled();
     expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "command", hidden: true })).toHaveAttribute(
       "readonly",
     );
   });
 
-  it("hides the whole panel for the view, and brings it back", async () => {
+  it("docks the panel down to its status strip, and brings it back", async () => {
     const user = userEvent.setup();
     await renderCockpitWindow({ isLocked: false, onClose: vi.fn() });
     const hide = screen.getByRole("button", { name: "hide panel" });
@@ -80,6 +80,9 @@ describe("CockpitWindow", () => {
 
     await user.click(hide);
 
+    // The strip stays: the ship's name, the way out and the way back up.
+    expect(screen.getByRole("heading", { name: "gh44 explorer" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "go on a spacewalk" })).toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "radar" })).not.toBeInTheDocument();
     const show = screen.getByRole("button", { name: "show panel" });
