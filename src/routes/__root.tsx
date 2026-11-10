@@ -5,6 +5,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { SolarSystem } from "#/components/SolarSystem";
 import { BootProvider } from "#/hooks/useBoot";
 import { ExplorerProvider } from "#/hooks/useExplorer";
+import { RocketLaunchProvider } from "#/hooks/useRocketLaunch";
 import { SPACE_COLORS } from "#/utils/palette";
 import { findPlanet } from "#/utils/planets";
 
@@ -85,14 +86,16 @@ function RootLayout() {
       <LockScreen>
         <MusicProvider>
           <ExplorerProvider>
-            <BootProvider>
-              <SolarSystem openPlanetId={planet?.id} />
-              <PageLayer>
-                <Outlet />
-              </PageLayer>
-              <Cockpit />
-              <BootScreen />
-            </BootProvider>
+            <RocketLaunchProvider>
+              <BootProvider>
+                <SolarSystem openPlanetId={planet?.id} />
+                <PageLayer>
+                  <Outlet />
+                </PageLayer>
+                <Cockpit />
+                <BootScreen />
+              </BootProvider>
+            </RocketLaunchProvider>
           </ExplorerProvider>
         </MusicProvider>
       </LockScreen>

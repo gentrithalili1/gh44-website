@@ -37,4 +37,28 @@ describe("LaunchDemo", () => {
     // Announced to screen readers.
     expect(screen.getByText("aborted. the rocket is relieved.")).toHaveAttribute("role", "status");
   });
+
+  it("stands a rocket on Mars only once asked, and lifts it off the planet on launch", async () => {
+    const user = userEvent.setup();
+    await renderAt("/gh44-confirm");
+    // The static system's rocket: drawn on Mars, not in the panel.
+    const getRocket = () => document.querySelector("svg path[data-status]");
+
+    expect(getRocket()).toBeNull();
+    await user.click(screen.getByRole("button", { name: "launch rocket?" }));
+    expect(getRocket()).toHaveAttribute("data-status", "asking");
+
+    await user.click(screen.getByRole("button", { name: "launch" }));
+    expect(getRocket()).toHaveAttribute("data-status", "launched");
+  });
+
+  it("takes the rocket off Mars on abort", async () => {
+    const user = userEvent.setup();
+    await renderAt("/gh44-confirm");
+
+    await user.click(screen.getByRole("button", { name: "launch rocket?" }));
+    await user.click(screen.getByRole("button", { name: "abort" }));
+
+    expect(document.querySelector("svg path[data-status]")).toBeNull();
+  });
 });

@@ -6,21 +6,15 @@ import {
   type RingBand,
   type UprightRing,
 } from "#/components/SolarSystem/utils/rings";
-import {
-  getRocketPose,
-  getTiltedPoint,
-  ORBIT_TILT,
-  ROCKET_OUTLINE,
-} from "#/components/SolarSystem/utils/space";
+import { getTiltedPoint, ORBIT_TILT, ROCKET_OUTLINE } from "#/components/SolarSystem/utils/space";
 import { getSurfaceShapes } from "#/components/SolarSystem/utils/surface";
+import { isRocketOnStage, useRocketLaunch } from "#/hooks/useRocketLaunch";
 import { getColorVars } from "#/utils/palette";
 import type { PlanetBody } from "#/utils/planets";
 
 import { PlanetOrbiter, PlanetSurfaceShape } from "./SolarSystemPlanet.elements";
 
 const RADIANS_TO_DEGREES = 180 / Math.PI;
-// A still frame of the rocket's flight.
-const ROCKET_ANGLE = 0.6;
 const ROCKET_PATH = `M ${ROCKET_OUTLINE.map((point) => `${point.x} ${point.y}`).join(" L ")} Z`;
 
 // A flat ring band between two tilted ellipses; even-odd fill leaves the middle open.
@@ -57,6 +51,7 @@ interface SolarSystemPlanetProps {
 // A still frame of one planet: what passes behind it, its body and surface, then what passes in
 // front (the near half of tilted orbits and rings).
 export function SolarSystemPlanet({ planet, x, y, state }: SolarSystemPlanetProps) {
+  const rocketLaunch = useRocketLaunch();
   const orbiters = getOrbiters(planet).map((orbiter) => ({
     orbiter,
     point: getTiltedPoint({ radius: orbiter.orbitRadius, angle: orbiter.phase }),
@@ -66,9 +61,7 @@ export function SolarSystemPlanet({ planet, x, y, state }: SolarSystemPlanetProp
   const uprightRingTransform = uprightRing
     ? `rotate(${uprightRing.lean * RADIANS_TO_DEGREES})`
     : undefined;
-  const rocket = planet.features.hasRocket
-    ? getRocketPose({ planetSize: planet.size, angle: ROCKET_ANGLE })
-    : null;
+  const hasRocket = planet.features.hasRocket === true && isRocketOnStage(rocketLaunch.status);
   const nearHalfClipId = `near-half-${planet.id}`;
 
   return (
@@ -142,12 +135,15 @@ export function SolarSystemPlanet({ planet, x, y, state }: SolarSystemPlanetProp
           className="fill-(--hue)"
         />
       ) : null}
-      {rocket ? (
-        <path
-          d={ROCKET_PATH}
-          transform={`translate(${rocket.x} ${rocket.y}) rotate(${rocket.rotation * RADIANS_TO_DEGREES})`}
-          className="fill-foreground"
-        />
+      {/* gh44-confirm's rocket stands on top of Mars while asked, and lifts off on launch. */}
+      {hasRocket ? (
+        <g key={rocketLaunch.launchId} transform={`translate(0 ${-planet.size})`}>
+          <path
+            d={ROCKET_PATH}
+            data-status={rocketLaunch.status}
+            className="fill-foreground transition-[translate,opacity] duration-1400 ease-in data-[status=launched]:-translate-y-48 data-[status=launched]:opacity-0"
+          />
+        </g>
       ) : null}
       {orbiters
         .filter(({ point }) => point.isInFront)

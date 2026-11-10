@@ -1,12 +1,7 @@
 import type { Point } from "#/components/SolarSystem/types";
 import { getOrbiters } from "#/components/SolarSystem/utils/orbiters";
 import { getRingBands, getUprightRing } from "#/components/SolarSystem/utils/rings";
-import {
-  getOrbitPosition,
-  ROCKET_GAP,
-  ROCKET_LENGTH,
-  SYSTEM_SIZE,
-} from "#/components/SolarSystem/utils/space";
+import { getOrbitPosition, ROCKET_HEIGHT, SYSTEM_SIZE } from "#/components/SolarSystem/utils/space";
 import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 import { PANEL_WIDTH, SHEET_HEIGHT } from "#/utils/panel";
 import { findPlanet, type PlanetBody, PLANETS } from "#/utils/planets";
@@ -100,7 +95,8 @@ export function getPlanetReach(planet: PlanetBody) {
   const orbiterReaches = getOrbiters(planet).map((orbiter) => orbiter.orbitRadius + orbiter.radius);
   const ringReaches = getRingBands(planet).map((band) => band.outerRadius);
   const uprightRingReach = getUprightRing(planet)?.outerRadius ?? 0;
-  const rocketReach = planet.features.hasRocket ? planet.size + ROCKET_GAP + ROCKET_LENGTH : 0;
+  // The rocket stands on top of the planet before it lifts off.
+  const rocketReach = planet.features.hasRocket ? planet.size + ROCKET_HEIGHT : 0;
 
   return Math.max(planet.size, rocketReach, uprightRingReach, ...orbiterReaches, ...ringReaches);
 }

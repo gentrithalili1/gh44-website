@@ -310,8 +310,8 @@ describe("getPlanetReach", () => {
     expect(reaches).toEqual({
       // The moon: orbit 24 plus its radius 3.
       me: 27,
-      // The rocket: 20 out from the surface, plus its 3-unit nose.
-      "gh44-confirm": 33,
+      // Deimos: orbit 23 plus its radius 1.5.
+      "gh44-confirm": 24.5,
       // The outermost company moon: orbit 73 plus radius 2.3.
       work: expect.closeTo(75.3, 5),
       // The outermost ring band: 2.15 planet radii.
