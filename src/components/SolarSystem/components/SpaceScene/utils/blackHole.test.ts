@@ -3,24 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   getAheadAnchor,
   getEscape,
+  getHoleDirections,
   getHoleScale,
   getJumpCenter,
   getJumpLift,
-  getRestAnchor,
   getSceneWarp,
-  HOLE_SKY_DIRECTION,
 } from "./blackHole";
-
-describe("getRestAnchor", () => {
-  it("rests in the top right of the screen", () => {
-    for (const isPhone of [true, false]) {
-      const anchor = getRestAnchor(isPhone);
-
-      expect(anchor.x).toBeGreaterThan(0);
-      expect(anchor.y).toBeGreaterThan(0);
-    }
-  });
-});
 
 describe("getAheadAnchor", () => {
   it("is straight ahead, up in the windshield", () => {
@@ -29,9 +17,17 @@ describe("getAheadAnchor", () => {
   });
 });
 
-describe("HOLE_SKY_DIRECTION", () => {
-  it("is a direction: one unit long", () => {
-    expect(Math.hypot(...HOLE_SKY_DIRECTION)).toBeCloseTo(1, 2);
+describe("getHoleDirections", () => {
+  it("gives directions one unit long, below the orbit plane outside the ship", () => {
+    for (const isPhone of [true, false]) {
+      const { home, cockpit } = getHoleDirections(isPhone);
+
+      expect(Math.hypot(...home)).toBeCloseTo(1, 2);
+      expect(Math.hypot(...cockpit)).toBeCloseTo(1, 2);
+      // The home view looks down on the system: its top right is under the plane, behind it.
+      expect(home[1]).toBeLessThan(0);
+      expect(home[2]).toBeLessThan(0);
+    }
   });
 });
 

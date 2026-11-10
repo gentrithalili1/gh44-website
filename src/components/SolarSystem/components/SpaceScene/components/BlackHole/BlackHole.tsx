@@ -14,12 +14,11 @@ import { PALETTE } from "#/utils/palette";
 import type { SceneState } from "../../types";
 import {
   getAheadAnchor,
+  getHoleDirections,
   getHoleScale,
   getJumpCenter,
-  getRestAnchor,
   HOLE_DISTANCE,
   HOLE_RADIUS,
-  HOLE_SKY_DIRECTION,
 } from "../../utils/blackHole";
 import { damp, PHONE_MAX_WIDTH } from "../../utils/sceneMath";
 import { HoverName } from "../HoverName";
@@ -32,16 +31,15 @@ const PLANE_REACH = 5;
 const PLANE_SIZE = HOLE_RADIUS * PLANE_REACH * 2;
 // The flight in takes this long, straight (no ease): the growth itself speeds up.
 const JUMP_SECONDS = 8;
-// It moves between its corner of the screen and its place in the sky this fast, as the cockpit
-// opens or closes.
+// It moves between its place seen from outside and its place seen from the cockpit this fast,
+// as the cockpit opens or closes.
 const PLACE_LAMBDA = 3;
 const NAME_POSITION: [number, number, number] = [0, HOLE_RADIUS * 2, 0];
 
-// The directions to it: pinned to the screen, where it ends up, and dead ahead.
-const pinned = new Vector3();
+// The directions to it: where it is in the sky, the cockpit's, and dead ahead.
 const toward = new Vector3();
+const fromCockpit = new Vector3();
 const ahead = new Vector3();
-const SKY = new Vector3(...HOLE_SKY_DIRECTION);
 
 // sRGB as written: the shader outputs it as it is.
 function toShaderColor(hex: string) {
@@ -52,12 +50,12 @@ interface BlackHoleProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// An easter egg: a black hole far out, its disk turning. Outside the ship it keeps its place in
-// the top right of the screen; from the cockpit it has its own place in the sky, in the
-// windshield as the site opens, and drifts across as the ship goes round the sun. Once every
-// planet is visited the cockpit can fly into it (`go gargantua`): the solar system drops away,
-// it swings dead ahead and grows until its shadow is all there is. It stays that way until the
-// visitor comes back.
+// An easter egg: a black hole far out in the sky, its disk turning. It is part of the space:
+// it turns with the stars as the camera does. It starts in the top right of the home view, and
+// in the windshield as the site opens, drifting across as the ship goes round the sun. Once
+// every planet is visited the cockpit can fly into it (`go gargantua`): the solar system drops
+// away, it swings dead ahead and grows until its shadow is all there is. It stays that way
+// until the visitor comes back.
 export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const explorer = useExplorer();
   const exploration = useExploration();
@@ -78,7 +76,7 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const growRef = useRef<Group>(null);
   // 0 to 1 through the flight in; GSAP drives it.
   const jumpRef = useRef({ progress: 0 });
-  // 0 pinned to its corner of the screen, 1 at its own place in the sky.
+  // 0 at its place seen from outside the ship, 1 at its place seen from the cockpit.
   const skyShareRef = useRef(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -128,12 +126,12 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
       delta,
       lambda: PLACE_LAMBDA,
     });
-    const rest = getRestAnchor(isPhone);
+    const directions = getHoleDirections(isPhone);
     const front = getAheadAnchor(isPhone);
-    pinned.set(rest.x, rest.y, 0.5).unproject(camera).sub(camera.position).normalize();
     ahead.set(front.x, front.y, 0.5).unproject(camera).sub(camera.position).normalize();
-    // From its corner to its place in the sky, then to dead ahead on the flight in.
-    toward.copy(pinned).lerp(SKY, skyShareRef.current).normalize();
+    // Its place in the sky, then dead ahead on the flight in.
+    toward.set(...directions.home);
+    toward.lerp(fromCockpit.set(...directions.cockpit), skyShareRef.current).normalize();
     toward.lerp(ahead, getJumpCenter(progress)).normalize();
     group.position.copy(camera.position).addScaledVector(toward, HOLE_DISTANCE);
     group.quaternion.copy(camera.quaternion);

@@ -2,13 +2,16 @@ import type { Point } from "#/components/SolarSystem/types";
 
 import type { SceneState } from "../types";
 
-// The black hole is far out, this far from the camera (just inside the stars' shell). Seen from
-// outside the ship it keeps its place in the top right of the screen; from the cockpit it has
-// its own place in the sky, and crosses the windshield as the ship goes round the sun.
+// The black hole is part of the sky, this far from the camera (just inside the stars' shell):
+// it turns with the stars as the camera does.
 export const HOLE_DISTANCE = 7000;
-// That place in the sky: the direction from the system to it, in the windshield as the site
-// opens (the ship starts with it ahead and to the right).
-export const HOLE_SKY_DIRECTION: [number, number, number] = [0.021, -0.13, 0.991];
+// The directions to it (one unit long). Outside the ship it is in the top right of the home
+// view, on a phone's tall screen and on desktop. The cockpit looks the other way, so there it
+// has a second place: in the windshield as the site opens, crossing as the ship goes round.
+const HOLE_DIRECTIONS = {
+  home: { phone: [0.109, -0.523, -0.846], desktop: [0.427, -0.493, -0.758] },
+  cockpit: [0.021, -0.13, 0.991],
+} as const;
 // Its shadow's radius out there: about 20 pixels across.
 export const HOLE_RADIUS = 60;
 // It fills the whole view by the end of the flight in: this many times its size.
@@ -23,21 +26,20 @@ const CENTER_BY = 0.14;
 // the windshield, on a phone and on desktop.
 const JUMP_VIEW_LIFT = { phone: 0.27, desktop: 0.21 } as const;
 
-// Where it rests on screen outside the ship, from the center to the edges (-1 to 1, `y` up):
-// the top right.
-const REST_ANCHORS = {
-  phone: { x: 0.6, y: 0.74 },
-  desktop: { x: 0.74, y: 0.68 },
-} as const;
-
 function smooth(share: number) {
   const clamped = Math.min(1, Math.max(0, share));
 
   return clamped * clamped * (3 - 2 * clamped);
 }
 
-export function getRestAnchor(isPhone: boolean): Point {
-  return isPhone ? REST_ANCHORS.phone : REST_ANCHORS.desktop;
+type Direction = readonly [number, number, number];
+
+// The direction to it from outside the ship, and from the cockpit.
+export function getHoleDirections(isPhone: boolean): { home: Direction; cockpit: Direction } {
+  return {
+    home: isPhone ? HOLE_DIRECTIONS.home.phone : HOLE_DIRECTIONS.home.desktop,
+    cockpit: HOLE_DIRECTIONS.cockpit,
+  };
 }
 
 // The share of the screen's height the camera's view is lifted by, flying in.
