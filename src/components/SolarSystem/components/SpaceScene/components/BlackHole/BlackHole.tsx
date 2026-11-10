@@ -37,6 +37,8 @@ const PLANE_REACH = 5;
 const PLANE_SIZE = HOLE_RADIUS * PLANE_REACH * 2;
 // The flight in takes this long, straight (no ease): the growth itself speeds up.
 const JUMP_SECONDS = 8;
+// The flight back out is the same one backward, a little quicker.
+const RETURN_SECONDS = 6;
 const NAME_POSITION: [number, number, number] = [0, HOLE_RADIUS * 2, 0];
 // While it calls (every planet visited, not been there yet) a ring goes out from it every few
 // seconds: from just outside the shadow to this many times its radius, fading on the way.
@@ -103,6 +105,17 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
         case "inside":
           // Without a flight (the visitor was put inside at once) it is all shadow just the same.
           jump.progress = 1;
+          return;
+        case "returning":
+          // The same flight, backward: the shadow shrinks to a dot and the system comes back.
+          gsap
+            .timeline()
+            .fromTo(
+              jump,
+              { progress: 1 },
+              { progress: 0, duration: RETURN_SECONDS, ease: "power1.inOut" },
+            )
+            .call(explorer.finishJump);
           return;
         case "idle":
           gsap.killTweensOf(jump);

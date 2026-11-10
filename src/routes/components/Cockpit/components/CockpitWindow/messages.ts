@@ -14,7 +14,7 @@ export const messages = {
   flokiWelcome:
     "Welcome aboard, stranger! I'm FLOKI, the captain's German Shepherd and your guide to this universe. Tap Ask FLOKI and let's explore!",
   // Back from the black hole: what Floki says, and what the terminal prints under it.
-  jumpArrived: (years: number) => `that took 8 seconds. ${years} years passed on earth.`,
+  jumpArrived: (years: number) => `home. that felt like minutes. ${years} years passed on earth.`,
   jumpProgress: "visited: 6/5",
   // Inside the black hole: nothing but the way back.
   voidLine: "nothing in here. not even light.",

@@ -73,7 +73,7 @@ interface CockpitWindowProps {
   onGo: (destination: Destination) => void;
   // The trip into the black hole: flying in, the cockpit goes dark; inside there is only black
   // and the way back.
-  jumpStatus: "idle" | "jumping" | "inside";
+  jumpStatus: "idle" | "jumping" | "inside" | "returning";
   // Starts that flight; `onArrive` runs once the visitor is back.
   onJump: (onArrive: () => void) => void;
   // The way back from inside.
@@ -192,6 +192,9 @@ export function CockpitWindow({
         return "on";
       case "inside":
         return "inside";
+      // Flying back out: the dark lifts at once, and stays lifted once home.
+      case "returning":
+        return "back";
       case "idle":
         return hasReturned ? "back" : undefined;
       default: {

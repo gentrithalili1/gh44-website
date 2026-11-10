@@ -441,7 +441,9 @@ describe("CockpitWindow's Floki", () => {
     await user.click(back);
 
     expect(screen.queryByRole("button", { name: "go back" })).not.toBeInTheDocument();
-    expect(output.getByText("that took 8 seconds. 7 years passed on earth.")).toBeInTheDocument();
+    expect(
+      output.getByText("home. that felt like minutes. 7 years passed on earth."),
+    ).toBeInTheDocument();
     expect(screen.getByText("systems online")).toBeInTheDocument();
     expect(screen.getByLabelText(new RegExp(`^earth time: .*${yearNow + 7}`))).toBeInTheDocument();
     expect(

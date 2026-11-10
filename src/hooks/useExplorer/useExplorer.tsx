@@ -19,8 +19,12 @@ type Cockpit =
 type ExplorerFlight = { status: "idle" } | { status: "flying"; destination: Destination };
 
 // The trip into the black hole (an easter egg): flying in after `go gargantua`, then inside,
-// where there is nothing but the way back.
-type ExplorerJump = { status: "idle" } | { status: "jumping" } | { status: "inside" };
+// where there is nothing but the way back; then flying back out to the solar system.
+type ExplorerJump =
+  | { status: "idle" }
+  | { status: "jumping" }
+  | { status: "inside" }
+  | { status: "returning" };
 
 // How a launch goes: the ship in the scene flies there first, or (no ship) the visitor arrives
 // at once and the page opens now.
@@ -49,8 +53,10 @@ type Explorer = {
   startJump: (onArrive: () => void) => void;
   // The flight in is over: nothing but black.
   reachHorizon: () => void;
-  // Back from inside: time has passed on Earth.
+  // Leaves the inside: the ship flies back out to the solar system (at once without a ship).
   endJump: () => void;
+  // The flight back is over: time has passed on Earth.
+  finishJump: () => void;
   // The years that passed on Earth while the visitor was in the black hole; a reload starts over.
   earthYearsPassed: number;
   // The planet the visitor last launched to from the cockpit: its page leads back to the cockpit.
@@ -63,6 +69,7 @@ const IDLE: ExplorerFlight = { status: "idle" };
 const NOT_JUMPING: ExplorerJump = { status: "idle" };
 const JUMPING: ExplorerJump = { status: "jumping" };
 const INSIDE: ExplorerJump = { status: "inside" };
+const RETURNING: ExplorerJump = { status: "returning" };
 
 const ExplorerContext = createContext<Explorer | null>(null);
 
@@ -87,6 +94,13 @@ export function ExplorerProvider({ children }: ExplorerProviderProps) {
 
   function hasShip() {
     return shipCountRef.current > 0;
+  }
+
+  function finishJump() {
+    setJump(NOT_JUMPING);
+    setEarthYearsPassed((years) => years + GARGANTUA_YEARS);
+    arriveRef.current?.();
+    arriveRef.current = null;
   }
 
   const explorer: Explorer = {
@@ -137,11 +151,10 @@ export function ExplorerProvider({ children }: ExplorerProviderProps) {
     },
     reachHorizon: () => setJump((current) => (current.status === "jumping" ? INSIDE : current)),
     endJump: () => {
-      setJump(NOT_JUMPING);
-      setEarthYearsPassed((years) => years + GARGANTUA_YEARS);
-      arriveRef.current?.();
-      arriveRef.current = null;
+      if (hasShip()) setJump((current) => (current.status === "inside" ? RETURNING : current));
+      else finishJump();
     },
+    finishJump,
     earthYearsPassed,
     cockpitTripPlanetId,
   };
