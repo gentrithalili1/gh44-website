@@ -98,7 +98,7 @@ export const PLANETS = [
     name: "work",
     title: "work",
     sub: `${ROLES.length} moons · 2016 → now`,
-    lede: "where i've worked. companies and roles, most recent first.",
+    lede: "where i've worked. companies and roles.",
     color: "ochre",
     size: 28,
     orbit: { radius: 280, phase: 2.2 },
