@@ -7,8 +7,8 @@ import { PALETTE } from "#/utils/palette";
 import { getFlagWave } from "./utils/flagWave";
 
 // In system units: a pole standing on top of the moon, and the flag at its top.
-const POLE = { height: 4.2, radius: 0.1 } as const;
-const FLAG = { width: 3.4, height: 1.8, columns: 16, rows: 8 } as const;
+const POLE = { height: 2.1, radius: 0.05 } as const;
+const FLAG = { width: 1.7, height: 0.9, columns: 16, rows: 8 } as const;
 const PIXELS = { width: 285, height: 150 } as const;
 // Thirteen stripes, the top one red; the blue field covers the top seven, two fifths across.
 const STRIPES = 13;
