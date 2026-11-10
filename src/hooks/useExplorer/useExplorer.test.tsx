@@ -157,7 +157,7 @@ describe("useExplorer", () => {
     expect(other.result.current.cockpit).toMatchObject({ isGreeting: false });
   });
 
-  it("flies into the black hole with a ship, waits inside, and comes back years later", () => {
+  it("flies into the black hole with a ship, waits inside, flies back and is home years later", () => {
     const { result } = renderExplorer();
     act(() => {
       result.current.boardShip();
@@ -172,6 +172,10 @@ describe("useExplorer", () => {
     expect(arrivals).toBe(0);
 
     act(() => result.current.endJump());
+    expect(result.current.jump).toEqual({ status: "returning" });
+    expect(arrivals).toBe(0);
+
+    act(() => result.current.finishJump());
     expect(result.current.jump).toEqual({ status: "idle" });
     expect(arrivals).toBe(1);
     expect(result.current.earthYearsPassed).toBe(7);
@@ -183,5 +187,10 @@ describe("useExplorer", () => {
     act(() => result.current.startJump(() => {}));
 
     expect(result.current.jump).toEqual({ status: "inside" });
+
+    act(() => result.current.endJump());
+
+    expect(result.current.jump).toEqual({ status: "idle" });
+    expect(result.current.earthYearsPassed).toBe(7);
   });
 });

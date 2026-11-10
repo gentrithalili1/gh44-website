@@ -3,10 +3,14 @@ import type { PlanetId } from "#/utils/planets";
 // One message in a conversation with Floki.
 export type FlokiTurn = { role: "visitor" | "floki"; text: string };
 
-// What Floki answers: words to say, and a planet to fly to when the visitor asked to go.
-export type FlokiReply = { say: string; go: PlanetId | undefined };
+// Where Floki and the visitor are: aboard the ship, or inside the black hole.
+export type FlokiPlace = "cockpit" | "tesseract";
 
-export type AskFlokiInput = { turns: readonly FlokiTurn[]; humor: number };
+// What Floki answers: words to say, a planet to fly to when the visitor asked to go, and whether
+// to leave the tesseract when they asked to go back.
+export type FlokiReply = { say: string; go: PlanetId | undefined; back: boolean };
+
+export type AskFlokiInput = { turns: readonly FlokiTurn[]; humor: number; place: FlokiPlace };
 
 export type AskFlokiOutcome =
   | { status: "answered"; reply: FlokiReply }

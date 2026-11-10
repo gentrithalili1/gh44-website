@@ -37,6 +37,8 @@ const PLANE_REACH = 5;
 const PLANE_SIZE = HOLE_RADIUS * PLANE_REACH * 2;
 // The flight in takes this long, straight (no ease): the growth itself speeds up.
 const JUMP_SECONDS = 8;
+// The flight home, a little quicker than the way in.
+const RETURN_SECONDS = 6;
 const NAME_POSITION: [number, number, number] = [0, HOLE_RADIUS * 2, 0];
 // While it calls (every planet visited, not been there yet) a ring goes out from it every few
 // seconds: from just outside the shadow to this many times its radius, fading on the way.
@@ -81,6 +83,8 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const growRef = useRef<Group>(null);
   // 0 to 1 through the flight in; GSAP drives it.
   const jumpRef = useRef({ progress: 0 });
+  // 1 to 0 through the flight home; GSAP drives it.
+  const homingRef = useRef({ progress: 0 });
   const signalRef = useRef<Mesh>(null);
   const signalMaterialRef = useRef<MeshBasicMaterial>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -93,6 +97,7 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   useGSAP(
     () => {
       const jump = jumpRef.current;
+      const homing = homingRef.current;
       switch (jumpStatus) {
         case "jumping":
           gsap
@@ -104,9 +109,23 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
           // Without a flight (the visitor was put inside at once) it is all shadow just the same.
           jump.progress = 1;
           return;
-        case "idle":
-          gsap.killTweensOf(jump);
+        case "returning":
+          // Out of the hole and facing home: it is behind the ship, and the flight runs toward
+          // the solar system, which grows back ahead.
           jump.progress = 0;
+          gsap
+            .timeline()
+            .fromTo(
+              homing,
+              { progress: 1 },
+              { progress: 0, duration: RETURN_SECONDS, ease: "power1.inOut" },
+            )
+            .call(explorer.finishJump);
+          return;
+        case "idle":
+          gsap.killTweensOf([jump, homing]);
+          jump.progress = 0;
+          homing.progress = 0;
           return;
         default: {
           const unknownStatus: never = jumpStatus;
@@ -120,6 +139,7 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   useFrame(({ camera, clock, size }) => {
     const { progress } = jumpRef.current;
     sceneStateRef.current.jump = progress;
+    sceneStateRef.current.homing = homingRef.current.progress;
     material.uniforms.uTime.value = clock.elapsedTime;
     growRef.current?.scale.setScalar(getHoleScale(progress));
     const signalShare = (clock.elapsedTime / SIGNAL.seconds) % 1;
@@ -129,6 +149,8 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
     }
     const group = groupRef.current;
     if (!group) return;
+    // Flying home, the hole is behind the ship: out of sight.
+    group.visible = homingRef.current.progress === 0;
 
     const isPhone = size.width < PHONE_MAX_WIDTH;
     const front = getAheadAnchor(isPhone);

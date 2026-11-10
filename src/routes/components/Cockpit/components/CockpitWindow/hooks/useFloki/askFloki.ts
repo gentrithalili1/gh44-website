@@ -45,10 +45,18 @@ function validateInput(input: unknown): AskFlokiInput {
     throw new Error("Expected humor from 0 to 100");
   }
 
-  return { turns: checkedTurns, humor: Math.round(humor) };
+  // Older clients send no place: they are aboard the ship.
+  const place = "place" in input && input.place === "tesseract" ? "tesseract" : "cockpit";
+
+  return { turns: checkedTurns, humor: Math.round(humor), place };
 }
 
-async function requestCompletion({ turns, humor, apiKey }: AskFlokiInput & { apiKey: string }) {
+async function requestCompletion({
+  turns,
+  humor,
+  place,
+  apiKey,
+}: AskFlokiInput & { apiKey: string }) {
   const response = await fetch(GROQ_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
@@ -60,7 +68,7 @@ async function requestCompletion({ turns, humor, apiKey }: AskFlokiInput & { api
       reasoning_effort: REASONING_EFFORT,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: getFlokiPrompt({ humor }) },
+        { role: "system", content: getFlokiPrompt({ humor, place }) },
         ...turns.map(({ role, text }) => ({
           role: role === "visitor" ? "user" : "assistant",
           content: role === "visitor" ? text : JSON.stringify({ say: text }),

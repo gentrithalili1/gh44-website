@@ -238,9 +238,9 @@ export function getCameraDistance({ viewport, zoom }: { viewport: Viewport; zoom
   return viewport.height / (2 * Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180) * zoom);
 }
 
-// The visitor zooms out at most this many times past home, and in this many times past the
-// closest a planet is framed.
-const ZOOM_OUT_LIMIT = 1.5;
+// The visitor zooms out at most this many times past home, far enough to see the system from
+// deep space, and in this many times past the closest a planet is framed.
+const ZOOM_OUT_LIMIT = 3.5;
 const ZOOM_IN_LIMIT = 1.5;
 
 // How close to and far from its point the visitor may move the camera.

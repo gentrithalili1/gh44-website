@@ -1,0 +1,1 @@
+export { TesseractScene } from "./TesseractScene";

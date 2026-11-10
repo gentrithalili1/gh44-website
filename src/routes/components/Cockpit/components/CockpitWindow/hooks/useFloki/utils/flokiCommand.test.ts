@@ -74,4 +74,20 @@ describe("getFlokiCommand", () => {
       expect(getCommand(text)).toBeUndefined();
     },
   );
+
+  it("leads the way back and says what the place is, only inside the tesseract", () => {
+    for (const text of [
+      "floki lets go back",
+      "Let's go back!",
+      "take me home",
+      "get us out of here",
+    ]) {
+      expect(getFlokiCommand({ text, tracks: [], place: "tesseract" })).toEqual({ kind: "back" });
+    }
+    for (const text of ["floki what is this", "What is this place?", "where are we"]) {
+      expect(getFlokiCommand({ text, tracks: [], place: "tesseract" })).toEqual({ kind: "place" });
+    }
+    expect(getFlokiCommand({ text: "lets go back", tracks: [], place: "cockpit" })).toBeUndefined();
+    expect(getFlokiCommand({ text: "what is this", tracks: [] })).toBeUndefined();
+  });
 });

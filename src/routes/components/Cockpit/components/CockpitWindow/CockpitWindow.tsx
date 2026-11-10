@@ -6,23 +6,28 @@ import { useExploration } from "#/hooks/useExploration";
 import { findSecret, useSecrets } from "#/hooks/useSecrets";
 import { DESTINATIONS } from "#/utils/destinations";
 import type { Destination } from "#/utils/destinations";
+import { useSpaceMode } from "#/hooks/useSpaceMode";
 import { useMusic } from "#/routes/hooks/useMusic";
 import { COCKPIT_SHIP_Y, GARGANTUA_YEARS } from "#/utils/explorer";
 
 import {
-  AstronautIcon,
+  DashboardLip,
+  DashboardPlates,
+  PedestalKeys,
   CockpitWindshield,
   ConsoleLights,
   ConsoleScreen,
 } from "./CockpitWindow.elements";
 import { CockpitFloki } from "./components/CockpitFloki";
-import { EarthClock } from "./components/EarthClock";
+import { CockpitStatus } from "./components/CockpitStatus";
+import { Tesseract } from "./components/Tesseract";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
 import { CockpitTerminal, type TerminalEgg } from "./components/CockpitTerminal";
 import { useFloki } from "./hooks/useFloki";
 import { useFlokiTalk } from "./hooks/useFlokiTalk";
 import { useFlokiWelcome } from "./hooks/useFlokiWelcome";
+import { useIsWideScreen } from "./hooks/useIsWideScreen";
 import { useTerminal } from "./hooks/useTerminal";
 import { messages } from "./messages";
 
@@ -71,7 +76,7 @@ interface CockpitWindowProps {
   onGo: (destination: Destination) => void;
   // The trip into the black hole: flying in, the cockpit goes dark; inside there is only black
   // and the way back.
-  jumpStatus: "idle" | "jumping" | "inside";
+  jumpStatus: "idle" | "jumping" | "inside" | "returning";
   // Starts that flight; `onArrive` runs once the visitor is back.
   onJump: (onArrive: () => void) => void;
   // The way back from inside.
@@ -101,16 +106,23 @@ export function CockpitWindow({
   earthYearsPassed,
 }: CockpitWindowProps) {
   const titleId = useId();
+  const panelId = useId();
+  // A wide screen keeps the panel up; a phone can dock it.
+  const isWideScreen = useIsWideScreen();
+  // The visitor can slide the console away for the whole view, and back.
+  const [panel, setPanel] = useState<"shown" | "hidden">("shown");
   const dialogRef = useRef<HTMLDivElement>(null);
   // What had focus when the cockpit opened, read on the first render before the input takes it.
   const [returnFocusTo] = useState(() => document.activeElement);
   const terminal = useTerminal();
   // The ship's computer: he answers in the terminal, and his screen shows him.
-  const floki = useFloki();
-  const flokiTalk = useFlokiTalk({ floki, terminal, onGo });
+  const floki = useFloki({ place: jumpStatus === "inside" ? "tesseract" : "cockpit" });
+  const flokiTalk = useFlokiTalk({ floki, terminal, onGo, onBack: onReturn });
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
   const [praiseCount, setPraiseCount] = useState(0);
   const exploration = useExploration();
+  // With the 3D scene, the inside of the black hole is the tesseract; without it, the dark.
+  const spaceMode = useSpaceMode();
   const secrets = useSecrets();
   // Every planet visited, and the black hole still ahead: the cockpit says so.
   const hasSignal =
@@ -176,12 +188,21 @@ export function CockpitWindow({
     });
   }
 
+  // Typed to Floki inside the tesseract: kept in the terminal like what is said out loud.
+  function handleTesseractAsk(question: string) {
+    terminal.print([{ kind: "visitor", text: question }]);
+    void flokiTalk.ask(question);
+  }
+
   function getJumpPhase() {
     switch (jumpStatus) {
       case "jumping":
         return "on";
       case "inside":
         return "inside";
+      // Flying back out: the dark lifts at once, and stays lifted once home.
+      case "returning":
+        return "back";
       case "idle":
         return hasReturned ? "back" : undefined;
       default: {
@@ -209,6 +230,14 @@ export function CockpitWindow({
         return unknownEgg;
       }
     }
+  }
+
+  // A wide screen keeps the panel up, launches included. On a phone the visitor can dock it down
+  // to its status strip, and every launch and jump docks it so the flight shows.
+  const isDocked = !isWideScreen && (panel === "hidden" || isLocked);
+
+  function handlePanelToggle() {
+    setPanel((current) => (current === "shown" ? "hidden" : "shown"));
   }
 
   // The visitor looks around: the windshield shifts a little against the console.
@@ -249,7 +278,18 @@ export function CockpitWindow({
       {/* The black hole's shadow takes the whole cockpit at the end of the flight in (a little
           past its edges: the cockpit is still shaking), and lifts once the ship is back. */}
       <div className="pointer-events-none absolute -inset-1 z-20 flex flex-col items-center justify-center gap-5 bg-black opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=inside]/cockpit:pointer-events-auto group-data-[jump=inside]/cockpit:opacity-100 group-data-[jump=on]/cockpit:animate-jump-black">
-        {jumpStatus === "inside" ? (
+        {jumpStatus === "inside" && spaceMode === "scene" ? (
+          <Tesseract
+            flokiStatus={floki.status}
+            canListen={floki.canListen}
+            isConversing={flokiTalk.isConversing}
+            lines={terminal.lines}
+            onAsk={handleTesseractAsk}
+            onTalk={() => void flokiTalk.talk()}
+            onReturn={onReturn}
+          />
+        ) : null}
+        {jumpStatus === "inside" && spaceMode === "static" ? (
           <>
             <p className="animate-void-in text-xs text-faint">{messages.voidLine}</p>
             <button
@@ -263,87 +303,85 @@ export function CockpitWindow({
           </>
         ) : null}
       </div>
-      <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4 md:p-6">
-        <div className="flex flex-col gap-1">
-          <h2 id={titleId} className="text-label font-bold tracking-label">
-            {messages.title}
-          </h2>
-          <p
-            data-signal={hasSignal ? "" : undefined}
-            className="flex items-center gap-2 text-xs text-muted data-signal:text-ochre"
-          >
-            <span
-              aria-hidden="true"
-              className="size-1.5 animate-light-blink rounded-full bg-sage in-data-signal:bg-ochre in-data-signal:shadow-[0_0_6px_var(--ochre)]"
-            />
-            {hasSignal ? messages.statusSignal : messages.status}
-          </p>
-          <EarthClock yearsPassed={earthYearsPassed} />
-        </div>
-        <button
-          type="button"
-          aria-label={messages.spacewalkLabel}
-          disabled={isLocked}
-          onClick={handleClose}
-          className="flex h-10 items-center gap-2 rounded-full border border-rule bg-bg-subtle pr-4 pl-3 text-xs text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40"
-        >
-          <AstronautIcon />
-          {messages.spacewalk}
-        </button>
-      </header>
-      <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
+      {/* On a phone it folds down to its status strip (its own `transform`, apart from the
+          boarding's `translate`). */}
+      <div
+        id={panelId}
+        data-panel={isDocked ? "docked" : "shown"}
+        className="absolute inset-x-0 bottom-0 max-h-[86%] rounded-t-[50%_1.5rem] border-t-8 border-surface bg-bg-subtle bg-[linear-gradient(to_bottom,var(--surface),var(--bg-subtle)_30%)] shadow-[0_-1px_0_var(--rule),0_-18px_40px_-12px_rgb(0_0_0/0.8)] transition-transform duration-500 ease-space group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in data-[panel=docked]:[transform:translateY(calc(100%-6rem))] motion-reduce:transition-none md:h-(--console-height) md:max-h-none md:rounded-t-[50%_2.5rem] md:border-t-12"
+      >
+        <DashboardLip />
+        <DashboardPlates />
         {/* Desktop: Floki on the left, the terminal in the middle, the radar over the radio on
-            the right. Phones: Floki beside the radar and the radio, the terminal under them. */}
-        <div className="mx-auto grid max-w-[96rem] grid-cols-[7rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
-          <ConsoleScreen
-            label={messages.screens.floki}
-            powerOrder={0}
-            className="row-span-2 md:col-start-1 md:row-start-1"
-            screenClassName="flex flex-col p-2 md:p-3"
-          >
-            <CockpitFloki
-              status={floki.status}
-              getLevel={floki.getLevel}
-              canListen={floki.canListen}
-              isConversing={flokiTalk.isConversing}
+            the right, the status strip over the terminal. Phones: the status strip on top (the
+            dock), then Floki beside the radar and the radio, the terminal under them. */}
+        <div className="mx-auto grid max-w-[96rem] grid-cols-[8.5rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
+          <div className="col-span-2 md:col-span-1 md:col-start-2 md:row-start-1">
+            <CockpitStatus
+              titleId={titleId}
+              hasSignal={hasSignal}
+              earthYearsPassed={earthYearsPassed}
+              canDock={!isWideScreen}
+              isDocked={isDocked}
+              panelId={panelId}
               isLocked={isLocked}
-              praiseCount={praiseCount}
-              onTalk={() => void flokiTalk.talk()}
+              onPanelToggle={handlePanelToggle}
+              onSpacewalk={handleClose}
             />
-          </ConsoleScreen>
-          <ConsoleScreen
-            label={messages.screens.radar}
-            powerOrder={2}
-            className="md:col-start-3 md:row-start-1"
-            screenClassName="p-2 md:p-3"
-          >
-            <CockpitRadar />
-          </ConsoleScreen>
-          <ConsoleScreen
-            label={messages.screens.radio}
-            powerOrder={3}
-            className="md:col-start-3 md:row-start-2"
-            screenClassName="flex flex-col p-2 md:p-3"
-          >
-            <CockpitRadio />
-          </ConsoleScreen>
-          <ConsoleScreen
-            label={messages.screens.terminal}
-            powerOrder={1}
-            indicator={<ConsoleLights />}
-            className="col-span-2 h-[min(14rem,27dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto"
-            screenClassName="flex flex-col"
-          >
-            <CockpitTerminal
-              terminal={terminal}
-              isLocked={isLocked}
-              shouldFocus={!isGreeting}
-              onAsk={(question) => void flokiTalk.ask(question)}
-              onGo={handleGo}
-              onEgg={handleEgg}
-              onJump={handleJump}
-            />
-          </ConsoleScreen>
+          </div>
+          {/* Docked, the rest of the panel is below the screen's edge: out of reach. */}
+          <div inert={isDocked} aria-hidden={isDocked ? true : undefined} className="contents">
+            <ConsoleScreen
+              label={messages.screens.floki}
+              powerOrder={0}
+              className="row-span-2 md:col-start-1 md:row-span-3 md:row-start-1"
+              screenClassName="flex flex-col p-2 md:p-3"
+            >
+              <CockpitFloki
+                status={floki.status}
+                getLevel={floki.getLevel}
+                canListen={floki.canListen}
+                isConversing={flokiTalk.isConversing}
+                isLocked={isLocked}
+                praiseCount={praiseCount}
+                onTalk={() => void flokiTalk.talk()}
+              />
+            </ConsoleScreen>
+            <ConsoleScreen
+              label={messages.screens.radar}
+              powerOrder={2}
+              className="md:col-start-3 md:row-span-2 md:row-start-1"
+              screenClassName="p-2 md:p-3"
+            >
+              <CockpitRadar />
+            </ConsoleScreen>
+            <ConsoleScreen
+              label={messages.screens.radio}
+              powerOrder={3}
+              className="md:col-start-3 md:row-start-3"
+              screenClassName="flex flex-col p-2 md:p-3"
+            >
+              <CockpitRadio />
+            </ConsoleScreen>
+            <ConsoleScreen
+              label={messages.screens.terminal}
+              powerOrder={1}
+              footer={<PedestalKeys />}
+              indicator={<ConsoleLights />}
+              className="col-span-2 h-[min(20rem,36dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-2 md:h-auto"
+              screenClassName="flex flex-col"
+            >
+              <CockpitTerminal
+                terminal={terminal}
+                isLocked={isLocked}
+                shouldFocus={!isGreeting}
+                onAsk={(question) => void flokiTalk.ask(question)}
+                onGo={handleGo}
+                onEgg={handleEgg}
+                onJump={handleJump}
+              />
+            </ConsoleScreen>
+          </div>
         </div>
       </div>
     </div>

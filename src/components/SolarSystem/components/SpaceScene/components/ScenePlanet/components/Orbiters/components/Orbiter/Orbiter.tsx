@@ -15,6 +15,7 @@ import { getOrbitPosition } from "#/components/SolarSystem/utils/space";
 import { getSurfaceHex } from "#/components/SolarSystem/utils/surfaceColor";
 
 import type { HoverChange } from "../../../../types";
+import { MoonFlag } from "./components/MoonFlag";
 import { HoverName } from "#/components/SolarSystem/components/SpaceScene/components/HoverName";
 
 const MOON_SEGMENTS = 24;
@@ -27,6 +28,7 @@ const CRATER_LIFT = 1.02;
 // Small moons are hard to point at: a wider, invisible target catches the pointer.
 const HIT_AREA_SCALE = 2.5;
 const FACING = new Vector3(0, 0, 1);
+const EARTH_MOON_ID = "moon";
 
 // A crater drawn on the rock's disc, moved onto its sphere on the side facing the home view and
 // turned to lie flat on it.
@@ -126,6 +128,8 @@ export function Orbiter({ orbiter, onHoverChange, onPlanetClick, sceneStateRef }
         />
         <meshBasicMaterial colorWrite={false} depthWrite={false} />
       </mesh>
+      {/* People have walked on Earth's moon: their flag is still there. */}
+      {orbiter.id === EARTH_MOON_ID ? <MoonFlag moonRadius={orbiter.radius} /> : null}
       {isHovered && orbiter.label ? <HoverName name={orbiter.label} /> : null}
     </mesh>
   );

@@ -14,7 +14,7 @@ const ALL_VISITED = {
   visitedIds: ["me", "gh44-confirm", "work", "gh44-theme", "gh44-brain"],
 } as const;
 
-const DESTINATION_LIST = "destinations: me, gh44-confirm, work, gh44-theme, gh44-brain";
+const DESTINATION_LIST = "destinations: me, work, gh44-confirm, gh44-theme, gh44-brain";
 
 describe("getWelcomeLines", () => {
   it("welcomes the visitor aboard, with the destinations to pick from", () => {
@@ -71,8 +71,8 @@ describe("runCommand", () => {
       kind: "print",
       lines: [
         "  me                who, where, how to reach",
-        "  gh44-confirm      promise based react dialogs",
         "  work              8 moons · 2016 → now",
+        "  gh44-confirm      promise based react dialogs",
         "  gh44-theme        one theme, 7 tools",
         "  gh44-brain        claude code, my way",
       ],
@@ -92,8 +92,8 @@ describe("runCommand", () => {
       kind: "print",
       lines: [
         "  me                visited",
-        "  gh44-confirm      unknown",
         "  work              visited",
+        "  gh44-confirm      unknown",
         "  gh44-theme        unknown",
         "  gh44-brain        unknown",
         "progress: 2/5",

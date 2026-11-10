@@ -34,8 +34,9 @@ import { PHONE_MAX_WIDTH } from "./utils/sceneMath";
 // Phones get a lower pixel ratio, which keeps the scene smooth.
 const PHONE_MAX_DPR = 1.5;
 const DESKTOP_MAX_DPR = 2;
-// Past the stars' shell seen from the farthest the visitor can zoom out on a phone.
-const CAMERA_FAR = 16000;
+// Past the black hole, the farthest thing out, seen from the farthest the visitor can zoom out
+// on a phone.
+const CAMERA_FAR = 40000;
 // The planets' night sides stay visible: a little light from everywhere.
 const AMBIENT_INTENSITY = 0.45;
 
@@ -60,6 +61,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
     cameraZoom: 1,
     warp: 0,
     jump: 0,
+    homing: 0,
   });
 
   // The open cockpit steps the system back, like an open planet.

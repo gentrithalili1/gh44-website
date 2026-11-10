@@ -22,7 +22,7 @@ describe("getHolePosition", () => {
     for (const isPhone of [true, false]) {
       const [x, y, z] = getHolePosition(isPhone);
 
-      expect(Math.hypot(x, y, z)).toBeGreaterThan(5000);
+      expect(Math.hypot(x, y, z)).toBeGreaterThan(10000);
       // The home view looks down on the system: its top right is under the plane, behind it.
       expect(x).toBeGreaterThan(0);
       expect(y).toBeLessThan(0);
@@ -40,20 +40,28 @@ describe("getHoleScale", () => {
 });
 
 describe("getEscape", () => {
-  it("drops the solar system away in the first moments, for good", () => {
-    expect(getEscape(0)).toBe(0);
-    expect(getEscape(0.035)).toBeCloseTo(0.5);
-    expect(getEscape(0.07)).toBe(1);
-    expect(getEscape(1)).toBe(1);
+  it("drops the solar system away in the first moments of the flight in, for good", () => {
+    expect(getEscape({ jump: 0, homing: 0 })).toBe(0);
+    expect(getEscape({ jump: 0.035, homing: 0 })).toBeCloseTo(0.5);
+    expect(getEscape({ jump: 0.07, homing: 0 })).toBe(1);
+    expect(getEscape({ jump: 1, homing: 0 })).toBe(1);
     expect(getJumpCenter(0.07)).toBeLessThan(1);
+  });
+
+  it("grows the solar system back ahead on the flight home", () => {
+    expect(getEscape({ jump: 0, homing: 1 })).toBe(1);
+    expect(getEscape({ jump: 0, homing: 0.4 })).toBeLessThan(1);
+    expect(getEscape({ jump: 0, homing: 0.4 })).toBeGreaterThan(0);
+    expect(getEscape({ jump: 0, homing: 0 })).toBe(0);
   });
 });
 
 describe("getSceneWarp", () => {
-  it("takes the launch's warp or the jump's, whichever is further along", () => {
-    expect(getSceneWarp({ warp: 0, jump: 0 })).toBe(0);
-    expect(getSceneWarp({ warp: 0.6, jump: 0 })).toBe(0.6);
-    expect(getSceneWarp({ warp: 0, jump: 0.5 })).toBe(1);
-    expect(getSceneWarp({ warp: -0.1, jump: 0 })).toBe(0);
+  it("takes the launch's warp, the jump's or the flight home's, whichever is further along", () => {
+    expect(getSceneWarp({ warp: 0, jump: 0, homing: 0 })).toBe(0);
+    expect(getSceneWarp({ warp: 0.6, jump: 0, homing: 0 })).toBe(0.6);
+    expect(getSceneWarp({ warp: 0, jump: 0.5, homing: 0 })).toBe(1);
+    expect(getSceneWarp({ warp: 0, jump: 0, homing: 0.6 })).toBe(1);
+    expect(getSceneWarp({ warp: -0.1, jump: 0, homing: 0 })).toBe(0);
   });
 });

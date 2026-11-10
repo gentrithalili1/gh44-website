@@ -31,7 +31,7 @@ describe("CockpitRadar", () => {
     await renderInRouter({ ui: <CockpitRadar /> });
 
     expect(getRadar().getByText("/")).toBeInTheDocument();
-    expect(getRadar().getByText("gh44-confirm")).toBeInTheDocument();
+    expect(getRadar().getByText("work")).toBeInTheDocument();
   });
 
   it("picks up a signal once every destination is visited", async () => {

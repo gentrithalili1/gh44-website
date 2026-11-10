@@ -63,15 +63,42 @@ describe("CockpitWindow", () => {
     await user.keyboard("{Escape}");
 
     expect(onClose).not.toHaveBeenCalled();
+    // On a phone the panel docks so the flight shows: the strip stays, its exit shut, and the
+    // rest is out of reach.
     expect(screen.getByRole("button", { name: "go on a spacewalk" })).toBeDisabled();
-    expect(screen.getByRole("textbox", { name: "command" })).toHaveAttribute("readonly");
+    expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "command", hidden: true })).toHaveAttribute(
+      "readonly",
+    );
   });
 
-  it("shows the ship's name and its systems", async () => {
+  it("docks the panel down to its status strip, and brings it back", async () => {
+    const user = userEvent.setup();
+    await renderCockpitWindow({ isLocked: false, onClose: vi.fn() });
+    const hide = screen.getByRole("button", { name: "hide panel" });
+    expect(hide).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(hide);
+
+    // The strip stays: the ship's name, the way out and the way back up.
+    expect(screen.getByRole("heading", { name: "gh44 explorer" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "go on a spacewalk" })).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "radar" })).not.toBeInTheDocument();
+    const show = screen.getByRole("button", { name: "show panel" });
+    expect(show).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(show);
+
+    expect(screen.getByRole("textbox", { name: "command" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "radar" })).toBeInTheDocument();
+  });
+
+  it("names the ship for screen readers, and shows earth's time", async () => {
     await renderCockpitWindow({ isLocked: false, onClose: vi.fn() });
 
     expect(screen.getByRole("dialog", { name: "gh44 explorer" })).toBeInTheDocument();
-    expect(screen.getByText("systems online")).toBeInTheDocument();
+    expect(screen.getByLabelText(/^earth time: /)).toBeInTheDocument();
   });
 
   it("takes the command line's focus and holds the page behind as a modal dialog", async () => {
@@ -441,8 +468,10 @@ describe("CockpitWindow's Floki", () => {
     await user.click(back);
 
     expect(screen.queryByRole("button", { name: "go back" })).not.toBeInTheDocument();
-    expect(output.getByText("that took 8 seconds. 7 years passed on earth.")).toBeInTheDocument();
-    expect(screen.getByText("systems online")).toBeInTheDocument();
+    expect(
+      output.getByText("home. that felt like minutes. 7 years passed on earth."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("signal detected · gargantua")).not.toBeInTheDocument();
     expect(screen.getByLabelText(new RegExp(`^earth time: .*${yearNow + 7}`))).toBeInTheDocument();
     expect(
       within(screen.getByRole("region", { name: "radar" })).getByText("6/5"),
