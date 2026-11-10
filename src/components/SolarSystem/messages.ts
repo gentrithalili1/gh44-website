@@ -15,5 +15,6 @@ export const messages = {
   shipAction: "open cockpit",
   sunScold: "floki: please don't.",
   fetchBall: "floki's ball",
+  voyager: "voyager 1 · launched 1977. still going.",
   pluto: "pluto · still a planet",
 } as const;

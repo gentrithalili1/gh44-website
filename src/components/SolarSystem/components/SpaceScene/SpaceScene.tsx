@@ -18,6 +18,7 @@ import { ScenePlanet } from "./components/ScenePlanet";
 import { Ships } from "./components/Ships";
 import { Stars } from "./components/Stars";
 import { Sun } from "./components/Sun";
+import { Voyager } from "./components/Voyager";
 import { WarpStreaks } from "./components/WarpStreaks";
 import { CAMERA_FOV } from "./hooks/useCameraFlight";
 import { usePageVisible } from "./hooks/usePageVisible";
@@ -89,6 +90,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         <Sun isPlanetOpen={isSystemFaded} />
         <Orbits isPlanetOpen={isSystemFaded} />
         <Pluto isFaded={isSystemFaded} sceneStateRef={sceneStateRef} />
+        <Voyager isHome={!isSystemFaded && explorer.cockpit.status === "closed"} />
         <FetchBall isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
         {labelList
           ? SOLAR_SYSTEM.map((planet) => (
