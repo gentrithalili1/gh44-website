@@ -13,10 +13,8 @@ interface PlanetOrbiterProps {
 
 const CRATER_OPACITY = 0.35;
 
-// A moon is round, a satellite a small diamond, a rock a gray disc with darker craters.
+// A moon is round, a rock a gray disc (an oval, for Mars' lumpy moons) with darker craters.
 export function PlanetOrbiter({ orbiter, x, y }: PlanetOrbiterProps) {
-  const size = orbiter.radius * 2;
-
   return (
     <g
       transform={`translate(${x} ${y})`}
@@ -24,14 +22,8 @@ export function PlanetOrbiter({ orbiter, x, y }: PlanetOrbiterProps) {
       style={getColorVars(orbiter.color)}
       className={SHADE_CLASS_NAMES[orbiter.shade]}
     >
-      {orbiter.kind === "satellite" ? (
-        <rect
-          x={-orbiter.radius}
-          y={-orbiter.radius}
-          width={size}
-          height={size}
-          transform="rotate(45)"
-        />
+      {orbiter.kind === "rock" ? (
+        <ellipse rx={orbiter.radius * orbiter.stretch.x} ry={orbiter.radius * orbiter.stretch.y} />
       ) : (
         <circle r={orbiter.radius} />
       )}

@@ -29,7 +29,7 @@ const AGENT_SATELLITES = ["implementer", "researcher", "verifier", "reviewer"];
 describe("SolarSystemPlanet", () => {
   it.each([
     { planet: "earth", names: ["the moon"] },
-    { planet: "mars", names: ["resolve", "reject"] },
+    { planet: "mars", names: ["phobos · resolve", "deimos · reject"] },
     { planet: "jupiter", names: COMPANY_MOONS },
     { planet: "saturn", names: APP_RINGS },
     { planet: "neptune", names: AGENT_SATELLITES },

@@ -6,7 +6,7 @@ export type PlanetFeatures = {
   // Drawn on the body: Mercury's craters, Venus' clouds, Earth's landmasses, Mars' dust,
   // Jupiter's bands and red spot, Neptune's haze.
   surface?: "craters" | "clouds" | "continents" | "dust" | "storms" | "haze";
-  // Earth's moon, Jupiter's company moons, Mars' satellites, Neptune's agent satellites.
+  // Earth's moon, Jupiter's company moons, Mars' Phobos and Deimos, Neptune's agent rocks.
   orbiters?: "moon" | "companies" | "probes" | "agents";
   // Saturn's rings, one band per app; Uranus' thin ring, standing almost upright.
   rings?: "apps" | "upright";

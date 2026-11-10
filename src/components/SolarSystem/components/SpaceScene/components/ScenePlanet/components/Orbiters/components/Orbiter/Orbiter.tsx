@@ -50,7 +50,7 @@ interface OrbiterProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// One moon, satellite or rock on its orbit; it names itself on hover, holds its planet still,
+// One moon or rock on its orbit; it names itself on hover, holds its planet still,
 // and opens the planet on click.
 export function Orbiter({ orbiter, onHoverChange, onPlanetClick, sceneStateRef }: OrbiterProps) {
   const meshRef = useRef<Mesh>(null);
@@ -67,6 +67,11 @@ export function Orbiter({ orbiter, onHoverChange, onPlanetClick, sceneStateRef }
   );
 
   const isMoon = orbiter.kind === "moon";
+  // A lumpy rock (Mars' moons) is a sphere drawn out unevenly; its craters stretch with it.
+  const stretch =
+    orbiter.kind === "rock"
+      ? ([orbiter.stretch.x, orbiter.stretch.y, orbiter.stretch.z] as const)
+      : undefined;
   const opacity = isMoon && !orbiter.isHighlighted ? PAST_MOON_OPACITY : 1;
 
   useFrame(() => {
@@ -96,12 +101,8 @@ export function Orbiter({ orbiter, onHoverChange, onPlanetClick, sceneStateRef }
   }
 
   return (
-    <mesh ref={meshRef}>
-      {orbiter.kind === "satellite" ? (
-        <octahedronGeometry args={[orbiter.radius]} />
-      ) : (
-        <sphereGeometry args={[orbiter.radius, MOON_SEGMENTS, MOON_SEGMENTS / 2]} />
-      )}
+    <mesh ref={meshRef} scale={stretch}>
+      <sphereGeometry args={[orbiter.radius, MOON_SEGMENTS, MOON_SEGMENTS / 2]} />
       <meshLambertMaterial
         color={getSurfaceHex({ color: orbiter.color, shade: orbiter.shade })}
         transparent

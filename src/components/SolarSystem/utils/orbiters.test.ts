@@ -22,13 +22,19 @@ describe("getOrbiters", () => {
     for (const other of others) expect(other.speed).toBeGreaterThan(moon?.speed ?? Infinity);
   });
 
-  it("gives Mars two satellites", () => {
-    expect(
-      getOrbiters(getPlanet("gh44-confirm")).map(({ kind, label }) => ({ kind, label })),
-    ).toEqual([
-      { kind: "satellite", label: "resolve" },
-      { kind: "satellite", label: "reject" },
+  it("gives Mars Phobos and Deimos: small lumpy rocks, Phobos the bigger, closer and faster", () => {
+    const [phobos, deimos] = getOrbiters(getPlanet("gh44-confirm"));
+
+    expect([phobos, deimos].map((moon) => [moon?.kind, moon?.label])).toEqual([
+      ["rock", "phobos · resolve"],
+      ["rock", "deimos · reject"],
     ]);
+    if (phobos?.kind !== "rock" || deimos?.kind !== "rock")
+      throw new Error("Mars' moons are rocks");
+    expect(phobos.radius).toBeGreaterThan(deimos.radius);
+    expect(phobos.orbitRadius).toBeLessThan(deimos.orbitRadius);
+    expect(phobos.speed).toBeGreaterThan(deimos.speed);
+    for (const moon of [phobos, deimos]) expect(moon.stretch).not.toEqual({ x: 1, y: 1, z: 1 });
   });
 
   it("gives Jupiter one moon per company, with JOIN highlighted in vivid", () => {

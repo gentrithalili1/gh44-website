@@ -21,20 +21,22 @@ type OrbiterBase = {
   speed: number;
 };
 
-// A moon, an artificial satellite, or a gray cratered rock, on a tilted orbit around its planet.
+// How much a rock is drawn out along each axis: 1 everywhere is round, like Neptune's.
+export type OrbiterStretch = { x: number; y: number; z: number };
+
+// A moon, or a gray cratered rock, on a tilted orbit around its planet.
 export type Orbiter =
-  | (OrbiterBase & { kind: "moon" | "satellite" })
-  | (OrbiterBase & { kind: "rock"; craters: OrbiterCrater[] });
+  | (OrbiterBase & { kind: "moon" })
+  | (OrbiterBase & { kind: "rock"; craters: OrbiterCrater[]; stretch: OrbiterStretch });
 
 const MOON_GAP = 12;
 const COMPANY_GAP = 10;
 const COMPANY_STEP = 5;
-const SATELLITE_GAP = 8;
-const SATELLITE_STEP = 5;
 const ANGLE_STEP = 0.79;
 const MOON_SPEED = 0.18;
 const COMPANY_SPEED = 0.9;
-const SATELLITE_SPEED = 0.7;
+const ROCK_SPEED = 0.7;
+const ROUND: OrbiterStretch = { x: 1, y: 1, z: 1 };
 const AGENT_IDS = ["implementer", "researcher", "verifier", "reviewer"] as const;
 const ROCK_GAP = 7;
 const ROCK_STEP = 4.5;
@@ -46,7 +48,28 @@ const ROCK_CRATERS = [
   { x: 0.35, y: 0.05, radius: 0.22 },
   { x: -0.1, y: 0.45, radius: 0.18 },
 ] as const;
-const PROBE_IDS = ["resolve", "reject"] as const;
+// Mars' two small, lumpy moons: Phobos, bigger, hugging the planet and fast (one lap in under 8
+// hours); Deimos, smaller, farther out and slow (30 hours). gh44-confirm's resolve and reject.
+const MARS_MOONS = [
+  {
+    id: "phobos",
+    radius: 2.2,
+    stretch: { x: 1.25, y: 0.95, z: 0.8 },
+    gap: 6,
+    speed: 1.2,
+    phase: 1,
+    turn: 0.4,
+  },
+  {
+    id: "deimos",
+    radius: 1.5,
+    stretch: { x: 1.15, y: 0.9, z: 0.85 },
+    gap: 13,
+    speed: 0.35,
+    phase: 1 + Math.PI,
+    turn: 2.1,
+  },
+] as const;
 
 type GetRockCratersParams = { radius: number; turn: number };
 
@@ -105,17 +128,19 @@ export function getOrbiters(planet: PlanetBody): Orbiter[] {
         };
       });
     case "probes":
-      return PROBE_IDS.map((id, index) => ({
-        id,
-        label: messages.marsSatellites[id],
-        kind: "satellite",
+      return MARS_MOONS.map((moon) => ({
+        id: moon.id,
+        label: messages.marsMoons[moon.id],
+        kind: "rock",
         color: "neutral",
-        shade: "soft",
+        shade: "vivid",
         isHighlighted: false,
-        radius: 1.6,
-        orbitRadius: planet.size + SATELLITE_GAP + index * SATELLITE_STEP,
-        phase: 1 + index * Math.PI,
-        speed: getSpeed({ base: SATELLITE_SPEED, index }),
+        radius: moon.radius,
+        craters: getRockCraters({ radius: moon.radius, turn: moon.turn }),
+        stretch: moon.stretch,
+        orbitRadius: planet.size + moon.gap,
+        phase: moon.phase,
+        speed: moon.speed,
       }));
     case "agents":
       return AGENT_IDS.map((id, index) => {
@@ -130,9 +155,10 @@ export function getOrbiters(planet: PlanetBody): Orbiter[] {
           isHighlighted: false,
           radius,
           craters: getRockCraters({ radius, turn: index * 1.7 }),
+          stretch: ROUND,
           orbitRadius: planet.size + ROCK_GAP + index * ROCK_STEP,
           phase: 0.4 + index * 1.6,
-          speed: getSpeed({ base: SATELLITE_SPEED, index }),
+          speed: getSpeed({ base: ROCK_SPEED, index }),
         };
       });
     default: {
