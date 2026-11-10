@@ -1,6 +1,6 @@
 import { useFrame } from "@react-three/fiber";
 import { type RefObject, useRef } from "react";
-import { type Group, type Mesh, Vector3 } from "three";
+import { type Group, type Mesh, Shape, Vector2, Vector3 } from "three";
 
 import type { SceneState } from "#/components/SolarSystem/components/SpaceScene/types";
 import { ROCKET_HEIGHT } from "#/components/SolarSystem/utils/space";
@@ -9,8 +9,23 @@ import { PALETTE, SPACE_COLORS } from "#/utils/palette";
 
 import { getRocketOrbit, getRocketPosition } from "./utils/rocketOrbit";
 
-const ROCKET_RADIUS = 1.4;
-const ROCKET_SEGMENTS = 12;
+// From the tail up: a nozzle, a round body with a porthole, and a pointed nose; three fins
+// flare out round the tail. In system units, ROCKET_HEIGHT tall in all.
+const ROCKET_SEGMENTS = 16;
+const BODY_RADIUS = 0.75;
+const NOZZLE = { bottomRadius: 0.55, topRadius: 0.4, height: 0.35 };
+const BODY_HEIGHT = 2.95;
+const NOSE_HEIGHT = ROCKET_HEIGHT - NOZZLE.height - BODY_HEIGHT;
+const PORTHOLE = { radius: 0.3, height: NOZZLE.height + BODY_HEIGHT * 0.7 };
+const FIN_THICKNESS = 0.14;
+const FIN_IDS = [0, 1, 2] as const;
+// A fin's side, from where it meets the body (x = 0): it sweeps back and out past the tail.
+const FIN_SHAPE = new Shape([
+  new Vector2(0, 1.6),
+  new Vector2(0.85, 0.3),
+  new Vector2(0.85, -0.15),
+  new Vector2(0, 0.35),
+]);
 const FLAME_RADIUS = 0.8;
 const FLAME_HEIGHT = 2.4;
 const FLAME_FLICKER = 0.25;
@@ -97,14 +112,36 @@ interface RocketBodyProps {
   flameRef?: RefObject<Mesh | null>;
 }
 
-// The cone points up from its tail at the group's origin; a flying one burns a flame below it.
+// The rocket points up from its tail at the group's origin; a flying one burns a flame below it.
 function RocketBody({ flameRef }: RocketBodyProps) {
   return (
     <>
-      <mesh position-y={ROCKET_HEIGHT / 2}>
-        <coneGeometry args={[ROCKET_RADIUS, ROCKET_HEIGHT, ROCKET_SEGMENTS]} />
+      <mesh position-y={NOZZLE.height / 2}>
+        <cylinderGeometry
+          args={[NOZZLE.topRadius, NOZZLE.bottomRadius, NOZZLE.height, ROCKET_SEGMENTS]}
+        />
+        <meshLambertMaterial color={SPACE_COLORS.rule} />
+      </mesh>
+      <mesh position-y={NOZZLE.height + BODY_HEIGHT / 2}>
+        <cylinderGeometry args={[BODY_RADIUS, BODY_RADIUS, BODY_HEIGHT, ROCKET_SEGMENTS]} />
         <meshLambertMaterial color={SPACE_COLORS.foreground} />
       </mesh>
+      <mesh position-y={NOZZLE.height + BODY_HEIGHT + NOSE_HEIGHT / 2}>
+        <coneGeometry args={[BODY_RADIUS, NOSE_HEIGHT, ROCKET_SEGMENTS]} />
+        <meshLambertMaterial color={PALETTE.clay.vivid} />
+      </mesh>
+      <mesh position={[0, PORTHOLE.height, BODY_RADIUS]}>
+        <circleGeometry args={[PORTHOLE.radius, ROCKET_SEGMENTS]} />
+        <meshBasicMaterial color={PALETTE.sky.vivid} />
+      </mesh>
+      {FIN_IDS.map((id) => (
+        <group key={id} rotation-y={(id * Math.PI * 2) / FIN_IDS.length}>
+          <mesh position={[BODY_RADIUS * 0.9, 0, -FIN_THICKNESS / 2]}>
+            <extrudeGeometry args={[FIN_SHAPE, { depth: FIN_THICKNESS, bevelEnabled: false }]} />
+            <meshLambertMaterial color={PALETTE.clay.vivid} />
+          </mesh>
+        </group>
+      ))}
       {flameRef ? (
         <mesh ref={flameRef} rotation-x={Math.PI} position-y={-FLAME_HEIGHT / 2}>
           <coneGeometry args={[FLAME_RADIUS, FLAME_HEIGHT, ROCKET_SEGMENTS]} />

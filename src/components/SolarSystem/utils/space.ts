@@ -40,10 +40,20 @@ export function getPlanetState({ planetId, openPlanetId }: GetPlanetStateParams)
 
 // gh44-confirm's rocket stands on top of Mars, nose up; from tail to nose it is this tall.
 export const ROCKET_HEIGHT = 4.8;
-// The rocket's outline, nose up (`y` down), its tail at y = 0.
+// The rocket's outline, nose up (`y` down), its tail at y = 0: a pointed nose, a straight body
+// and two fins flaring out at the tail.
 export const ROCKET_OUTLINE = [
   { x: 0, y: -ROCKET_HEIGHT },
-  { x: 1.8, y: 0 },
-  { x: 0, y: -0.9 },
-  { x: -1.8, y: 0 },
+  { x: 0.55, y: -4.1 },
+  { x: 0.75, y: -3.3 },
+  { x: 0.75, y: -1.4 },
+  { x: 1.6, y: -0.3 },
+  { x: 1.6, y: 0.2 },
+  { x: 0.75, y: -0.35 },
+  { x: -0.75, y: -0.35 },
+  { x: -1.6, y: 0.2 },
+  { x: -1.6, y: -0.3 },
+  { x: -0.75, y: -1.4 },
+  { x: -0.75, y: -3.3 },
+  { x: -0.55, y: -4.1 },
 ] as const;

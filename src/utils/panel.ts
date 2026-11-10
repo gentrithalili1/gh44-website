@@ -1,7 +1,7 @@
 // The planet panel: a column this share of the screen's width on the right on desktop, and a
 // bottom sheet this share of its height on phones. The camera frames planets in the space it
 // leaves free.
-export const PANEL_WIDTH = 0.55;
+export const PANEL_WIDTH = 0.5;
 export const SHEET_HEIGHT = 0.62;
 
 export const PANEL_STYLE = {

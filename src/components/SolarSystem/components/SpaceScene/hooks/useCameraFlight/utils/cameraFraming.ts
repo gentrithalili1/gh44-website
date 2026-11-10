@@ -38,9 +38,9 @@ const SHIP_POLAR = 1.05;
 
 // The share of a phone's height the bottom sheet leaves free.
 const PHONE_FREE_HEIGHT = 1 - SHEET_HEIGHT;
-// On desktop the planet's box is the left 45% of the screen, centered 30% from the left.
-const DESKTOP_FREE_WIDTH = 0.45;
-const DESKTOP_CENTER_X = 0.3;
+// On desktop the planet's box is the left half of the screen, centered in it.
+const DESKTOP_FREE_WIDTH = 0.5;
+const DESKTOP_CENTER_X = 0.25;
 // The planet's reach fills this share of the free box, and zooms in at most this many times.
 const REACH_FILL = 0.42;
 const MAX_ZOOM = 9;

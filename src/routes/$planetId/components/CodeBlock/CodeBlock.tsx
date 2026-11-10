@@ -90,7 +90,7 @@ export function CodeBlock({ label, tabs, selectedTabId, onSelectTab }: CodeBlock
         role="tablist"
         aria-label={label}
         onKeyDown={handleTabKeyDown}
-        className="flex gap-0.5 overflow-x-auto border-b border-rule px-2"
+        className="flex gap-0.5 overflow-x-auto px-2 shadow-[inset_0_-1px_0_var(--color-rule)]"
       >
         {tabs.map((tab) => (
           <CodeTab

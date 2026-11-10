@@ -77,6 +77,8 @@ const CANOPY_THICKNESS = 0.8;
 // Outlines are drawn on the x/y plane; turned this way they lie on the orbit plane, nose to -z.
 const LIE_FLAT = Math.PI / 2;
 const PUFF_IDS = Array.from({ length: PUFF_COUNT }, (_, index) => index);
+// The name hangs just under the hull, closer than the pointer target's edge.
+const LABEL_DROP = 4;
 // Over the labels, like the names of hovered moons.
 const LABEL_Z_INDEX_RANGE = [2, 0];
 
@@ -182,6 +184,8 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
   // The cockpit covers the ship, so a hover from before it opened no longer counts.
   const isActive = isHovered && !isCockpitOpen;
   useCursor(isActive);
+  // Named like a planet while it orbits; behind an open planet only while pointed at.
+  const isLabelShown = !isFlying && !isCockpitOpen && (!isFaded || isActive);
 
   // `go`: a beat for the confirmation, the cockpit closes, the ship turns and flies, and the page
   // opens on arrival; the camera's own flight takes over from there.
@@ -366,20 +370,26 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
             <meshLambertMaterial color={PALETTE.clay.soft} />
           </mesh>
         </group>
-        {isActive && !isFlying ? (
+        {isLabelShown ? (
           // Hangs under the ship as seen: it turns to face the camera.
           <Billboard>
             <Html
-              position={[0, -HIT_RADIUS, 0]}
+              position={[0, -LABEL_DROP, 0]}
               zIndexRange={LABEL_Z_INDEX_RANGE}
               className="pointer-events-none"
             >
-              <span
-                role="tooltip"
-                className="flex -translate-x-1/2 translate-y-1 flex-col items-center rounded-sm bg-background px-1.5 py-0.5 text-label-sub whitespace-nowrap"
-              >
-                <span className="text-foreground">{messages.shipName}</span>
-                <span className="text-clay">{messages.shipAction}</span>
+              <span className="flex -translate-x-1/2 translate-y-1 flex-col items-center text-center whitespace-nowrap">
+                <span
+                  data-active={isActive ? "" : undefined}
+                  className="text-label tracking-label text-muted transition-colors data-active:text-foreground"
+                >
+                  {messages.shipName}
+                </span>
+                {isActive ? (
+                  <span role="tooltip" className="text-label-sub text-clay">
+                    {messages.shipAction}
+                  </span>
+                ) : null}
               </span>
             </Html>
           </Billboard>
