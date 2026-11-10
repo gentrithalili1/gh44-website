@@ -9,6 +9,7 @@ import { useExplorer } from "#/hooks/useExplorer";
 import { SOLAR_SYSTEM } from "#/utils/planets";
 
 import { BlackHole } from "./components/BlackHole";
+import { Endurance } from "./components/Endurance";
 import { FetchBall } from "./components/FetchBall";
 import { LabelNudges } from "./components/LabelNudges";
 import { Orbits } from "./components/Orbits";
@@ -95,6 +96,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
           <Sun isPlanetOpen={isSystemFaded} />
           <Orbits isPlanetOpen={isSystemFaded} />
           <Pluto isFaded={isSystemFaded} sceneStateRef={sceneStateRef} />
+          <Endurance isFaded={openPlanetId !== undefined} />
           <Voyagers isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
           <FetchBall isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
           {labelList
