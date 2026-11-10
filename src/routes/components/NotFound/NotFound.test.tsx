@@ -17,15 +17,6 @@ describe("NotFound", () => {
     ).toBeInTheDocument();
   });
 
-  it("gives pluto its own verdict", async () => {
-    await renderAt("/pluto");
-
-    expect(screen.getByRole("heading", { level: 1, name: "pluto" })).toBeInTheDocument();
-    expect(
-      screen.getByText("demoted in 2006. still no page. the dinosaurs voted."),
-    ).toBeInTheDocument();
-  });
-
   it("offers one way back, at the top like a planet page", async () => {
     await renderAt("/pluto");
 

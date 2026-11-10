@@ -1,6 +1,4 @@
-import { useCursor } from "@react-three/drei";
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
-import { useNavigate } from "@tanstack/react-router";
 import { type RefObject, useRef, useState } from "react";
 import type { Group } from "three";
 
@@ -10,9 +8,9 @@ import { PALETTE } from "#/utils/palette";
 
 import type { SceneState } from "../../types";
 import { setGroupOpacity } from "../../utils/groupOpacity";
-import { damp, FADED_OPACITY, isDragRelease, toPlanePosition } from "../../utils/sceneMath";
+import { damp, FADED_OPACITY, toPlanePosition } from "../../utils/sceneMath";
 import { HoverName } from "../HoverName";
-import { getPlutoAngle, PLUTO, PLUTO_ID } from "./utils/plutoOrbit";
+import { getPlutoAngle, PLUTO } from "./utils/plutoOrbit";
 
 const SEGMENTS = 16;
 // A speck is hard to point at: a wider, invisible target catches the pointer.
@@ -26,14 +24,12 @@ interface PlutoProps {
 }
 
 // An easter egg: a grey speck past the last orbit, with no label. It names itself when pointed
-// at, holds still, and opens a page that is not there.
+// at and holds still. Nothing to click.
 export function Pluto({ isFaded, sceneStateRef }: PlutoProps) {
-  const navigate = useNavigate();
   const groupRef = useRef<Group>(null);
   const timeRef = useRef(0);
   const opacityRef = useRef(1);
   const [isHovered, setIsHovered] = useState(false);
-  useCursor(isHovered);
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -61,19 +57,13 @@ export function Pluto({ isFaded, sceneStateRef }: PlutoProps) {
     setIsHovered(false);
   }
 
-  function handleClick(event: ThreeEvent<MouseEvent>) {
-    event.stopPropagation();
-    if (isDragRelease(event.delta)) return;
-    void navigate({ to: "/$planetId", params: { planetId: PLUTO_ID } });
-  }
-
   return (
     <group ref={groupRef}>
       <mesh>
         <sphereGeometry args={[PLUTO.radius, SEGMENTS, SEGMENTS / 2]} />
         <meshLambertMaterial color={PALETTE.neutral.vivid} />
       </mesh>
-      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut} onClick={handleClick}>
+      <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
         <sphereGeometry args={[PLUTO.radius * HIT_AREA_SCALE, SEGMENTS, SEGMENTS / 2]} />
         <meshBasicMaterial colorWrite={false} depthWrite={false} />
       </mesh>

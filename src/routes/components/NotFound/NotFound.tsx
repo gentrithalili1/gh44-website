@@ -1,19 +1,11 @@
-import { useLocation } from "@tanstack/react-router";
-
 import { PANEL_STYLE } from "#/utils/panel";
 
 import { BackToOrbitLink } from "../BackToOrbitLink";
 import { messages } from "./messages";
 import { LostPlanet } from "./NotFound.elements";
 
-const PLUTO_PATH = "/pluto";
-
-// Any page that is not a planet: a lost one, with dinosaurs, and the way back. Pluto, found far
-// out in the system, gets its own verdict.
+// Any page that is not a planet: a lost one, with dinosaurs, and the way back.
 export function NotFound() {
-  const location = useLocation();
-  const copy = location.pathname === PLUTO_PATH ? messages.pluto : messages;
-
   return (
     <>
       <BackToOrbitLink />
@@ -23,9 +15,9 @@ export function NotFound() {
       >
         <LostPlanet label={messages.illustration} />
         <h1 className="mb-1.5 text-planet-sm font-bold tracking-planet md:text-planet">
-          {copy.heading}
+          {messages.heading}
         </h1>
-        <p className="max-w-[36ch] text-lede text-muted">{copy.description}</p>
+        <p className="max-w-[36ch] text-lede text-muted">{messages.description}</p>
       </main>
     </>
   );
