@@ -17,7 +17,7 @@ export const messages = {
   // What Floki says out loud.
   sunScoldSpoken: "Please don't poke the sun!",
   fetchBall: "floki's ball",
-  voyager: "voyager 1 · launched 1977. still going.",
+  voyagers: { voyager1: "voyager 1", voyager2: "voyager 2" },
   blackHole: "gargantua",
   blackHoleUnknown: "???",
   pluto: "pluto · still a planet",
