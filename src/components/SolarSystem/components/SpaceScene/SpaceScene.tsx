@@ -60,6 +60,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
     cameraZoom: 1,
     warp: 0,
     jump: 0,
+    homing: 0,
   });
 
   // The open cockpit steps the system back, like an open planet.

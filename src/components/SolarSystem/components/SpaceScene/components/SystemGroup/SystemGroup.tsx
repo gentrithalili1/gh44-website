@@ -11,15 +11,15 @@ interface SystemGroupProps {
 }
 
 // Everything that belongs to the solar system: the sun, the planets, the ships. On the flight
-// into the black hole it all drops away behind the ship, shrinking into the sun, and is gone
-// until the ship is back.
+// into the black hole it all drops away behind the ship, shrinking into the sun; on the flight
+// home it grows back ahead of it.
 export function SystemGroup({ sceneStateRef, children }: SystemGroupProps) {
   const groupRef = useRef<Group>(null);
 
   useFrame(() => {
     const group = groupRef.current;
     if (!group) return;
-    const escape = getEscape(sceneStateRef.current.jump);
+    const escape = getEscape(sceneStateRef.current);
     group.visible = escape < 1;
     group.scale.setScalar(1 - escape);
   });

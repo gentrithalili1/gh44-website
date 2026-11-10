@@ -234,7 +234,8 @@ export function useCameraFlight({
       CAMERA_FOV +
       Math.sin(Math.PI * flight.progress) * FLIGHT_FOV_PUSH +
       // The brake dips a launch's warp under 0, on purpose; the jump has no brake.
-      (sceneState.jump > 0 ? getSceneWarp(sceneState) : sceneState.warp) * WARP_FOV_PUSH;
+      (sceneState.jump > 0 || sceneState.homing > 0 ? getSceneWarp(sceneState) : sceneState.warp) *
+        WARP_FOV_PUSH;
     camera.position.set(...placement.position);
     camera.lookAt(...placement.target);
     // Flying into the black hole, the view lifts: straight ahead moves from the ship, behind

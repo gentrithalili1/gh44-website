@@ -59,12 +59,22 @@ export function getJumpCenter(jump: number) {
   return smooth(jump / CENTER_BY);
 }
 
-// 0 to 1: how far the solar system has dropped away behind the ship; 1 is gone.
-export function getEscape(jump: number) {
-  return smooth(jump / ESCAPE_BY);
+// On the flight home the stars run at full stretch until this much of it is left, then ease
+// off as the system comes back; the system starts to show once this much is left.
+const HOMING_WARP_FROM = 0.3;
+const HOMING_SYSTEM_FROM = 0.75;
+
+// 0 to 1: how far the solar system has dropped away. On the flight home it grows back ahead of
+// the ship, from a point to its full size.
+export function getEscape({ jump, homing }: Pick<SceneState, "jump" | "homing">) {
+  const away = smooth(jump / ESCAPE_BY);
+  const ahead = smooth(homing / HOMING_SYSTEM_FROM);
+
+  return Math.max(away, ahead);
 }
 
-// The scene's warp: a launch's, or the flight into the hole, whichever is further along.
-export function getSceneWarp({ warp, jump }: Pick<SceneState, "warp" | "jump">) {
-  return Math.max(warp, smooth(jump / WARP_BY));
+// The scene's warp: a launch's, the flight into the hole, or the flight home, whichever is
+// furthest along.
+export function getSceneWarp({ warp, jump, homing }: Pick<SceneState, "warp" | "jump" | "homing">) {
+  return Math.max(warp, smooth(jump / WARP_BY), smooth(homing / HOMING_WARP_FROM));
 }
