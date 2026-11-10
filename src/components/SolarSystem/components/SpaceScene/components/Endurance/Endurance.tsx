@@ -13,9 +13,9 @@ import { getRingModules, RING_RADIUS } from "./utils/enduranceRing";
 // Far out past the last orbit on the way to the black hole: below the orbit plane and behind the
 // system, in the top right of the home view. Scene units.
 const POSITION: [number, number, number] = [1196, -1380, -2122];
-// The wheel leans toward the home view, and turns once in about 40 seconds for gravity.
+// The wheel leans toward the home view, and turns once in about 26 seconds for gravity.
 const LEAN: [number, number, number] = [-0.5, -0.45, 0];
-const SPIN_SPEED = 0.16;
+const SPIN_SPEED = 0.24;
 // Drawn far larger than life, or it would be lost among the stars.
 const SHIP_SCALE = 6;
 const HIT_RADIUS = RING_RADIUS + 2.5;

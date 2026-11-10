@@ -7,11 +7,9 @@ import { PALETTE } from "#/utils/palette";
 
 import { setGroupOpacity } from "../../utils/groupOpacity";
 import { damp, FADED_OPACITY, MAX_FRAME_STEP } from "../../utils/sceneMath";
+import { HOMESTEAD_POSITION } from "../../utils/homestead";
 import { HoverName } from "../HoverName";
 
-// Where the Avalon is headed: far out past it, the same way from the sun. From the home view
-// that is beyond the bottom left corner, off screen until the camera turns. Scene units.
-const POSITION: [number, number, number] = [-1050, 0, 968];
 const RADIUS = 34;
 const SEGMENTS = 32;
 // A band of cloud round it, standing a little off the ground, turning once in about 80 seconds.
@@ -54,7 +52,7 @@ export function Homestead({ isFaded }: HomesteadProps) {
   }
 
   return (
-    <group ref={groupRef} position={POSITION}>
+    <group ref={groupRef} position={HOMESTEAD_POSITION}>
       <mesh onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
         <sphereGeometry args={[RADIUS, SEGMENTS, SEGMENTS / 2]} />
         <meshLambertMaterial color={PALETTE.sage.soft} />
