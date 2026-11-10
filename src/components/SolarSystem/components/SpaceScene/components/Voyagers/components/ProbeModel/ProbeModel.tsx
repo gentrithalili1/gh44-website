@@ -12,7 +12,7 @@ const DISH_TOP = DISH.radius * 1.4;
 const ROUND = 20;
 const THIN = 6;
 // Drawn far larger than life, or it would be lost among the stars.
-export const PROBE_SCALE = 1.9;
+export const PROBE_SCALE = 3.2;
 // From its middle to the end of its longest boom, and to the top of its dish, as drawn.
 export const PROBE_REACH = 9 * PROBE_SCALE;
 export const PROBE_TOP = DISH_TOP * PROBE_SCALE;
@@ -74,8 +74,7 @@ const STRUTS = [
   },
 ] as const;
 
-// A deep-space probe of the 1970s, shared by the Voyagers and Pioneer. Decorative: whoever flies
-// it adds the pointer target and the name.
+// A Voyager probe. Decorative: whoever flies it adds the pointer target and the name.
 export function ProbeModel() {
   return (
     <group scale={PROBE_SCALE}>

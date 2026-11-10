@@ -6,7 +6,7 @@ import type { SceneState } from "../../../../types";
 import { setGroupOpacity } from "../../../../utils/groupOpacity";
 import { damp, FADED_OPACITY } from "../../../../utils/sceneMath";
 import { HoverName } from "../../../HoverName";
-import { PROBE_REACH, PROBE_TOP, ProbeModel } from "../../../ProbeModel";
+import { PROBE_REACH, PROBE_TOP, ProbeModel } from "../ProbeModel";
 import {
   getCourseShare,
   getVoyagerFade,
@@ -26,7 +26,7 @@ interface VoyagerProbeProps {
 }
 
 // One Voyager probe flying straight out from the sun, its dish turned back toward home. It
-// shows its name when pointed at. Decorative otherwise: nothing to click.
+// shows its name and a line about it when pointed at. Decorative otherwise: nothing to click.
 export function VoyagerProbe({ course, name, isFaded, sceneStateRef }: VoyagerProbeProps) {
   const groupRef = useRef<Group>(null);
   const timeRef = useRef(0);
