@@ -161,7 +161,6 @@ export function ScenePlanet({
       {uprightRing ? <UprightRing ring={uprightRing} /> : null}
       <Orbiters
         orbiters={getOrbiters(planet)}
-        isPlanetOpen={state === "current"}
         onHoverChange={handleHoverChange}
         onPlanetClick={handleOpen}
         sceneStateRef={sceneStateRef}

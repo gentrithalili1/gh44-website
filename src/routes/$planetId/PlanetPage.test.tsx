@@ -57,7 +57,7 @@ describe("PlanetPage", () => {
         .map((link) => ({ name: link.textContent, href: link.getAttribute("href") })),
     ).toEqual([
       {
-        name: "write in gmail (opens in new tab)",
+        name: "gentrithalili11@gmail.com (opens in new tab)",
         href: "https://mail.google.com/mail/?view=cm&to=gentrithalili11@gmail.com&su=hi%20gentrit",
       },
       {
@@ -73,16 +73,6 @@ describe("PlanetPage", () => {
         href: "https://www.instagram.com/gentrithalili_/",
       },
     ]);
-  });
-
-  it("copies the email on me and says so", async () => {
-    const user = userEvent.setup();
-    await renderAt("/me");
-
-    await user.click(screen.getByRole("button", { name: "gentrithalili11@gmail.com" }));
-
-    await expect(navigator.clipboard.readText()).resolves.toBe("gentrithalili11@gmail.com");
-    expect(screen.getByRole("button", { name: "copied. talk soon." })).toBeInTheDocument();
   });
 
   it.each(PROJECTS)("shows $name with its lede and repo", async ({ path, name, lede, repo }) => {

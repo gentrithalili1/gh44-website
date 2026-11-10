@@ -1,4 +1,3 @@
-import { GMAIL_COMPOSE_URL } from "#/utils/contact";
 import type { PaletteColor } from "#/utils/palette";
 import type { PlanetBody } from "#/utils/planets";
 import { isCurrentRole, ROLES } from "#/utils/roles";
@@ -20,8 +19,6 @@ type OrbiterBase = {
   // Starting angle (radians) and angular speed (radians per second).
   phase: number;
   speed: number;
-  // Opens in a new tab when clicked while its planet is open.
-  link?: { href: string; label: string };
 };
 
 // A moon, an artificial satellite, or a gray cratered rock, on a tilted orbit around its planet.
@@ -88,7 +85,6 @@ export function getOrbiters(planet: PlanetBody): Orbiter[] {
           orbitRadius: planet.size + MOON_GAP,
           phase: 0.9,
           speed: MOON_SPEED,
-          link: { href: GMAIL_COMPOSE_URL, label: messages.writeInGmail },
         },
       ];
     case "companies":

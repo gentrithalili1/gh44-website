@@ -23,7 +23,6 @@ function getOrbitPositions(radius: number) {
 
 interface OrbitersProps {
   orbiters: OrbiterData[];
-  isPlanetOpen: boolean;
   onHoverChange: (change: HoverChange) => void;
   onPlanetClick: () => void;
   sceneStateRef: RefObject<SceneState>;
@@ -31,13 +30,7 @@ interface OrbitersProps {
 
 // A planet's moons and satellites, each on its orbit around the planet's equator, passing behind
 // and in front of it.
-export function Orbiters({
-  orbiters,
-  isPlanetOpen,
-  onHoverChange,
-  onPlanetClick,
-  sceneStateRef,
-}: OrbitersProps) {
+export function Orbiters({ orbiters, onHoverChange, onPlanetClick, sceneStateRef }: OrbitersProps) {
   const [orbits] = useState(() =>
     orbiters.map((orbiter) => ({
       orbiter,
@@ -60,7 +53,6 @@ export function Orbiters({
       </lineLoop>
       <Orbiter
         orbiter={orbiter}
-        isPlanetOpen={isPlanetOpen}
         onHoverChange={onHoverChange}
         onPlanetClick={onPlanetClick}
         sceneStateRef={sceneStateRef}

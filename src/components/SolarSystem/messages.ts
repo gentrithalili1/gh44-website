@@ -3,7 +3,6 @@ import { EXPLORER_NAME } from "#/utils/explorer";
 export const messages = {
   planetsLabel: "planets",
   earthMoon: "the moon",
-  writeInGmail: "write in gmail",
   marsSatellites: { resolve: "resolve", reject: "reject" },
   brainAgents: {
     implementer: "implementer",

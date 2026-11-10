@@ -22,13 +22,6 @@ describe("getOrbiters", () => {
     for (const other of others) expect(other.speed).toBeGreaterThan(moon?.speed ?? Infinity);
   });
 
-  it("lets Earth's moon open a Gmail compose to Gentrit", () => {
-    expect(getOrbiters(getPlanet("me"))[0]?.link).toEqual({
-      href: "https://mail.google.com/mail/?view=cm&to=gentrithalili11@gmail.com&su=hi%20gentrit",
-      label: "write in gmail",
-    });
-  });
-
   it("gives Mars two satellites", () => {
     expect(
       getOrbiters(getPlanet("gh44-confirm")).map(({ kind, label }) => ({ kind, label })),
