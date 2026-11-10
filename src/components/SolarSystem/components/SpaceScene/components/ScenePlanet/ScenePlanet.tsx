@@ -80,6 +80,11 @@ export function ScenePlanet({
   const state = isCockpitOpen ? "faded" : getPlanetState({ planetId: planet.id, openPlanetId });
   const ringBands = getRingBands(planet);
   const uprightRing = getUprightRing(planet);
+  const outerBand = ringBands.at(-1);
+  const ringSpan =
+    ringBands[0] && outerBand
+      ? { innerRadius: ringBands[0].innerRadius, outerRadius: outerBand.outerRadius }
+      : undefined;
   const isSitePlanet = planet.kind === "site";
   const isHovered = hoverSources.size > 0;
   useCursor(isHovered && state === "idle");
@@ -139,6 +144,8 @@ export function ScenePlanet({
     <group ref={groupRef}>
       <PlanetSurface
         planet={planet}
+        isOpen={state === "current"}
+        ringSpan={ringSpan}
         sceneStateRef={sceneStateRef}
         onPointerOver={isSitePlanet ? handlePointerOver : undefined}
         onPointerOut={isSitePlanet ? handlePointerOut : undefined}
@@ -151,7 +158,7 @@ export function ScenePlanet({
         onPlanetClick={handleOpen}
         sceneStateRef={sceneStateRef}
       />
-      <Rings bands={ringBands} onHoverChange={handleHoverChange} />
+      <Rings bands={ringBands} planetSize={planet.size} onHoverChange={handleHoverChange} />
       {planet.features.hasRocket ? (
         <Rocket planetSize={planet.size} sceneStateRef={sceneStateRef} />
       ) : null}
