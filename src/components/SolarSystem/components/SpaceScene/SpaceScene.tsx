@@ -13,6 +13,7 @@ import { Endurance } from "./components/Endurance";
 import { FetchBall } from "./components/FetchBall";
 import { LabelNudges } from "./components/LabelNudges";
 import { Orbits } from "./components/Orbits";
+import { Pioneer } from "./components/Pioneer";
 import { Pluto } from "./components/Pluto";
 import { SceneCamera } from "./components/SceneCamera";
 import { SceneClock } from "./components/SceneClock";
@@ -97,6 +98,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
           <Orbits isPlanetOpen={isSystemFaded} />
           <Pluto isFaded={isSystemFaded} sceneStateRef={sceneStateRef} />
           <Endurance isFaded={openPlanetId !== undefined} />
+          <Pioneer isHome={!isSystemFaded && explorer.cockpit.status === "closed"} />
           <Voyagers isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
           <FetchBall isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
           {labelList

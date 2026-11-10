@@ -18,6 +18,7 @@ export const messages = {
   sunScoldSpoken: "Please don't poke the sun!",
   fetchBall: "floki's ball",
   endurance: "endurance",
+  pioneer: "pioneer 10 · launched 1972. still going.",
   voyagers: { voyager1: "voyager 1", voyager2: "voyager 2" },
   blackHole: "gargantua",
   blackHoleUnknown: "???",

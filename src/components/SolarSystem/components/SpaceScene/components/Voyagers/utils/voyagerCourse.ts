@@ -1,7 +1,7 @@
-// Both probes left the planets behind long ago: each flies straight out from the sun, from just
-// past the last orbit until it is out of sight, then is found again where it started. Scene
+// Both probes left the planets behind long ago: each flies straight out from the sun, from well
+// past the last orbit (478) until it is out of sight, then is found again where it started. Scene
 // units and seconds.
-const COURSE = { from: 545, to: 860, speed: 1.1 } as const;
+const COURSE = { from: 720, to: 1040, speed: 1.1 } as const;
 // A probe fades in over this share of its course, and out over the same share at the end.
 const FADE_SHARE = 0.08;
 
