@@ -19,6 +19,7 @@ import { ScenePlanet } from "./components/ScenePlanet";
 import { Ships } from "./components/Ships";
 import { Stars } from "./components/Stars";
 import { Sun } from "./components/Sun";
+import { SystemGroup } from "./components/SystemGroup";
 import { Voyager } from "./components/Voyager";
 import { WarpStreaks } from "./components/WarpStreaks";
 import { CAMERA_FOV } from "./hooks/useCameraFlight";
@@ -90,31 +91,33 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
         />
         <BlackHole sceneStateRef={sceneStateRef} />
         <WarpStreaks sceneStateRef={sceneStateRef} />
-        <Sun isPlanetOpen={isSystemFaded} />
-        <Orbits isPlanetOpen={isSystemFaded} />
-        <Pluto isFaded={isSystemFaded} sceneStateRef={sceneStateRef} />
-        <Voyager isHome={!isSystemFaded && explorer.cockpit.status === "closed"} />
-        <FetchBall isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
-        {labelList
-          ? SOLAR_SYSTEM.map((planet) => (
-              <ScenePlanet
-                key={planet.id}
-                planet={planet}
-                openPlanetId={openPlanetId}
-                isCockpitOpen={isCockpitOpen}
-                sceneStateRef={sceneStateRef}
-                labelList={labelList}
-              />
-            ))
-          : null}
-        {labelList ? (
-          <LabelNudges
-            labelList={labelList}
-            openPlanetId={openPlanetId}
-            sceneStateRef={sceneStateRef}
-          />
-        ) : null}
-        <Ships openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
+        <SystemGroup sceneStateRef={sceneStateRef}>
+          <Sun isPlanetOpen={isSystemFaded} />
+          <Orbits isPlanetOpen={isSystemFaded} />
+          <Pluto isFaded={isSystemFaded} sceneStateRef={sceneStateRef} />
+          <Voyager isHome={!isSystemFaded && explorer.cockpit.status === "closed"} />
+          <FetchBall isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
+          {labelList
+            ? SOLAR_SYSTEM.map((planet) => (
+                <ScenePlanet
+                  key={planet.id}
+                  planet={planet}
+                  openPlanetId={openPlanetId}
+                  isCockpitOpen={isCockpitOpen}
+                  sceneStateRef={sceneStateRef}
+                  labelList={labelList}
+                />
+              ))
+            : null}
+          {labelList ? (
+            <LabelNudges
+              labelList={labelList}
+              openPlanetId={openPlanetId}
+              sceneStateRef={sceneStateRef}
+            />
+          ) : null}
+          <Ships openPlanetId={openPlanetId} sceneStateRef={sceneStateRef} />
+        </SystemGroup>
       </Canvas>
       <nav aria-label={messages.planetsLabel} className="pointer-events-none absolute inset-0">
         <ul ref={setLabelList} />

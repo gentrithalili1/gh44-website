@@ -47,7 +47,7 @@
     calc(var(--power-delay, 0ms) + var(--screen, 0) * 110ms) both;
   --animate-screen-off: screen-off 140ms linear calc(var(--screen, 0) * 30ms) both;
   /* Near the black hole the screens give out, one after another. */
-  --animate-screen-jump: screen-off 220ms steps(3, end) calc(4000ms + var(--screen, 0) * 130ms) both;
+  --animate-screen-jump: screen-off 220ms steps(3, end) calc(6800ms + var(--screen, 0) * 130ms) both;
 
   @keyframes boot-type {
     from {
@@ -94,7 +94,9 @@
   /* The radio's dead air: a signal fades up for whoever waits ten seconds. */
   --animate-morse-in: morse-in 1500ms var(--ease-space) 10s both;
   /* The black hole's shadow covers the cockpit as the flight in ends, and lifts on return. */
-  --animate-jump-black: jump-black 700ms var(--ease-space) 4500ms both;
+  --animate-jump-black: jump-black 700ms var(--ease-space) 7300ms both;
+  /* Inside it, the way back shows after a beat of nothing. */
+  --animate-void-in: morse-in 1400ms var(--ease-space) 1200ms both;
   --animate-jump-back: jump-back 1100ms var(--ease-space) both;
   --animate-floki-perk: floki-perk 700ms var(--ease-space) both;
   --animate-cockpit-rumble: cockpit-rumble 650ms linear both;

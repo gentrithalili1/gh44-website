@@ -7,11 +7,12 @@ import { SUN_GLOW_RADIUS, SUN_RADIUS } from "#/components/SolarSystem/utils/spac
 import { PALETTE } from "#/utils/palette";
 
 import { messages } from "#/components/SolarSystem/messages";
+import { useFlokiLine } from "#/hooks/useFlokiLine";
 
 import { setGroupOpacity } from "../../utils/groupOpacity";
 import { damp, FADED_OPACITY, isDragRelease } from "../../utils/sceneMath";
 import { HoverName } from "../HoverName";
-import { addPoke, getFlareLevel } from "./utils/sunPokes";
+import { getFlareLevel } from "./utils/sunPokes";
 import {
   CORONA_FRAGMENT_SHADER,
   CORONA_VERTEX_SHADER,
@@ -51,8 +52,8 @@ interface SunProps {
 }
 
 // gh44: everything revolves around it, and it lights the planets. Its surface boils and its
-// corona reaches out in slow streamers. Decorative, with no label; poked five times quickly it
-// flares, and Floki objects (an easter egg).
+// corona reaches out in slow streamers. Decorative, with no label; poked, it flares, and Floki
+// objects out loud (an easter egg).
 export function Sun({ isPlanetOpen }: SunProps) {
   // Passed through the constructor, so each material keeps its uniforms object.
   const [surface] = useState(() => ({
@@ -85,8 +86,8 @@ export function Sun({ isPlanetOpen }: SunProps) {
   const surfaceRef = useRef<ShaderMaterial>(null);
   const coronaRef = useRef<ShaderMaterial>(null);
   const opacityRef = useRef(1);
-  // The recent pokes and when the last flare went off, in seconds of the scene's clock.
-  const pokesRef = useRef<readonly number[]>([]);
+  const flokiLine = useFlokiLine();
+  // When the last flare went off, in seconds of the scene's clock.
   const flaredAtRef = useRef<number | null>(null);
   const nowRef = useRef(0);
   const [isScolded, setIsScolded] = useState(false);
@@ -123,11 +124,11 @@ export function Sun({ isPlanetOpen }: SunProps) {
   function handleClick(event: ThreeEvent<MouseEvent>) {
     if (isDragRelease(event.delta)) return;
     event.stopPropagation();
-    const result = addPoke({ pokes: pokesRef.current, now: nowRef.current });
-    pokesRef.current = result.pokes;
-    if (!result.isFlare) return;
+    // One flare at a time: poking a flaring sun does nothing more.
+    if (flaredAtRef.current !== null) return;
     flaredAtRef.current = nowRef.current;
     setIsScolded(true);
+    void flokiLine.say(messages.sunScoldSpoken);
   }
 
   return (

@@ -65,9 +65,11 @@ export function Cockpit() {
       isGreeting={explorer.cockpit.status === "open" && explorer.cockpit.isGreeting}
       onBoard={explorer.boardCockpit}
       isClosing={explorer.cockpit.status === "closing"}
-      isLocked={explorer.flight.status === "flying" || explorer.jump.status === "jumping"}
-      isJumping={explorer.jump.status === "jumping"}
+      isLocked={explorer.flight.status === "flying" || explorer.jump.status !== "idle"}
+      jumpStatus={explorer.jump.status}
       onJump={explorer.startJump}
+      onReturn={explorer.endJump}
+      earthYearsPassed={explorer.earthYearsPassed}
       onClose={explorer.closeCockpit}
       onClosed={explorer.finishClosing}
       onGo={handleGo}

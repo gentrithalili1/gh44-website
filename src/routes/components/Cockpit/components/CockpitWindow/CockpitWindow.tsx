@@ -5,7 +5,7 @@ import type { CockpitReveal } from "#/hooks/useExplorer";
 import { findSecret } from "#/hooks/useSecrets";
 import type { Destination } from "#/utils/destinations";
 import { useMusic } from "#/routes/hooks/useMusic";
-import { COCKPIT_SHIP_Y } from "#/utils/explorer";
+import { COCKPIT_SHIP_Y, GARGANTUA_YEARS } from "#/utils/explorer";
 
 import {
   AstronautIcon,
@@ -14,6 +14,7 @@ import {
   ConsoleScreen,
 } from "./CockpitWindow.elements";
 import { CockpitFloki } from "./components/CockpitFloki";
+import { EarthClock } from "./components/EarthClock";
 import { CockpitRadar } from "./components/CockpitRadar";
 import { CockpitRadio } from "./components/CockpitRadio";
 import { CockpitTerminal, type TerminalEgg } from "./components/CockpitTerminal";
@@ -66,10 +67,15 @@ interface CockpitWindowProps {
   // The closing cockpit has faded out.
   onClosed: () => void;
   onGo: (destination: Destination) => void;
-  // Flying into the black hole: locked like a launch, and the cockpit goes dark at the end.
-  isJumping: boolean;
-  // Starts that flight; `onArrive` runs on the other side.
+  // The trip into the black hole: flying in, the cockpit goes dark; inside there is only black
+  // and the way back.
+  jumpStatus: "idle" | "jumping" | "inside";
+  // Starts that flight; `onArrive` runs once the visitor is back.
   onJump: (onArrive: () => void) => void;
+  // The way back from inside.
+  onReturn: () => void;
+  // The years that passed on Earth meanwhile.
+  earthYearsPassed: number;
 }
 
 // What plays on the way into the black hole, if the radio is on.
@@ -87,8 +93,10 @@ export function CockpitWindow({
   onClose,
   onClosed,
   onGo,
-  isJumping,
+  jumpStatus,
   onJump,
+  onReturn,
+  earthYearsPassed,
 }: CockpitWindowProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -155,16 +163,30 @@ export function CockpitWindow({
       findSecret("horizon");
       setHasReturned(true);
       terminal.print([
-        { kind: "floki", text: messages.jumpArrived },
+        { kind: "floki", text: messages.jumpArrived(GARGANTUA_YEARS) },
         { kind: "output", text: messages.jumpProgress },
       ]);
     });
   }
 
   function getJumpPhase() {
-    if (isJumping) return "on";
+    switch (jumpStatus) {
+      case "jumping":
+        return "on";
+      case "inside":
+        return "inside";
+      case "idle":
+        return hasReturned ? "back" : undefined;
+      default: {
+        const unknownStatus: never = jumpStatus;
+        return unknownStatus;
+      }
+    }
+  }
 
-    return hasReturned ? "back" : undefined;
+  // The way back is the only thing in there: it takes focus as it appears.
+  function focusVoidBack(button: HTMLButtonElement | null) {
+    button?.focus();
   }
 
   function handleEgg(egg: TerminalEgg) {
@@ -217,12 +239,23 @@ export function CockpitWindow({
       className={`group/cockpit fixed inset-0 z-50 overflow-clip text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing, isLocked })}`}
     >
       <CockpitWindshield />
-      {/* The black hole's shadow takes the whole cockpit at the end of the flight in, and lifts
-          once the ship is back. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-20 bg-night opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=on]/cockpit:animate-jump-black"
-      />
+      {/* The black hole's shadow takes the whole cockpit at the end of the flight in (a little
+          past its edges: the cockpit is still shaking), and lifts once the ship is back. */}
+      <div className="pointer-events-none absolute -inset-1 z-20 flex flex-col items-center justify-center gap-5 bg-black opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=inside]/cockpit:pointer-events-auto group-data-[jump=inside]/cockpit:opacity-100 group-data-[jump=on]/cockpit:animate-jump-black">
+        {jumpStatus === "inside" ? (
+          <>
+            <p className="animate-void-in text-xs text-faint">{messages.voidLine}</p>
+            <button
+              ref={focusVoidBack}
+              type="button"
+              onClick={onReturn}
+              className="h-10 animate-void-in rounded-full border border-rule px-5 text-xs text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+            >
+              {messages.voidBack}
+            </button>
+          </>
+        ) : null}
+      </div>
       <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4 md:p-6">
         <div className="flex flex-col gap-1">
           <h2 id={titleId} className="text-label font-bold tracking-label">
@@ -235,6 +268,7 @@ export function CockpitWindow({
             />
             {messages.status}
           </p>
+          <EarthClock yearsPassed={earthYearsPassed} />
         </div>
         <button
           type="button"

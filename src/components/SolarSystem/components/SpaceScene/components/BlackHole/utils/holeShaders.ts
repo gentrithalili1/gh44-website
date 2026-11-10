@@ -2,8 +2,8 @@ import { NOISE_GLSL } from "#/components/SolarSystem/components/SpaceScene/utils
 
 // The black hole on a flat plane facing the camera: a black shadow, a thin ring of light at its
 // edge, the far side of its disk bent into a halo over and under it, and the near side of the
-// disk as a flat band across the front. The side turning toward the viewer is brighter. Colors
-// are sRGB as given; no conversion.
+// disk as a flat band across the front. The gas turns round it, and the side turning toward the
+// viewer is brighter. Colors are sRGB as given; no conversion.
 export const HOLE_VERTEX_SHADER = /* glsl */ `
   varying vec2 vUv;
 
@@ -36,14 +36,19 @@ export const HOLE_FRAGMENT_SHADER = /* glsl */ `
     float shadow = smoothstep(1.0, 0.96, reach);
     float doppler = 1.0 - 0.55 * smoothstep(-1.5, 1.5, point.x);
 
-    float haloGrain = 0.6 + 0.4 * snoise(vec3(cos(angle) * 2.0, sin(angle) * 2.0, reach * 3.0 - uTime * 0.2));
+    float haloTurn = angle - uTime * 0.5;
+    float haloGrain = 0.5 + 0.5 * snoise(vec3(cos(haloTurn) * 2.4, sin(haloTurn) * 2.4, reach * 3.0));
     float halo = smoothstep(1.0, 1.1, reach) * smoothstep(1.8, 1.1, reach) * haloGrain;
     float ring = smoothstep(0.05, 0.0, abs(reach - 1.03));
 
     float diskReach = length(vec2(point.x, point.y / TILT));
     float diskAngle = atan(point.y / TILT, point.x);
-    float swirl = 0.5 + 0.5 * snoise(vec3(cos(diskAngle - uTime * 0.3) * 1.5, sin(diskAngle - uTime * 0.3) * 1.5, diskReach * 1.6));
-    float band = smoothstep(1.25, 1.6, diskReach) * smoothstep(4.4, 2.0, diskReach) * (0.5 + 0.5 * swirl);
+    // Streaks of gas run round the disk, the inner ones faster than the outer.
+    float turn = diskAngle - uTime * (1.6 / max(diskReach, 1.0));
+    float streaks = 0.5 + 0.5 * snoise(vec3(cos(turn) * 2.6, sin(turn) * 2.6, diskReach * 2.4));
+    float clumps = 0.5 + 0.5 * snoise(vec3(cos(turn * 2.0) * 1.4, sin(turn * 2.0) * 1.4, diskReach * 0.8 + 7.0));
+    float swirl = streaks * 0.65 + clumps * 0.35;
+    float band = smoothstep(1.25, 1.6, diskReach) * smoothstep(4.4, 2.0, diskReach) * (0.3 + 0.7 * swirl);
     // The near side crosses in front of the shadow; the far side is hidden behind it.
     band *= max(step(point.y, 0.0), 1.0 - shadow);
 

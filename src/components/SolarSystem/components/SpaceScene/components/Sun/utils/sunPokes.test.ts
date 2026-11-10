@@ -1,29 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addPoke, FLARE_SECONDS, getFlareLevel, POKES_TO_FLARE } from "./sunPokes";
-
-describe("addPoke", () => {
-  it("flares on the fifth quick poke, and starts over", () => {
-    let pokes: readonly number[] = [];
-    const flares = Array.from({ length: POKES_TO_FLARE }, (_, index) => {
-      const result = addPoke({ pokes, now: index * 0.3 });
-      pokes = result.pokes;
-      return result.isFlare;
-    });
-
-    expect(flares).toEqual([false, false, false, false, true]);
-    expect(pokes).toEqual([]);
-  });
-
-  it("forgets slow pokes", () => {
-    let pokes: readonly number[] = [];
-    for (let index = 0; index < 10; index++) {
-      const result = addPoke({ pokes, now: index * 2 });
-      pokes = result.pokes;
-      expect(result.isFlare).toBe(false);
-    }
-  });
-});
+import { FLARE_SECONDS, getFlareLevel } from "./sunPokes";
 
 describe("getFlareLevel", () => {
   it("starts full, eases off and ends", () => {
