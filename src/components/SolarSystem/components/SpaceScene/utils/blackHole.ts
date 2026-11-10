@@ -2,15 +2,14 @@ import type { Point } from "#/components/SolarSystem/types";
 
 import type { SceneState } from "../types";
 
-// The black hole is part of the sky, this far from the camera (just inside the stars' shell):
-// it turns with the stars as the camera does.
-export const HOLE_DISTANCE = 7000;
-// The directions to it (one unit long). Outside the ship it is in the top right of the home
-// view, on a phone's tall screen and on desktop. The cockpit looks the other way, so there it
-// has a second place: in the windshield as the site opens, crossing as the ship goes round.
+// The black hole has one place in space, like a planet: this far from the sun (just inside the
+// stars' shell), in the top right of the home view. The camera looks down on the system, so
+// that is below the orbit plane, behind it. A phone's tall screen sees less to the side, so
+// there it sits closer to the middle. The cockpit only sees it when the ship faces that way.
+const HOLE_DISTANCE = 7000;
 const HOLE_DIRECTIONS = {
-  home: { phone: [0.109, -0.523, -0.846], desktop: [0.427, -0.493, -0.758] },
-  cockpit: [0.021, -0.13, 0.991],
+  phone: [0.109, -0.523, -0.846],
+  desktop: [0.427, -0.493, -0.758],
 } as const;
 // Its shadow's radius out there: about 20 pixels across.
 export const HOLE_RADIUS = 60;
@@ -32,14 +31,11 @@ function smooth(share: number) {
   return clamped * clamped * (3 - 2 * clamped);
 }
 
-type Direction = readonly [number, number, number];
+// Where the black hole is, in scene units.
+export function getHolePosition(isPhone: boolean): [number, number, number] {
+  const [x, y, z] = isPhone ? HOLE_DIRECTIONS.phone : HOLE_DIRECTIONS.desktop;
 
-// The direction to it from outside the ship, and from the cockpit.
-export function getHoleDirections(isPhone: boolean): { home: Direction; cockpit: Direction } {
-  return {
-    home: isPhone ? HOLE_DIRECTIONS.home.phone : HOLE_DIRECTIONS.home.desktop,
-    cockpit: HOLE_DIRECTIONS.cockpit,
-  };
+  return [x * HOLE_DISTANCE, y * HOLE_DISTANCE, z * HOLE_DISTANCE];
 }
 
 // The share of the screen's height the camera's view is lifted by, flying in.

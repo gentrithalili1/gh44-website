@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getAheadAnchor,
   getEscape,
-  getHoleDirections,
+  getHolePosition,
   getHoleScale,
   getJumpCenter,
   getJumpLift,
@@ -17,16 +17,16 @@ describe("getAheadAnchor", () => {
   });
 });
 
-describe("getHoleDirections", () => {
-  it("gives directions one unit long, below the orbit plane outside the ship", () => {
+describe("getHolePosition", () => {
+  it("is far past every orbit, below the orbit plane and behind the system", () => {
     for (const isPhone of [true, false]) {
-      const { home, cockpit } = getHoleDirections(isPhone);
+      const [x, y, z] = getHolePosition(isPhone);
 
-      expect(Math.hypot(...home)).toBeCloseTo(1, 2);
-      expect(Math.hypot(...cockpit)).toBeCloseTo(1, 2);
+      expect(Math.hypot(x, y, z)).toBeGreaterThan(5000);
       // The home view looks down on the system: its top right is under the plane, behind it.
-      expect(home[1]).toBeLessThan(0);
-      expect(home[2]).toBeLessThan(0);
+      expect(x).toBeGreaterThan(0);
+      expect(y).toBeLessThan(0);
+      expect(z).toBeLessThan(0);
     }
   });
 });

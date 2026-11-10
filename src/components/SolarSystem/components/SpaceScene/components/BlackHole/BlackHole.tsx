@@ -14,13 +14,12 @@ import { PALETTE } from "#/utils/palette";
 import type { SceneState } from "../../types";
 import {
   getAheadAnchor,
-  getHoleDirections,
+  getHolePosition,
   getHoleScale,
   getJumpCenter,
-  HOLE_DISTANCE,
   HOLE_RADIUS,
 } from "../../utils/blackHole";
-import { damp, PHONE_MAX_WIDTH } from "../../utils/sceneMath";
+import { PHONE_MAX_WIDTH } from "../../utils/sceneMath";
 import { HoverName } from "../HoverName";
 import { HOLE_FRAGMENT_SHADER, HOLE_VERTEX_SHADER } from "./utils/holeShaders";
 
@@ -31,14 +30,10 @@ const PLANE_REACH = 5;
 const PLANE_SIZE = HOLE_RADIUS * PLANE_REACH * 2;
 // The flight in takes this long, straight (no ease): the growth itself speeds up.
 const JUMP_SECONDS = 8;
-// It moves between its place seen from outside and its place seen from the cockpit this fast,
-// as the cockpit opens or closes.
-const PLACE_LAMBDA = 3;
 const NAME_POSITION: [number, number, number] = [0, HOLE_RADIUS * 2, 0];
 
-// The directions to it: where it is in the sky, the cockpit's, and dead ahead.
+// From the camera: the way to it, and dead ahead.
 const toward = new Vector3();
-const fromCockpit = new Vector3();
 const ahead = new Vector3();
 
 // sRGB as written: the shader outputs it as it is.
@@ -50,12 +45,12 @@ interface BlackHoleProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// An easter egg: a black hole far out in the sky, its disk turning. It is part of the space:
-// it turns with the stars as the camera does. It starts in the top right of the home view, and
-// in the windshield as the site opens, drifting across as the ship goes round the sun. Once
-// every planet is visited the cockpit can fly into it (`go gargantua`): the solar system drops
-// away, it swings dead ahead and grows until its shadow is all there is. It stays that way
-// until the visitor comes back.
+// An easter egg: a black hole far out, its disk turning. It has one place in space, like a
+// planet, in the top right of the home view: it moves on screen only as the camera does, and
+// the cockpit sees it only when the ship faces that way. Once every planet is visited the
+// cockpit can fly into it (`go gargantua`): the solar system drops away, the ship swings to
+// face it and it grows until its shadow is all there is. It stays that way until the visitor
+// comes back.
 export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const explorer = useExplorer();
   const exploration = useExploration();
@@ -76,12 +71,9 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const growRef = useRef<Group>(null);
   // 0 to 1 through the flight in; GSAP drives it.
   const jumpRef = useRef({ progress: 0 });
-  // 0 at its place seen from outside the ship, 1 at its place seen from the cockpit.
-  const skyShareRef = useRef(0);
   const [isHovered, setIsHovered] = useState(false);
 
   const jumpStatus = explorer.jump.status;
-  const isCockpit = explorer.cockpit.status === "open";
   const isFound = secrets.hasCrossedHorizon || exploration.visitedIds.length >= DESTINATIONS.length;
 
   useGSAP(
@@ -111,7 +103,7 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
     { dependencies: [jumpStatus] },
   );
 
-  useFrame(({ camera, clock, size }, delta) => {
+  useFrame(({ camera, clock, size }) => {
     const { progress } = jumpRef.current;
     sceneStateRef.current.jump = progress;
     material.uniforms.uTime.value = clock.elapsedTime;
@@ -120,20 +112,14 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
     if (!group) return;
 
     const isPhone = size.width < PHONE_MAX_WIDTH;
-    skyShareRef.current = damp({
-      current: skyShareRef.current,
-      target: isCockpit ? 1 : 0,
-      delta,
-      lambda: PLACE_LAMBDA,
-    });
-    const directions = getHoleDirections(isPhone);
     const front = getAheadAnchor(isPhone);
     ahead.set(front.x, front.y, 0.5).unproject(camera).sub(camera.position).normalize();
-    // Its place in the sky, then dead ahead on the flight in.
-    toward.set(...directions.home);
-    toward.lerp(fromCockpit.set(...directions.cockpit), skyShareRef.current).normalize();
-    toward.lerp(ahead, getJumpCenter(progress)).normalize();
-    group.position.copy(camera.position).addScaledVector(toward, HOLE_DISTANCE);
+    // Where it is, seen from the camera; on the flight in the ship swings to face it, drawn
+    // as it swinging dead ahead.
+    toward.set(...getHolePosition(isPhone)).sub(camera.position);
+    const distance = toward.length();
+    toward.normalize().lerp(ahead, getJumpCenter(progress)).normalize();
+    group.position.copy(camera.position).addScaledVector(toward, distance);
     group.quaternion.copy(camera.quaternion);
   });
 
