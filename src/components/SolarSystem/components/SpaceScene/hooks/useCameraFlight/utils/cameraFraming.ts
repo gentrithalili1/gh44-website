@@ -142,6 +142,8 @@ type MixPosesParams = {
   // The camera's angle at each end: it turns between them on the way.
   fromAngle: CameraAngle;
   toAngle: CameraAngle;
+  // How far round the camera swings at mid-flight (radians); see `mixAngles`.
+  swing?: number;
 };
 
 function mix({ from, to, progress }: { from: number; to: number; progress: number }) {
@@ -188,6 +190,7 @@ export function mixPoses({
   progress,
   fromAngle,
   toAngle,
+  swing,
 }: MixPosesParams): CameraPose {
   const zoom = from.zoom * (to.zoom / from.zoom) ** progress;
   const offset = {
@@ -200,23 +203,33 @@ export function mixPoses({
     x: (mix({ from: screenFrom.x, to: screenTo.x, progress }) - offset.x) / zoom,
     y: (mix({ from: screenFrom.y, to: screenTo.y, progress }) - offset.y) / zoom,
   };
-  const step = toPlane({ screen, angle: mixAngles({ from: fromAngle, to: toAngle, progress }) });
+  const step = toPlane({
+    screen,
+    angle: mixAngles({ from: fromAngle, to: toAngle, progress, swing }),
+  });
 
   return { x: anchor.x - step.x, y: anchor.y - step.y, zoom, offset };
 }
 
 const FULL_TURN = Math.PI * 2;
 
-type MixAnglesParams = { from: CameraAngle; to: CameraAngle; progress: number };
+type MixAnglesParams = {
+  from: CameraAngle;
+  to: CameraAngle;
+  progress: number;
+  // Radians the camera swings round its point at mid-flight, on top of the turn: the flight
+  // curves instead of sliding straight. None at either end.
+  swing?: number;
+};
 
 // Turns the camera between two angles, around the short way.
-export function mixAngles({ from, to, progress }: MixAnglesParams): CameraAngle {
+export function mixAngles({ from, to, progress, swing = 0 }: MixAnglesParams): CameraAngle {
   const turn =
     ((((to.azimuth - from.azimuth + Math.PI) % FULL_TURN) + FULL_TURN) % FULL_TURN) - Math.PI;
 
   return {
     polar: mix({ from: from.polar, to: to.polar, progress }),
-    azimuth: from.azimuth + turn * progress,
+    azimuth: from.azimuth + turn * progress + swing * Math.sin(Math.PI * progress),
   };
 }
 

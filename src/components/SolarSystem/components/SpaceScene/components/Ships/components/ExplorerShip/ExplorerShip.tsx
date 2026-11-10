@@ -4,24 +4,14 @@ import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { useNavigate } from "@tanstack/react-router";
 import gsap from "gsap";
 import { type RefObject, useRef, useState } from "react";
-import {
-  type Group,
-  Material,
-  type Mesh,
-  PerspectiveCamera,
-  Shape,
-  type Sprite,
-  Vector2,
-} from "three";
+import { type Group, Material, type Mesh, PerspectiveCamera, type Sprite } from "three";
 
 import { messages } from "#/components/SolarSystem/messages";
-import type { PlanetState, Point } from "#/components/SolarSystem/types";
+import type { PlanetState } from "#/components/SolarSystem/types";
 import {
   getShipAngle,
   getShipPose,
-  SHIP_CANOPY,
   SHIP_ENGINE,
-  SHIP_HULL,
   SHIP_LENGTH,
   SHIP_SCALE,
   type ShipPose,
@@ -42,7 +32,9 @@ import {
   isDragRelease,
   toPlanePosition,
 } from "../../../../utils/sceneMath";
+import { ShipHull } from "./components/ShipHull";
 import { getFlightPose } from "./utils/shipFlight";
+import { getBank } from "./utils/shipModel";
 import { getTrailPuff, PUFF_COUNT } from "./utils/shipTrail";
 
 gsap.registerPlugin(useGSAP);
@@ -70,12 +62,9 @@ const GLOW_CORE = 0.2;
 const HIT_RADIUS = 10;
 const SPHERE_SEGMENTS = 12;
 const PUFF_RADIUS = 0.9;
-// The hull is a flat outline given thickness, its edges rounded; the canopy rises out of it.
-const HULL_THICKNESS = 1.4;
-const HULL_BEVEL = { bevelEnabled: true, bevelThickness: 0.4, bevelSize: 0.3, bevelSegments: 2 };
-const CANOPY_THICKNESS = 0.8;
-// Outlines are drawn on the x/y plane; turned this way they lie on the orbit plane, nose to -z.
-const LIE_FLAT = Math.PI / 2;
+// It rolls into its turns: roll first, then the heading.
+const BODY_ROTATION_ORDER = "YXZ";
+const BANK_LAMBDA = 7;
 const PUFF_IDS = Array.from({ length: PUFF_COUNT }, (_, index) => index);
 // The name hangs just under the hull, closer than the pointer target's edge.
 const LABEL_DROP = 4;
@@ -83,20 +72,25 @@ const LABEL_DROP = 4;
 const LABEL_Z_INDEX_RANGE = [2, 0];
 
 // After `go` the cockpit shows its confirmation this long, then closes and the ship flies:
-// it turns toward the planet, then flies at it, about 700ms in all.
+// it turns toward the planet, then flies at it, under a second in all.
 const CONFIRM_SECONDS = 0.6;
-const TURN_SECONDS = 0.25;
-const TRAVEL_SECONDS = 0.5;
+const TURN_SECONDS = 0.3;
+const TRAVEL_SECONDS = 0.6;
 const TRAVEL_STARTS_INTO_TURN = 0.6;
 const TURN_EASE = "power2.inOut";
 const TRAVEL_EASE = "power2.in";
+// The jump: the stars start to stretch while the confirmation still shows, seen through the
+// windshield, and the engine opens up as the ship leaves. On arrival the jump ends with a
+// brake that dips just past rest.
+const WARP_STARTS_AT = 0.15;
+const WARP_IN_SECONDS = 0.55;
+const WARP_IN_EASE = "power2.in";
+const WARP_OUT_SECONDS = 0.7;
+const WARP_OUT_EASE = "back.out(2.2)";
+const THRUST_SECONDS = 0.3;
 
 // Just behind the tail, so the glow spills out from it.
 const ENGINE_POSITION = toPlanePosition(SHIP_ENGINE);
-
-function createShape(points: readonly Point[]) {
-  return new Shape(points.map((point) => new Vector2(point.x, point.y)));
-}
 
 // A radial fade from the engine's color to transparent.
 function drawEngineGlow() {
@@ -117,13 +111,16 @@ function drawEngineGlow() {
   return canvas;
 }
 
-function createShipShapes() {
-  return { hull: createShape(SHIP_HULL), canopy: createShape(SHIP_CANOPY) };
-}
-
-// Where the ship is headed from where, and how far through the turn and the trip (GSAP drives
-// both).
-type ShipFlight = { planetId: string | null; home: ShipPose; turn: number; travel: number };
+// Where the ship is headed from where, how far through the turn and the trip, how far into the
+// jump the stars are and how hard the engine pushes (GSAP drives them all).
+type ShipFlight = {
+  planetId: string | null;
+  home: ShipPose;
+  turn: number;
+  travel: number;
+  warp: number;
+  thrust: number;
+};
 
 // Like a planet's state: off its orbit for the launch, stepped back behind an open planet.
 function getShipState({ isFlying, isFaded }: { isFlying: boolean; isFaded: boolean }): PlanetState {
@@ -148,14 +145,13 @@ interface ExplorerShipProps {
 }
 
 // The gh44 explorer orbits the sun between Mars and Jupiter on the scene clock, nose first,
-// bobbing, its engine glowing and now and then puffing a trail. It holds still while hovered.
+// bobbing, its engine burning and now and then puffing a trail. It holds still while hovered.
 // Clicking it opens the cockpit: the camera flies in and follows it, its engine flared. On
-// `go` it turns toward the planet and flies there, then the page opens. It steps back while a
+// `go` the stars stretch, it banks toward the planet and flies there, then the page opens. It steps back while a
 // planet is open, and still opens the cockpit from there, coming forward while hovered.
 export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps) {
   const explorer = useExplorer();
   const navigate = useNavigate();
-  const [shapes] = useState(createShipShapes);
   const [glowCanvas] = useState(drawEngineGlow);
   const groupRef = useRef<Group>(null);
   const scaleRef = useRef<Group>(null);
@@ -168,11 +164,18 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
   const opacityRef = useRef(1);
   const glowLevelRef = useRef(GLOW_IDLE);
   const bobLevelRef = useRef(1);
+  // 0 idle to 1 flared, for the exhaust; and the roll and heading of the last frame.
+  const flareRef = useRef(0);
+  const thrustRef = useRef(0);
+  const bankRef = useRef(0);
+  const headingRef = useRef<number | null>(null);
   const flightRef = useRef<ShipFlight>({
     planetId: null,
     home: getShipPose(getShipAngle(0)),
     turn: 0,
     travel: 0,
+    warp: 0,
+    thrust: 0,
   });
   const [isHovered, setIsHovered] = useState(false);
 
@@ -198,23 +201,26 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
       flight.home = sceneStateRef.current.shipPose;
       flight.turn = 0;
       flight.travel = 0;
+      const travelStartsAt = CONFIRM_SECONDS + TURN_SECONDS * TRAVEL_STARTS_INTO_TURN;
+      function arrive() {
+        flight.planetId = null;
+        // Back home unseen: it fades in again behind the open planet.
+        opacityRef.current = 0;
+        // The flight ends once the page is open, so the camera never turns for home in between.
+        void navigate({ to: "/$planetId", params: { planetId: destination.name } }).finally(
+          explorer.endFlight,
+        );
+      }
       gsap
-        .timeline({
-          onComplete: () => {
-            flight.planetId = null;
-            // Back home unseen: it fades in again behind the open planet.
-            opacityRef.current = 0;
-            explorer.endFlight();
-            void navigate({ to: "/$planetId", params: { planetId: destination.name } });
-          },
-        })
+        .timeline()
+        .to(flight, { warp: 1, duration: WARP_IN_SECONDS, ease: WARP_IN_EASE }, WARP_STARTS_AT)
         .call(explorer.closeCockpit, undefined, CONFIRM_SECONDS)
         .to(flight, { turn: 1, duration: TURN_SECONDS, ease: TURN_EASE }, CONFIRM_SECONDS)
-        .to(
-          flight,
-          { travel: 1, duration: TRAVEL_SECONDS, ease: TRAVEL_EASE },
-          CONFIRM_SECONDS + TURN_SECONDS * TRAVEL_STARTS_INTO_TURN,
-        );
+        .to(flight, { travel: 1, duration: TRAVEL_SECONDS, ease: TRAVEL_EASE }, travelStartsAt)
+        .to(flight, { thrust: 1, duration: THRUST_SECONDS, ease: TRAVEL_EASE }, travelStartsAt)
+        .call(arrive)
+        .set(flight, { thrust: 0 })
+        .to(flight, { warp: 0, duration: WARP_OUT_SECONDS, ease: WARP_OUT_EASE });
     },
     { dependencies: [explorer.flight] },
   );
@@ -247,6 +253,8 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
           })
         : { ...getShipPose(orbitAngle), fade: 1 };
     sceneState.shipPose = { x: pose.x, y: pose.y, heading: pose.heading };
+    sceneState.warp = flight.warp;
+    thrustRef.current = flight.thrust;
 
     bobLevelRef.current = damp({
       current: bobLevelRef.current,
@@ -271,6 +279,15 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
     body.rotation.y = getPlaneYaw(
       pose.heading + Math.sin(time * TILT_SPEED) * TILT_RADIANS * bobLevel,
     );
+    const turnRate = delta > 0 ? (pose.heading - (headingRef.current ?? pose.heading)) / delta : 0;
+    headingRef.current = pose.heading;
+    bankRef.current = damp({
+      current: bankRef.current,
+      target: getBank(turnRate),
+      delta,
+      lambda: BANK_LAMBDA,
+    });
+    body.rotation.z = bankRef.current;
 
     opacityRef.current = damp({
       current: opacityRef.current,
@@ -287,6 +304,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
       delta,
     });
     const glowLevel = glowLevelRef.current;
+    flareRef.current = (glowLevel - GLOW_IDLE) / (GLOW_FLARED - GLOW_IDLE);
     const flicker = Math.sin(time * GLOW_FLICKER_SPEED) * GLOW_FLICKER;
     setMaterialOpacity({ object: glowRef.current, opacity: (glowLevel + flicker) * opacity });
     glowRef.current?.scale.setScalar(
@@ -335,7 +353,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
   return (
     <group ref={handleGroupRef}>
       <group ref={scaleRef}>
-        <group ref={bodyRef}>
+        <group ref={bodyRef} rotation-order={BODY_ROTATION_ORDER}>
           <mesh
             onPointerOver={handlePointerOver}
             onPointerOut={handlePointerOut}
@@ -361,14 +379,7 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
               <canvasTexture attach="map" args={[glowCanvas]} />
             </spriteMaterial>
           </sprite>
-          <mesh rotation-x={LIE_FLAT} position-y={HULL_THICKNESS / 2}>
-            <extrudeGeometry args={[shapes.hull, { depth: HULL_THICKNESS, ...HULL_BEVEL }]} />
-            <meshLambertMaterial color={PALETTE.neutral.vivid} />
-          </mesh>
-          <mesh rotation-x={LIE_FLAT} position-y={HULL_THICKNESS / 2 + CANOPY_THICKNESS}>
-            <extrudeGeometry args={[shapes.canopy, { depth: CANOPY_THICKNESS, ...HULL_BEVEL }]} />
-            <meshLambertMaterial color={PALETTE.clay.soft} />
-          </mesh>
+          <ShipHull flareRef={flareRef} thrustRef={thrustRef} />
         </group>
         {isLabelShown ? (
           // Hangs under the ship as seen: it turns to face the camera.

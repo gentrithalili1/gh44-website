@@ -3,11 +3,11 @@ import { useId, useState } from "react";
 import { useCopyText } from "../../hooks/useCopyText";
 import { usePlayOnScreen } from "../../hooks/usePlayOnScreen";
 import type { CopyStatus } from "../../types";
+import { getNextTabIndex } from "../../utils/tabKeys";
 import { CodeLines, CodeTab } from "./CodeBlock.elements";
 import { messages } from "./messages";
 import type { CodeBlockTab } from "./types";
 import { getCodeLength, getPlainLines, getTypingDuration, revealLines } from "./utils/codeLines";
-import { getNextTabIndex } from "../../utils/tabKeys";
 
 function getCopyStatusCopy(status: CopyStatus) {
   switch (status) {
@@ -115,7 +115,8 @@ export function CodeBlock({ label, tabs, selectedTabId, onSelectTab }: CodeBlock
           <p className="px-4 pt-3.5 pr-20 text-xs leading-relaxed text-faint">{selectedTab.note}</p>
         ) : null}
         <pre ref={typing.ref} className="m-0 p-4 pr-20 text-code wrap-anywhere whitespace-pre-wrap">
-          <code>
+          {/* `text-code` also matches the code background color: plain lines need their own. */}
+          <code className="text-foreground">
             <CodeLines lines={lines} />
           </code>
         </pre>

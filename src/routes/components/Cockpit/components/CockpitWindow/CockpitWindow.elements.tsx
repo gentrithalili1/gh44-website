@@ -23,15 +23,36 @@ export function AstronautIcon() {
   );
 }
 
-// The space outside shows through the window: it is the live scene behind the cockpit.
+const GLARE_ID = "cockpit-glass-glare";
+const SHEEN_ID = "cockpit-glass-sheen";
+
+// The space outside shows through the window: it is the live scene behind the cockpit. The
+// glass carries a warm glare where the sun sits ahead and a faint slanted sheen. Drawn a little
+// oversized, it shifts against the console as the visitor looks around (--look-x, --look-y), and
+// closes in round the window on boarding.
 export function CockpitWindshield() {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
-      className="absolute inset-x-0 top-0 h-full w-full md:h-[calc(100%-var(--console-height)+5rem)]"
+      className="absolute inset-x-0 top-0 h-full w-full translate-x-[calc(var(--look-x,0)*-8px)] translate-y-[calc(var(--look-y,0)*-5px)] scale-[1.03] transition-[translate] duration-500 ease-space group-data-[power=off]/cockpit:animate-hull-out group-data-[reveal=flight]/cockpit:animate-hull-in motion-reduce:translate-none md:h-[calc(100%-var(--console-height)+5rem)]"
     >
+      <defs>
+        <radialGradient id={GLARE_ID} cx="50%" cy="58%" r="55%">
+          <stop offset="0" stopColor="currentColor" stopOpacity="0.1" className="text-ochre" />
+          <stop offset="1" stopColor="currentColor" stopOpacity="0" className="text-ochre" />
+        </radialGradient>
+        <linearGradient id={SHEEN_ID} x1="0" y1="0" x2="1" y2="0.6">
+          <stop offset="0.18" stopColor="currentColor" stopOpacity="0" />
+          <stop offset="0.3" stopColor="currentColor" stopOpacity="0.05" />
+          <stop offset="0.36" stopColor="currentColor" stopOpacity="0.012" />
+          <stop offset="0.44" stopColor="currentColor" stopOpacity="0.035" />
+          <stop offset="0.5" stopColor="currentColor" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={WINDOW_PATH} fill={`url(#${GLARE_ID})`} />
+      <path d={WINDOW_PATH} fill={`url(#${SHEEN_ID})`} className="text-foreground" />
       <path d={HULL_PATH} fillRule="evenodd" className="fill-surface" />
       {STRUT_PATHS.map((path) => (
         <path
@@ -118,18 +139,24 @@ interface ConsoleScreenProps {
   className?: string;
   // The screen's own layout and padding.
   screenClassName?: string;
+  // Its turn when the console powers on, from 0.
+  powerOrder: number;
   children: React.ReactNode;
 }
 
 // A screen set into the console: a raised bezel with its label plate and screws, and the glass
-// sunk into it.
+// sunk into it. A dark cover over the picture flickers away when the console powers on, and
+// comes back as it powers off.
 export function ConsoleScreen({
   label,
   indicator = <PowerLamp />,
   className = "",
   screenClassName = "p-3",
+  powerOrder,
   children,
 }: ConsoleScreenProps) {
+  const coverStyle = { "--screen": powerOrder } as const;
+
   return (
     <div
       className={`flex min-h-0 min-w-0 flex-col rounded-lg bg-surface px-1 pb-1 shadow-[inset_0_1px_0_rgb(255_255_255/0.07),0_1px_0_rgb(0_0_0/0.5),0_12px_22px_-14px_rgb(0_0_0/0.9)] ${className}`}
@@ -152,6 +179,11 @@ export function ConsoleScreen({
           className="pointer-events-none absolute inset-0"
         />
         {children}
+        <span
+          aria-hidden="true"
+          style={coverStyle}
+          className="pointer-events-none absolute inset-0 z-10 bg-night opacity-0 group-data-[power=off]/cockpit:animate-screen-off group-data-[power=on]/cockpit:animate-screen-on motion-reduce:animate-none after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-sage after:opacity-0 group-data-[power=on]/cockpit:after:animate-screen-line motion-reduce:after:animate-none"
+        />
       </div>
     </div>
   );

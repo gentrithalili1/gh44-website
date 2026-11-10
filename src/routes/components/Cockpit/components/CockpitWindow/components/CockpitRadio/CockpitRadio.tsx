@@ -106,7 +106,7 @@ export function CockpitRadio() {
           id={playlistId}
           aria-label={messages.playlistLabel}
           data-open={isPlaylistOpen}
-          className="hidden max-h-21 overflow-y-auto overscroll-contain border-t border-border-subtle pt-1.5 data-[open=true]:block md:block md:max-h-24 md:min-h-0 md:flex-1"
+          className="hidden max-h-21 overflow-y-auto overscroll-contain border-t border-border-subtle pt-1.5 data-[open=true]:block md:block md:max-h-none md:min-h-0 md:flex-1"
         >
           {music.tracks.map((track, index) => (
             <PlaylistTrack

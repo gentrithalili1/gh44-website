@@ -1,11 +1,13 @@
 import { useFrame } from "@react-three/fiber";
 import { type RefObject, useRef, useState } from "react";
-import type { Group } from "three";
+import { Color, type Group, LinearSRGBColorSpace } from "three";
 
 import { SYSTEM_SIZE } from "#/components/SolarSystem/utils/space";
+import { PALETTE } from "#/utils/palette";
 
 import type { SceneState } from "../../types";
 import { damp } from "../../utils/sceneMath";
+import { Nebula } from "./components/Nebula";
 import { ShootingStars } from "./components/ShootingStars";
 import { createStarField } from "./utils/starField";
 import { STAR_FRAGMENT_SHADER, STAR_VERTEX_SHADER } from "./utils/starShaders";
@@ -25,7 +27,8 @@ interface StarsProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// Twinkling stars all around the system, far behind it. They take the open planet's color,
+// Twinkling stars and a faint band of dust all around the system, far behind it. They take the
+// open planet's color,
 // easing there and back, and the sky turns past the cockpit while the ship cruises.
 export function Stars({ openPlanetId, isCruising, sceneStateRef }: StarsProps) {
   const [field] = useState(() => createStarField());
@@ -39,6 +42,9 @@ export function Stars({ openPlanetId, isCruising, sceneStateRef }: StarsProps) {
       uPixelRatio: { value: 1 },
       uSizeBoost: { value: 1 },
       uColor: { value: getStarTint(openPlanetId) },
+      // sRGB as written: the star shaders output them as they are.
+      uCoolColor: { value: new Color().setStyle(PALETTE.sky.soft, LinearSRGBColorSpace) },
+      uWarmColor: { value: new Color().setStyle(PALETTE.ochre.soft, LinearSRGBColorSpace) },
     },
   }));
 
@@ -66,6 +72,7 @@ export function Stars({ openPlanetId, isCruising, sceneStateRef }: StarsProps) {
 
   return (
     <group ref={skyRef}>
+      <Nebula tint={material.uniforms.uColor.value} />
       <points frustumCulled={false} renderOrder={-1}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[field.positions, 3]} />
@@ -73,6 +80,7 @@ export function Stars({ openPlanetId, isCruising, sceneStateRef }: StarsProps) {
           <bufferAttribute attach="attributes-aSize" args={[field.sizes, 1]} />
           <bufferAttribute attach="attributes-aPhase" args={[field.phases, 1]} />
           <bufferAttribute attach="attributes-aSpeed" args={[field.speeds, 1]} />
+          <bufferAttribute attach="attributes-aHue" args={[field.hues, 1]} />
         </bufferGeometry>
         <shaderMaterial args={[material]} transparent depthTest={false} depthWrite={false} />
       </points>

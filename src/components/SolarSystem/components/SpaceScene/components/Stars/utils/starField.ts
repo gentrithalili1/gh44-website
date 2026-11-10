@@ -7,13 +7,16 @@ const STAR_DEPTHS = [0.2, 0.5, 1] as const;
 
 type CreateStarFieldParams = { random?: () => number };
 
-// Stars at random spots all over a sphere around the system, each with a depth, size and twinkle.
+// Stars at random spots all over a sphere around the system, each with a depth, size, twinkle
+// and hue.
 export function createStarField({ random = Math.random }: CreateStarFieldParams = {}) {
   const positions = new Float32Array(STAR_COUNT * 3);
   const depths = new Float32Array(STAR_COUNT);
   const sizes = new Float32Array(STAR_COUNT);
   const phases = new Float32Array(STAR_COUNT);
   const speeds = new Float32Array(STAR_COUNT);
+  // From -1 (cool) to 1 (warm). Squared toward 0: most stars stay near the shared tint.
+  const hues = new Float32Array(STAR_COUNT);
   for (let index = 0; index < STAR_COUNT; index++) {
     // Even over the sphere: an even height, and an even turn around it.
     const height = random() * 2 - 1;
@@ -26,7 +29,9 @@ export function createStarField({ random = Math.random }: CreateStarFieldParams 
     sizes[index] = random() * 1.1 + 0.3;
     phases[index] = random() * Math.PI * 2;
     speeds[index] = random() * 1.5 + 0.5;
+    const lean = random() * 2 - 1;
+    hues[index] = lean * Math.abs(lean);
   }
 
-  return { positions, depths, sizes, phases, speeds };
+  return { positions, depths, sizes, phases, speeds, hues };
 }

@@ -23,11 +23,20 @@ import { messages } from "./messages";
 
 const FOCUSABLE_SELECTOR = "button:not(:disabled), input, a[href]:not([aria-disabled='true'])";
 
-// The iris opens around the ship, which the camera holds this far down the screen.
-const COCKPIT_STYLE = { "--ship-y": `${COCKPIT_SHIP_Y * 100}%` } as const;
+// The iris opens around the ship, which the camera holds this far down the screen. The screens
+// power on once the cockpit is in view: after the flight in, or right away.
+const SHIP_Y = `${COCKPIT_SHIP_Y * 100}%`;
+const COCKPIT_STYLES = {
+  flight: { "--ship-y": SHIP_Y, "--power-delay": "1000ms" },
+  instant: { "--ship-y": SHIP_Y, "--power-delay": "250ms" },
+} as const satisfies Record<CockpitReveal, object>;
 
-function getAnimation({ reveal, isClosing }: { reveal: CockpitReveal; isClosing: boolean }) {
+type GetAnimationParams = { reveal: CockpitReveal; isClosing: boolean; isLocked: boolean };
+
+function getAnimation({ reveal, isClosing, isLocked }: GetAnimationParams) {
   if (isClosing) return "pointer-events-none animate-cockpit-close";
+  // After `go` the engine opens up: the cockpit shakes until it closes.
+  if (isLocked) return "motion-safe:animate-cockpit-rumble";
 
   switch (reveal) {
     case "flight":
@@ -120,6 +129,14 @@ export function CockpitWindow({
     onGo(destination);
   }
 
+  // The visitor looks around: the windshield shifts a little against the console.
+  function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse") return;
+    const { style } = event.currentTarget;
+    style.setProperty("--look-x", ((event.clientX / window.innerWidth) * 2 - 1).toFixed(3));
+    style.setProperty("--look-y", ((event.clientY / window.innerHeight) * 2 - 1).toFixed(3));
+  }
+
   function handleAnimationEnd(event: React.AnimationEvent) {
     if (isClosing && event.target === event.currentTarget) onClosed();
   }
@@ -137,9 +154,13 @@ export function CockpitWindow({
       onKeyDown={handleKeyDown}
       onFocus={handleStepIn}
       onPointerDown={handleStepIn}
+      onPointerMove={handlePointerMove}
       onAnimationEnd={handleAnimationEnd}
-      style={COCKPIT_STYLE}
-      className={`fixed inset-0 z-50 overflow-hidden text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing })}`}
+      data-reveal={reveal}
+      data-power={isClosing ? "off" : "on"}
+      // Clipped, not scrollable: focusing the terminal while the console rises must not scroll it.
+      style={COCKPIT_STYLES[reveal]}
+      className={`group/cockpit fixed inset-0 z-50 overflow-clip text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing, isLocked })}`}
     >
       <CockpitWindshield />
       <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4 md:p-6">
@@ -166,12 +187,13 @@ export function CockpitWindow({
           {messages.spacewalk}
         </button>
       </header>
-      <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
+      <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
         {/* Desktop: Floki on the left, the terminal in the middle, the radar over the radio on
             the right. Phones: Floki beside the radar and the radio, the terminal under them. */}
         <div className="mx-auto grid max-w-[96rem] grid-cols-[7rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
           <ConsoleScreen
             label={messages.screens.floki}
+            powerOrder={0}
             className="row-span-2 md:col-start-1 md:row-start-1"
             screenClassName="flex flex-col p-2 md:p-3"
           >
@@ -186,6 +208,7 @@ export function CockpitWindow({
           </ConsoleScreen>
           <ConsoleScreen
             label={messages.screens.radar}
+            powerOrder={2}
             className="md:col-start-3 md:row-start-1"
             screenClassName="p-2 md:p-3"
           >
@@ -193,6 +216,7 @@ export function CockpitWindow({
           </ConsoleScreen>
           <ConsoleScreen
             label={messages.screens.radio}
+            powerOrder={3}
             className="md:col-start-3 md:row-start-2"
             screenClassName="flex flex-col p-2 md:p-3"
           >
@@ -200,6 +224,7 @@ export function CockpitWindow({
           </ConsoleScreen>
           <ConsoleScreen
             label={messages.screens.terminal}
+            powerOrder={1}
             indicator={<ConsoleLights />}
             className="col-span-2 h-[min(14rem,27dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto"
             screenClassName="flex flex-col"
