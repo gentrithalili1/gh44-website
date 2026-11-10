@@ -187,10 +187,11 @@ describe("runCommand", () => {
     });
   });
 
-  it("keeps gargantua unknown until every planet is visited", () => {
+  it("flies to gargantua for whoever knows the name, without listing it", () => {
+    expect(DESTINATION_LIST).not.toContain("gargantua");
     expect(runCommand({ input: "go gargantua", context: AT_HOME })).toEqual({
-      kind: "print",
-      lines: ["unknown destination: gargantua", DESTINATION_LIST],
+      kind: "jump",
+      lines: ["destination: gargantua", "route: unknown", "turning away from the sun. first time."],
     });
     expect(runCommand({ input: "go gargantua", context: ALL_VISITED })).toEqual({
       kind: "jump",
