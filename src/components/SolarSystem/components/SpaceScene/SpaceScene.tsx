@@ -16,6 +16,7 @@ import { ScenePlanet } from "./components/ScenePlanet";
 import { Ships } from "./components/Ships";
 import { Stars } from "./components/Stars";
 import { Sun } from "./components/Sun";
+import { WarpStreaks } from "./components/WarpStreaks";
 import { CAMERA_FOV } from "./hooks/useCameraFlight";
 import { usePageVisible } from "./hooks/usePageVisible";
 import type { SceneState } from "./types";
@@ -48,6 +49,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
     planetAngles: new Map(),
     shipPose: getShipPose(SHIP_ORBIT.phase),
     cameraZoom: 1,
+    warp: 0,
   });
 
   // The open cockpit steps the system back, like an open planet.
@@ -81,6 +83,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
           isCruising={isCockpitOpen}
           sceneStateRef={sceneStateRef}
         />
+        <WarpStreaks sceneStateRef={sceneStateRef} />
         <Sun isPlanetOpen={isSystemFaded} />
         <Orbits isPlanetOpen={isSystemFaded} />
         {labelList

@@ -10,4 +10,7 @@ export type SceneState = {
   shipPose: ShipPose;
   // How many pixels one unit spans where the camera looks.
   cameraZoom: number;
+  // 0 to 1: how far into a launch's jump the scene is (stars stretch, the view widens). It dips
+  // just under 0 as the jump brakes.
+  warp: number;
 };

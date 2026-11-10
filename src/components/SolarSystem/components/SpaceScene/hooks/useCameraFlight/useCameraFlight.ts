@@ -16,6 +16,7 @@ import {
   getCameraDistance,
   getCameraFocus,
   getCameraPlacement,
+  CAMERA_FOV,
   getCameraPose,
   getDistanceLimits,
   getPlanetPosition,
@@ -35,6 +36,13 @@ const FLIGHT_OUT_SECONDS = 1.2;
 // To the ship and back is quicker: the cockpit opens out of it within about a second.
 const SHIP_FLIGHT_IN_SECONDS = 0.7;
 const SHIP_FLIGHT_OUT_SECONDS = 0.9;
+// Flights curve: the camera swings this far round its point at mid-flight (radians), one way
+// going in and back the other way going out.
+const PLANET_SWING = 0.32;
+const SHIP_SWING = 0.2;
+// The view widens a little at a flight's fastest (degrees), and a lot through a launch's jump.
+const FLIGHT_FOV_PUSH = 4;
+const WARP_FOV_PUSH = 16;
 
 type Flight = {
   // What the camera is headed for.
@@ -44,9 +52,18 @@ type Flight = {
   from: CameraPose;
   // The camera's angle at take-off; it turns from there to the focus' own angle.
   fromAngle: CameraAngle;
+  // How far round the camera swings at mid-flight.
+  swing: number;
   // 0 at take-off, 1 on arrival; GSAP drives it.
   progress: number;
 };
+
+function getFlightSwing({ from, to }: { from: CameraFocus; to: CameraFocus }) {
+  if (to.kind === "ship") return SHIP_SWING;
+  if (to.kind === "planet") return PLANET_SWING;
+
+  return from.kind === "ship" ? -SHIP_SWING : -PLANET_SWING;
+}
 
 function getFocusKey(focus: CameraFocus) {
   return focus.kind === "planet" ? `planet:${focus.planetId}` : focus.kind;
@@ -129,6 +146,7 @@ export function useCameraFlight({
     anchor: focus,
     from: { x: 0, y: 0, zoom: 1, offset: { x: 0, y: 0 } },
     fromAngle: HOME_ANGLE,
+    swing: 0,
     progress: 1,
   });
   // The pose and angle drawn last frame, and how far the visitor has zoomed from the framing.
@@ -144,6 +162,7 @@ export function useCameraFlight({
       if (getFocusKey(flight.focus) === focusKey) return;
       const duration = getFlightSeconds({ from: flight.focus, to: focus });
       flight.anchor = focus.kind === "home" ? flight.focus : focus;
+      flight.swing = getFlightSwing({ from: flight.focus, to: focus });
       flight.focus = focus;
       flight.from = poseRef.current ?? flight.from;
       flight.fromAngle = angleRef.current;
@@ -192,18 +211,28 @@ export function useCameraFlight({
             progress: flight.progress,
             fromAngle: flight.fromAngle,
             toAngle: focusAngle,
+            swing: flight.swing,
           })
         : target;
     // Settled, the visitor steers, except in the cockpit, which keeps turning with the ship.
     const settledAngle = flight.focus.kind === "ship" ? focusAngle : angleRef.current;
     const angle = isFlying
-      ? mixAngles({ from: flight.fromAngle, to: focusAngle, progress: flight.progress })
+      ? mixAngles({
+          from: flight.fromAngle,
+          to: focusAngle,
+          progress: flight.progress,
+          swing: flight.swing,
+        })
       : settledAngle;
     poseRef.current = pose;
     angleRef.current = angle;
     sceneState.cameraZoom = pose.zoom;
 
     const placement = getCameraPlacement({ pose, angle, viewport: size });
+    camera.fov =
+      CAMERA_FOV +
+      Math.sin(Math.PI * flight.progress) * FLIGHT_FOV_PUSH +
+      sceneState.warp * WARP_FOV_PUSH;
     camera.position.set(...placement.position);
     camera.lookAt(...placement.target);
     camera.setViewOffset(
