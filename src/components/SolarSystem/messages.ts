@@ -16,5 +16,7 @@ export const messages = {
   sunScold: "floki: please don't.",
   fetchBall: "floki's ball",
   voyager: "voyager 1 · launched 1977. still going.",
+  blackHole: "gargantua",
+  blackHoleUnknown: "???",
   pluto: "pluto · still a planet",
 } as const;

@@ -1,3 +1,4 @@
+import { useSecrets } from "#/hooks/useSecrets";
 import { isCurrentRole, ROLES } from "#/utils/roles";
 
 import { messages } from "./messages";
@@ -13,9 +14,19 @@ function formatMonth(month: string) {
   return monthFormat.format(new Date(month));
 }
 
+// The roles, most recent first. A visitor back from the black hole (an easter egg) finds one
+// more on top, from the years that passed meanwhile.
 export function WorkPanel() {
+  const secrets = useSecrets();
+
   return (
     <ol aria-label={messages.rolesLabel} className="border-l border-rule">
+      {secrets.hasCrossedHorizon ? (
+        <li className="relative pb-5.5 pl-5.5 before:absolute before:top-2 before:-left-1 before:size-1.75 before:rounded-full before:border before:border-dashed before:border-muted before:bg-background">
+          <b className="block font-medium">{messages.future.company}</b>
+          <span className="text-label text-muted">{messages.future.title}</span>
+        </li>
+      ) : null}
       {ROLES.map((role) => {
         const isCurrent = isCurrentRole(role);
 

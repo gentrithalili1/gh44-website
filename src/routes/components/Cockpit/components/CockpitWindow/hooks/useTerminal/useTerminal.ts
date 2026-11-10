@@ -6,6 +6,7 @@ import { useSecrets } from "#/hooks/useSecrets";
 
 import {
   getWelcomeLines,
+  hasFoundGargantua,
   runCommand,
 } from "../../components/CockpitTerminal/utils/terminalCommands";
 
@@ -24,10 +25,12 @@ type Screen = { lines: readonly TerminalLine[]; nextLineId: number };
 // Where the visitor is in the command history: typing a new line, or showing an earlier one.
 type HistoryPosition = { status: "typing" } | { status: "browsing"; index: number };
 
-function getWelcomeScreen(): Screen {
+// With a signal, Floki has picked up the black hole and says so.
+function getWelcomeScreen({ hasSignal }: { hasSignal: boolean }): Screen {
   const lines = [
     ...getWelcomeLines().map((text) => ({ kind: "output", text }) as const),
     { kind: "floki", text: messages.floki.greeting } as const,
+    ...(hasSignal ? [{ kind: "floki", text: messages.gargantua.signal } as const] : []),
   ];
 
   return { lines: lines.map((line, id) => ({ ...line, id })), nextLineId: lines.length };
@@ -56,7 +59,11 @@ export function useTerminal() {
   const location = useLocation();
   const exploration = useExploration();
   const secrets = useSecrets();
-  const [screen, setScreen] = useState(getWelcomeScreen);
+  const [screen, setScreen] = useState(() =>
+    getWelcomeScreen({
+      hasSignal: hasFoundGargantua(exploration) && !secrets.hasCrossedHorizon,
+    }),
+  );
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<readonly string[]>([]);
   const [historyPosition, setHistoryPosition] = useState<HistoryPosition>({ status: "typing" });
@@ -69,6 +76,7 @@ export function useTerminal() {
         pathname: location.pathname,
         visitedIds: exploration.visitedIds,
         hasBall: secrets.hasBall,
+        hasCrossedHorizon: secrets.hasCrossedHorizon,
       },
     });
     const echo = { kind: "command", text: command.trim() } as const;

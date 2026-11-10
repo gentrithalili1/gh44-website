@@ -46,6 +46,8 @@
   --animate-screen-line: screen-line 520ms cubic-bezier(0.33, 1, 0.68, 1)
     calc(var(--power-delay, 0ms) + var(--screen, 0) * 110ms) both;
   --animate-screen-off: screen-off 140ms linear calc(var(--screen, 0) * 30ms) both;
+  /* Near the black hole the screens give out, one after another. */
+  --animate-screen-jump: screen-off 220ms steps(3, end) calc(4000ms + var(--screen, 0) * 130ms) both;
 
   @keyframes boot-type {
     from {
@@ -91,6 +93,9 @@
   --animate-cockpit-close: cockpit-close 520ms var(--ease-space) forwards;
   /* The radio's dead air: a signal fades up for whoever waits ten seconds. */
   --animate-morse-in: morse-in 1500ms var(--ease-space) 10s both;
+  /* The black hole's shadow covers the cockpit as the flight in ends, and lifts on return. */
+  --animate-jump-black: jump-black 700ms var(--ease-space) 4500ms both;
+  --animate-jump-back: jump-back 1100ms var(--ease-space) both;
   --animate-floki-perk: floki-perk 700ms var(--ease-space) both;
   --animate-cockpit-rumble: cockpit-rumble 650ms linear both;
   /* Boarding: the hull closes in round the window and the console rises as the iris opens, then
@@ -154,6 +159,18 @@
     }
     100% {
       translate: 1px -1px;
+    }
+  }
+
+  @keyframes jump-black {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes jump-back {
+    from {
+      opacity: 1;
     }
   }
 

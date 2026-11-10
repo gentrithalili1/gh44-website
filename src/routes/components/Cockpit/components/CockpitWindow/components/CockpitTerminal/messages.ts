@@ -61,6 +61,12 @@ export const messages = {
     rateLimited: "cooling down. too many questions for now. the terminal still works.",
     unavailable: "comms down. the terminal still works.",
   },
+  // The black hole: only a destination once every planet is visited.
+  gargantua: {
+    name: "gargantua",
+    signal: "there's something past gh44-brain. try: go gargantua",
+    confirm: ["destination: gargantua", "route: unknown", "turning away from the sun. first time."],
+  },
   // Commands help never lists.
   secrets: {
     sudo: ["nice try.", "this incident will be reported to floki."],

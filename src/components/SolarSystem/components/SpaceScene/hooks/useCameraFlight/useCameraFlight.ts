@@ -3,11 +3,13 @@ import type { OrbitControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import gsap from "gsap";
 import { type ComponentRef, type RefObject, useRef } from "react";
-import { PerspectiveCamera, Vector3 } from "three";
+import { PerspectiveCamera, Quaternion, Vector3 } from "three";
 
 import { useExplorer } from "#/hooks/useExplorer";
 
 import type { SceneState } from "../../types";
+import { getJumpTurn, getSceneWarp, HOLE_POSITION } from "../../utils/blackHole";
+import { PHONE_MAX_WIDTH } from "../../utils/sceneMath";
 import {
   type CameraAngle,
   type CameraFocus,
@@ -43,6 +45,9 @@ const SHIP_SWING = 0.2;
 // The view widens a little at a flight's fastest (degrees), and a lot through a launch's jump.
 const FLIGHT_FOV_PUSH = 4;
 const WARP_FOV_PUSH = 16;
+// Flying into the black hole, the camera holds it in the middle of the windshield: this share
+// of the screen's height above the center, on a phone and on desktop.
+const JUMP_VIEW_LIFT = { phone: 0.27, desktop: 0.21 } as const;
 
 type Flight = {
   // What the camera is headed for.
@@ -114,6 +119,9 @@ function getFocusAngle({ flight, sceneState }: { flight: Flight; sceneState: Sce
 
 // Where the camera is looking from, relative to its point.
 const fromPoint = new Vector3();
+// The camera's own turn, kept while it is turned toward the black hole.
+const ownTurn = new Quaternion();
+const holeTurn = new Quaternion();
 
 type UseCameraFlightParams = {
   openPlanetId: string | undefined;
@@ -232,14 +240,26 @@ export function useCameraFlight({
     camera.fov =
       CAMERA_FOV +
       Math.sin(Math.PI * flight.progress) * FLIGHT_FOV_PUSH +
-      sceneState.warp * WARP_FOV_PUSH;
+      // The brake dips a launch's warp under 0, on purpose; the jump has no brake.
+      (sceneState.jump > 0 ? getSceneWarp(sceneState) : sceneState.warp) * WARP_FOV_PUSH;
     camera.position.set(...placement.position);
     camera.lookAt(...placement.target);
+    // Flying into the black hole: it turns away from the ship to face it, and lifts it into
+    // the windshield.
+    const jumpTurn = getJumpTurn(sceneState.jump);
+    if (jumpTurn > 0) {
+      ownTurn.copy(camera.quaternion);
+      camera.lookAt(...HOLE_POSITION);
+      holeTurn.copy(camera.quaternion);
+      camera.quaternion.slerpQuaternions(ownTurn, holeTurn, jumpTurn);
+    }
+    const jumpLift =
+      size.height * (size.width < PHONE_MAX_WIDTH ? JUMP_VIEW_LIFT.phone : JUMP_VIEW_LIFT.desktop);
     camera.setViewOffset(
       size.width,
       size.height,
-      placement.viewOffset.x,
-      placement.viewOffset.y,
+      placement.viewOffset.x * (1 - jumpTurn),
+      placement.viewOffset.y + (jumpLift - placement.viewOffset.y) * jumpTurn,
       size.width,
       size.height,
     );

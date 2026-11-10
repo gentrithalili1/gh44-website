@@ -11,4 +11,7 @@ export const messages = {
   // Floki says it out loud when the cockpit opens by itself on a first visit.
   flokiWelcome:
     "Welcome aboard, stranger! I'm FLOKI, the captain's German Shepherd and your guide to this universe. Tap Ask FLOKI and let's explore!",
+  // Back from the black hole: what Floki says, and what the terminal prints under it.
+  jumpArrived: "that took 5 seconds. 7 years passed on main.",
+  jumpProgress: "visited: 6/5",
 } as const;

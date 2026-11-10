@@ -33,6 +33,8 @@ async function renderCockpitWindow({
           onClose={onClose}
           onClosed={vi.fn()}
           onGo={vi.fn()}
+          isJumping={false}
+          onJump={(onArrive) => onArrive()}
         />
       </MusicProvider>
     ),
@@ -107,6 +109,8 @@ function FlokiCockpit({ onGo, isGreeting = false }: { onGo: () => void; isGreeti
         onClose={vi.fn()}
         onClosed={vi.fn()}
         onGo={onGo}
+        isJumping={false}
+        onJump={(onArrive) => onArrive()}
       />
     </MusicProvider>
   );
@@ -124,6 +128,7 @@ async function typeCommand(command: string) {
 describe("CockpitWindow's Floki", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    sessionStorage.clear();
   });
 
   it("prints floki's answer to a question", async () => {
@@ -394,5 +399,26 @@ describe("CockpitWindow's Floki", () => {
     await user.click(screen.getByRole("button", { name: "ask floki" }));
 
     await waitFor(() => expect(recognizers.length).toBeGreaterThan(0));
+  });
+
+  it("flies into gargantua once every planet is visited, and counts it on return", async () => {
+    sessionStorage.setItem(
+      "gh44-explorer-visits",
+      JSON.stringify(["me", "gh44-confirm", "work", "gh44-theme", "gh44-brain"]),
+    );
+    const user = userEvent.setup();
+    await renderInRouter({ ui: <FlokiCockpit onGo={vi.fn()} /> });
+    const output = within(screen.getByRole("log", { name: "terminal output" }));
+    expect(
+      output.getByText("there's something past gh44-brain. try: go gargantua"),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByRole("textbox", { name: "command" }), "go gargantua{Enter}");
+
+    expect(output.getByText("that took 5 seconds. 7 years passed on main.")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("region", { name: "radar" })).getByText("6/5"),
+    ).toBeInTheDocument();
+    expect(sessionStorage.getItem("gh44-explorer-secrets")).toBe('["horizon"]');
   });
 });

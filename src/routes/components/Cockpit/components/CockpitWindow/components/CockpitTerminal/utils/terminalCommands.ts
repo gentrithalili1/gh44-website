@@ -11,6 +11,8 @@ export type CommandContext = {
   visitedIds: readonly PlanetId[];
   // Floki's ball is already out in the system.
   hasBall: boolean;
+  // The visitor has been through the black hole and back.
+  hasCrossedHorizon: boolean;
 };
 
 // What a secret command sets off outside the terminal.
@@ -22,6 +24,8 @@ export type CommandResult =
   | { kind: "egg"; egg: TerminalEgg; lines: readonly string[] }
   | { kind: "clear" }
   | { kind: "go"; destination: Destination; lines: readonly string[] }
+  // Into the black hole, once every planet is visited.
+  | { kind: "jump"; lines: readonly string[] }
   | { kind: "ask"; question: string; lines: readonly string[] };
 
 type CommandParams = { args: readonly string[]; context: CommandContext };
@@ -45,10 +49,18 @@ function getDestinationList() {
   return messages.destinationList(DESTINATIONS.map((destination) => destination.name));
 }
 
-function go({ args }: CommandParams): CommandResult {
+// Every planet is visited: the black hole shows itself.
+export function hasFoundGargantua({ visitedIds }: Pick<CommandContext, "visitedIds">) {
+  return visitedIds.length >= DESTINATIONS.length;
+}
+
+function go({ args, context }: CommandParams): CommandResult {
   const [name] = args;
   if (name === undefined) {
     return print([messages.usage(messages.commands.go.usage), getDestinationList()]);
+  }
+  if (name === messages.gargantua.name && hasFoundGargantua(context)) {
+    return { kind: "jump", lines: messages.gargantua.confirm };
   }
 
   const destination = DESTINATIONS.find((candidate) => candidate.name === name);
@@ -103,7 +115,13 @@ const COMMANDS: Readonly<Record<string, Command>> = {
             value: context.visitedIds.includes(name) ? messages.visited : messages.unknown,
           }),
         ),
-        messages.progress({ visited: context.visitedIds.length, total: DESTINATIONS.length }),
+        ...(context.hasCrossedHorizon
+          ? [getRow({ name: messages.gargantua.name, value: messages.visited })]
+          : []),
+        messages.progress({
+          visited: context.visitedIds.length + (context.hasCrossedHorizon ? 1 : 0),
+          total: DESTINATIONS.length,
+        }),
       ]),
   },
   go: { ...messages.commands.go, run: go },

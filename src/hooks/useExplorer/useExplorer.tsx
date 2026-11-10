@@ -17,6 +17,9 @@ type Cockpit =
 // The ship's trip to a destination, from the cockpit's `go` to the page opening.
 type ExplorerFlight = { status: "idle" } | { status: "flying"; destination: Destination };
 
+// The trip into the black hole (an easter egg), from `go gargantua` until the ship is back.
+type ExplorerJump = { status: "idle" } | { status: "jumping" };
+
 // How a launch goes: the ship in the scene flies there first, or (no ship) the visitor arrives
 // at once and the page opens now.
 type LaunchOutcome = { status: "flying" } | { status: "arrived" };
@@ -38,6 +41,11 @@ type Explorer = {
   hasShip: () => boolean;
   launch: (destination: Destination) => LaunchOutcome;
   endFlight: () => void;
+  jump: ExplorerJump;
+  // Flies into the black hole and calls `onArrive` on the other side: after the trip with a ship
+  // in the scene, at once without one.
+  startJump: (onArrive: () => void) => void;
+  endJump: () => void;
   // The planet the visitor last launched to from the cockpit: its page leads back to the cockpit.
   cockpitTripPlanetId: string | undefined;
 };
@@ -45,6 +53,8 @@ type Explorer = {
 const CLOSED: Cockpit = { status: "closed" };
 const CLOSING: Cockpit = { status: "closing" };
 const IDLE: ExplorerFlight = { status: "idle" };
+const NOT_JUMPING: ExplorerJump = { status: "idle" };
+const JUMPING: ExplorerJump = { status: "jumping" };
 
 const ExplorerContext = createContext<Explorer | null>(null);
 
@@ -58,6 +68,9 @@ export function ExplorerProvider({ children }: ExplorerProviderProps) {
   const [cockpit, setCockpit] = useState<Cockpit>(CLOSED);
   const [flight, setFlight] = useState<ExplorerFlight>(IDLE);
   const [cockpitTripPlanetId, setCockpitTripPlanetId] = useState<string>();
+  const [jump, setJump] = useState<ExplorerJump>(NOT_JUMPING);
+  // What to do on the other side of the black hole: read in handlers only.
+  const arriveRef = useRef<(() => void) | null>(null);
   // How many ships are in the scene: read in handlers only, so it never re-renders.
   const shipCountRef = useRef(0);
   // The cockpit greets once per page load: every visit opens in it, a closed one stays closed.
@@ -108,6 +121,20 @@ export function ExplorerProvider({ children }: ExplorerProviderProps) {
       return { status: "arrived" };
     },
     endFlight: () => setFlight(IDLE),
+    jump,
+    startJump: (onArrive) => {
+      if (!hasShip()) {
+        onArrive();
+        return;
+      }
+      arriveRef.current = onArrive;
+      setJump(JUMPING);
+    },
+    endJump: () => {
+      setJump(NOT_JUMPING);
+      arriveRef.current?.();
+      arriveRef.current = null;
+    },
     cockpitTripPlanetId,
   };
 

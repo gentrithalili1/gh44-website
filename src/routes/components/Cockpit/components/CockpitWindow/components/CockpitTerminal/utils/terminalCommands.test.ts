@@ -2,7 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import { getWelcomeLines, runCommand } from "./terminalCommands";
 
-const AT_HOME = { pathname: "/", visitedIds: [], hasBall: false } as const;
+const AT_HOME = {
+  pathname: "/",
+  visitedIds: [],
+  hasBall: false,
+  hasCrossedHorizon: false,
+} as const;
+
+const ALL_VISITED = {
+  ...AT_HOME,
+  visitedIds: ["me", "gh44-confirm", "work", "gh44-theme", "gh44-brain"],
+} as const;
 
 const DESTINATION_LIST = "destinations: me, gh44-confirm, work, gh44-theme, gh44-brain";
 
@@ -175,6 +185,29 @@ describe("runCommand", () => {
       egg: "fetch",
       lines: ["it's still out there. your turn."],
     });
+  });
+
+  it("keeps gargantua unknown until every planet is visited", () => {
+    expect(runCommand({ input: "go gargantua", context: AT_HOME })).toEqual({
+      kind: "print",
+      lines: ["unknown destination: gargantua", DESTINATION_LIST],
+    });
+    expect(runCommand({ input: "go gargantua", context: ALL_VISITED })).toEqual({
+      kind: "jump",
+      lines: ["destination: gargantua", "route: unknown", "turning away from the sun. first time."],
+    });
+  });
+
+  it("counts gargantua as one more than there is, once crossed", () => {
+    const result = runCommand({
+      input: "explore",
+      context: { ...ALL_VISITED, hasCrossedHorizon: true },
+    });
+
+    expect(result.kind === "print" && result.lines.slice(-2)).toEqual([
+      "  gargantua         visited",
+      "progress: 6/5",
+    ]);
   });
 
   it("keeps the secret commands out of help", () => {

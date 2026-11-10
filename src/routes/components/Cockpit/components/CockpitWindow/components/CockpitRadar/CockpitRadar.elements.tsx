@@ -58,3 +58,20 @@ export function RadarBall() {
     </g>
   );
 }
+
+interface RadarSignalProps {
+  isReached: boolean;
+}
+
+// The black hole, once every planet is visited: a blip at the edge of the scope, past every
+// orbit, blinking until the visitor has been there.
+export function RadarSignal({ isReached }: RadarSignalProps) {
+  return (
+    <circle
+      cx={32}
+      cy={-33}
+      r={2.2}
+      className={isReached ? "fill-ochre" : "fill-ochre motion-safe:animate-light-blink"}
+    />
+  );
+}

@@ -4,7 +4,7 @@ import { useExploration } from "#/hooks/useExploration";
 import { useSecrets } from "#/hooks/useSecrets";
 import { DESTINATIONS } from "#/utils/destinations";
 
-import { RadarBall, RadarBlip, RadarFace } from "./CockpitRadar.elements";
+import { RadarBall, RadarBlip, RadarFace, RadarSignal } from "./CockpitRadar.elements";
 import { messages } from "./messages";
 import { getRadarBlips } from "./utils/radarBlips";
 
@@ -17,11 +17,17 @@ export function CockpitRadar() {
   const exploration = useExploration();
   const secrets = useSecrets();
 
-  const counts = { visited: exploration.visitedIds.length, total: DESTINATIONS.length };
+  // Through the black hole and back counts as one more than there is.
+  const counts = {
+    visited: exploration.visitedIds.length + (secrets.hasCrossedHorizon ? 1 : 0),
+    total: DESTINATIONS.length,
+  };
   const next = DESTINATIONS.find(({ name }) => !exploration.visitedIds.includes(name));
+  const hasSignal = next === undefined;
+  const beyond = secrets.hasCrossedHorizon ? messages.beyond : messages.signal;
   const rows = [
     { term: messages.route, value: location.pathname },
-    { term: messages.next, value: next?.name ?? messages.allVisited },
+    { term: messages.next, value: next?.name ?? beyond },
     { term: messages.visited, value: messages.progress(counts) },
   ];
 
@@ -42,6 +48,7 @@ export function CockpitRadar() {
             isVisited={exploration.visitedIds.includes(blip.id)}
           />
         ))}
+        {hasSignal ? <RadarSignal isReached={secrets.hasCrossedHorizon} /> : null}
         {secrets.hasBall ? <RadarBall /> : null}
       </svg>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 md:gap-2">

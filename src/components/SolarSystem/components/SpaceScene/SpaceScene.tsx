@@ -8,6 +8,7 @@ import { useBoot } from "#/hooks/useBoot";
 import { useExplorer } from "#/hooks/useExplorer";
 import { SOLAR_SYSTEM } from "#/utils/planets";
 
+import { BlackHole } from "./components/BlackHole";
 import { FetchBall } from "./components/FetchBall";
 import { LabelNudges } from "./components/LabelNudges";
 import { Orbits } from "./components/Orbits";
@@ -53,6 +54,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
     shipPose: getShipPose(SHIP_ORBIT.phase),
     cameraZoom: 1,
     warp: 0,
+    jump: 0,
   });
 
   // The open cockpit steps the system back, like an open planet.
@@ -86,6 +88,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
           isCruising={isCockpitOpen}
           sceneStateRef={sceneStateRef}
         />
+        <BlackHole sceneStateRef={sceneStateRef} />
         <WarpStreaks sceneStateRef={sceneStateRef} />
         <Sun isPlanetOpen={isSystemFaded} />
         <Orbits isPlanetOpen={isSystemFaded} />

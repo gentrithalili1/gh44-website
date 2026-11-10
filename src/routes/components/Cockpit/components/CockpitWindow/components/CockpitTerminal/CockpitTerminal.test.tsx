@@ -10,7 +10,7 @@ import { CockpitTerminal } from "./CockpitTerminal";
 
 // The terminal with its screen, as the cockpit gives it one.
 function TerminalWithScreen(
-  props: Omit<ComponentProps<typeof CockpitTerminal>, "terminal" | "onAsk" | "onEgg"> & {
+  props: Omit<ComponentProps<typeof CockpitTerminal>, "terminal" | "onAsk" | "onEgg" | "onJump"> & {
     onAsk?: (question: string) => void;
     onEgg?: ComponentProps<typeof CockpitTerminal>["onEgg"];
   },
@@ -22,6 +22,7 @@ function TerminalWithScreen(
       terminal={terminal}
       onAsk={props.onAsk ?? vi.fn()}
       onEgg={props.onEgg ?? vi.fn()}
+      onJump={vi.fn()}
     />
   );
 }

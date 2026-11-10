@@ -34,7 +34,7 @@ describe("CockpitRadar", () => {
     expect(getRadar().getByText("gh44-confirm")).toBeInTheDocument();
   });
 
-  it("says so once every destination is visited", async () => {
+  it("picks up a signal once every destination is visited", async () => {
     sessionStorage.setItem(
       "gh44-explorer-visits",
       JSON.stringify(["me", "gh44-confirm", "work", "gh44-theme", "gh44-brain"]),
@@ -42,6 +42,20 @@ describe("CockpitRadar", () => {
 
     await renderInRouter({ ui: <CockpitRadar /> });
 
-    expect(getRadar().getByText("all visited")).toBeInTheDocument();
+    expect(getRadar().getByText("???")).toBeInTheDocument();
+    expect(getRadar().getByText("5/5")).toBeInTheDocument();
+  });
+
+  it("names the signal and counts it, once the visitor has been through", async () => {
+    sessionStorage.setItem(
+      "gh44-explorer-visits",
+      JSON.stringify(["me", "gh44-confirm", "work", "gh44-theme", "gh44-brain"]),
+    );
+    sessionStorage.setItem("gh44-explorer-secrets", JSON.stringify(["horizon"]));
+
+    await renderInRouter({ ui: <CockpitRadar /> });
+
+    expect(getRadar().getByText("gargantua")).toBeInTheDocument();
+    expect(getRadar().getByText("6/5")).toBeInTheDocument();
   });
 });

@@ -4,6 +4,7 @@ import { flushSync } from "react-dom";
 import type { CockpitReveal } from "#/hooks/useExplorer";
 import { findSecret } from "#/hooks/useSecrets";
 import type { Destination } from "#/utils/destinations";
+import { useMusic } from "#/routes/hooks/useMusic";
 import { COCKPIT_SHIP_Y } from "#/utils/explorer";
 
 import {
@@ -65,7 +66,14 @@ interface CockpitWindowProps {
   // The closing cockpit has faded out.
   onClosed: () => void;
   onGo: (destination: Destination) => void;
+  // Flying into the black hole: locked like a launch, and the cockpit goes dark at the end.
+  isJumping: boolean;
+  // Starts that flight; `onArrive` runs on the other side.
+  onJump: (onArrive: () => void) => void;
 }
+
+// What plays on the way into the black hole, if the radio is on.
+const JUMP_TRACK_TITLE = "s.t.a.y.";
 
 // Inside the gh44 explorer, full screen: an arched windshield with two struts looks out on the
 // live system, over a graphite console of bezeled screens: the terminal in the middle, Floki on
@@ -79,6 +87,8 @@ export function CockpitWindow({
   onClose,
   onClosed,
   onGo,
+  isJumping,
+  onJump,
 }: CockpitWindowProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -90,6 +100,9 @@ export function CockpitWindow({
   const flokiTalk = useFlokiTalk({ floki, terminal, onGo });
   useFlokiWelcome({ floki, isGreeting, text: messages.flokiWelcome });
   const [praiseCount, setPraiseCount] = useState(0);
+  const music = useMusic();
+  // Back from the black hole: the dark lifts and the screens power on again.
+  const [hasReturned, setHasReturned] = useState(false);
 
   // The page behind takes focus again only once the cockpit is no longer open over it.
   function handleClose() {
@@ -129,6 +142,29 @@ export function CockpitWindow({
   function handleGo(destination: Destination) {
     flokiTalk.takeControls();
     onGo(destination);
+  }
+
+  // Into the black hole (an easter egg): Floki stops, the radio finds the right track, and on
+  // the other side the terminal says what it cost.
+  function handleJump() {
+    flokiTalk.takeControls();
+    setHasReturned(false);
+    const trackIndex = music.tracks.findIndex((track) => track.title === JUMP_TRACK_TITLE);
+    if (music.status === "playing" && trackIndex >= 0) void music.playTrack(trackIndex);
+    onJump(() => {
+      findSecret("horizon");
+      setHasReturned(true);
+      terminal.print([
+        { kind: "floki", text: messages.jumpArrived },
+        { kind: "output", text: messages.jumpProgress },
+      ]);
+    });
+  }
+
+  function getJumpPhase() {
+    if (isJumping) return "on";
+
+    return hasReturned ? "back" : undefined;
   }
 
   function handleEgg(egg: TerminalEgg) {
@@ -175,11 +211,18 @@ export function CockpitWindow({
       onAnimationEnd={handleAnimationEnd}
       data-reveal={reveal}
       data-power={isClosing ? "off" : "on"}
+      data-jump={getJumpPhase()}
       // Clipped, not scrollable: focusing the terminal while the console rises must not scroll it.
       style={COCKPIT_STYLES[reveal]}
       className={`group/cockpit fixed inset-0 z-50 overflow-clip text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing, isLocked })}`}
     >
       <CockpitWindshield />
+      {/* The black hole's shadow takes the whole cockpit at the end of the flight in, and lifts
+          once the ship is back. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-20 bg-night opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=on]/cockpit:animate-jump-black"
+      />
       <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4 md:p-6">
         <div className="flex flex-col gap-1">
           <h2 id={titleId} className="text-label font-bold tracking-label">
@@ -254,6 +297,7 @@ export function CockpitWindow({
               onAsk={(question) => void flokiTalk.ask(question)}
               onGo={handleGo}
               onEgg={handleEgg}
+              onJump={handleJump}
             />
           </ConsoleScreen>
         </div>

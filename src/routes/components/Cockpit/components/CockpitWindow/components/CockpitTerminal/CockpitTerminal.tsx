@@ -25,6 +25,8 @@ interface CockpitTerminalProps {
   onGo: (destination: Destination) => void;
   // A secret command set something off outside the terminal.
   onEgg: (egg: TerminalEgg) => void;
+  // `go gargantua`, once it is a destination.
+  onJump: () => void;
 }
 
 // The terminal on the center screen, the ship's command line. Every destination it prints is a
@@ -36,6 +38,7 @@ export function CockpitTerminal({
   onAsk,
   onGo,
   onEgg,
+  onJump,
 }: CockpitTerminalProps) {
   // Where the caret is in the command line; null keeps it at the end.
   const [caretIndex, setCaretIndex] = useState<number | null>(null);
@@ -61,6 +64,9 @@ export function CockpitTerminal({
         return;
       case "egg":
         onEgg(result.egg);
+        return;
+      case "jump":
+        onJump();
         return;
       default: {
         const unknownResult: never = result;
