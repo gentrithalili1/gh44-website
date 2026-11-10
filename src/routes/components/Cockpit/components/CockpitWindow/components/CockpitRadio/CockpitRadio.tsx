@@ -1,11 +1,25 @@
 import { useId, useState } from "react";
 
 import { useMusic } from "#/routes/hooks/useMusic";
+import { CONTACT_EMAIL } from "#/utils/contact";
 
-import { PlaylistTrack, RadioButton, RadioIcon, RadioTrack } from "./CockpitRadio.elements";
+import {
+  DeadAir,
+  PlaylistTrack,
+  RadioButton,
+  RadioIcon,
+  RadioTrack,
+} from "./CockpitRadio.elements";
 import { messages } from "./messages";
+import { toMorse } from "./utils/morse";
 
 type MusicStatus = ReturnType<typeof useMusic>["status"];
+
+// An easter egg: skipping past the last track lands on dead air, before the list starts over.
+type DeadAirState = { status: "off" } | { status: "on"; wasPlaying: boolean };
+
+const ON_AIR: DeadAirState = { status: "off" };
+const MORSE_EMAIL = toMorse(CONTACT_EMAIL);
 
 // What the display says instead of the track: null once a track is loaded.
 function getStatusText(status: MusicStatus) {
@@ -26,18 +40,51 @@ function getStatusText(status: MusicStatus) {
 
 // The console's radio: what plays, with play or stop, the next and previous tracks, and a
 // playlist to pick from (on phones it opens from its toggle). It is the same player as the music
-// button; without the track it is offline.
+// button; without the track it is offline. Skipping past the last track lands on dead air once,
+// where a signal comes through for whoever waits.
 export function CockpitRadio() {
   const music = useMusic();
   const playlistId = useId();
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+  const [deadAir, setDeadAir] = useState<DeadAirState>(ON_AIR);
 
   const isPlaying = music.status === "playing";
   const statusText = getStatusText(music.status);
 
+  const isDeadAir = deadAir.status === "on";
+  const isOnLastTrack = music.hasManyTracks && music.trackIndex === music.tracks.length - 1;
+
   function handlePlayStop() {
+    setDeadAir(ON_AIR);
     if (isPlaying) music.stop();
     else void music.play();
+  }
+
+  function handlePrevious() {
+    setDeadAir(ON_AIR);
+    music.previous();
+  }
+
+  // Past the last track there is dead air; one more skip starts the list over, playing again if
+  // it was.
+  function handleNext() {
+    if (deadAir.status === "on") {
+      setDeadAir(ON_AIR);
+      music.next();
+      if (deadAir.wasPlaying) void music.play();
+      return;
+    }
+    if (isOnLastTrack) {
+      setDeadAir({ status: "on", wasPlaying: isPlaying });
+      music.stop();
+      return;
+    }
+    music.next();
+  }
+
+  function handleTrackPick(index: number) {
+    setDeadAir(ON_AIR);
+    void music.playTrack(index);
   }
 
   function handlePlaylistToggle() {
@@ -52,16 +99,22 @@ export function CockpitRadio() {
       {/* Phones: one row. Desktop: the controls centered, what plays under them. */}
       <div className="flex items-center gap-2 md:flex-col-reverse md:items-stretch md:gap-2">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 md:items-center md:text-center">
-          {statusText === null ? (
+          {isDeadAir ? (
+            <DeadAir
+              label={messages.deadAir}
+              morse={MORSE_EMAIL}
+              morseLabel={messages.morseLabel(CONTACT_EMAIL)}
+            />
+          ) : null}
+          {statusText === null && !isDeadAir ? (
             <RadioTrack
               isPlaying={isPlaying}
               artist={music.track.artist}
               separator={messages.trackSeparator}
               title={music.track.title}
             />
-          ) : (
-            <p className="text-xs text-muted">{statusText}</p>
-          )}
+          ) : null}
+          {statusText === null ? null : <p className="text-xs text-muted">{statusText}</p>}
         </div>
         {statusText === null ? (
           <div className="flex shrink-0 items-center gap-1.5 md:justify-center">
@@ -70,7 +123,7 @@ export function CockpitRadio() {
               <RadioButton
                 aria-label={messages.previousLabel}
                 disabled={!music.hasManyTracks}
-                onClick={music.previous}
+                onClick={handlePrevious}
               >
                 <RadioIcon name="previous" />
               </RadioButton>
@@ -84,7 +137,7 @@ export function CockpitRadio() {
             <RadioButton
               aria-label={messages.nextLabel}
               disabled={!music.hasManyTracks}
-              onClick={music.next}
+              onClick={handleNext}
             >
               <RadioIcon name="next" />
             </RadioButton>
@@ -111,12 +164,12 @@ export function CockpitRadio() {
           {music.tracks.map((track, index) => (
             <PlaylistTrack
               key={track.id}
-              isCurrent={index === music.trackIndex}
+              isCurrent={!isDeadAir && index === music.trackIndex}
               isPlaying={isPlaying}
               artist={track.artist}
               separator={messages.trackSeparator}
               title={track.title}
-              onClick={() => void music.playTrack(index)}
+              onClick={() => handleTrackPick(index)}
             />
           ))}
         </ul>

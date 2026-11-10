@@ -89,6 +89,8 @@
 
   --animate-cockpit-iris: cockpit-iris 450ms var(--ease-space) 550ms both;
   --animate-cockpit-close: cockpit-close 520ms var(--ease-space) forwards;
+  /* The radio's dead air: a signal fades up for whoever waits ten seconds. */
+  --animate-morse-in: morse-in 1500ms var(--ease-space) 10s both;
   --animate-floki-perk: floki-perk 700ms var(--ease-space) both;
   --animate-cockpit-rumble: cockpit-rumble 650ms linear both;
   /* Boarding: the hull closes in round the window and the console rises as the iris opens, then
@@ -152,6 +154,12 @@
     }
     100% {
       translate: 1px -1px;
+    }
+  }
+
+  @keyframes morse-in {
+    from {
+      opacity: 0;
     }
   }
 

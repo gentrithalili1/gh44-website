@@ -120,3 +120,28 @@ export function PlaylistTrack({
     </li>
   );
 }
+
+interface DeadAirProps {
+  label: string;
+  // The signal that comes through for whoever waits, and what it spells.
+  morse: string;
+  morseLabel: string;
+}
+
+// Past the last track: a flat meter and nothing on air. Ten seconds in, a signal fades up.
+export function DeadAir({ label, morse, morseLabel }: DeadAirProps) {
+  return (
+    <p role="status" className="flex min-w-0 flex-col gap-0.5 text-xs md:items-center">
+      <span className="flex items-baseline gap-2 text-muted">
+        <RadioLevel isPlaying={false} />
+        {label}
+      </span>
+      <span
+        aria-label={morseLabel}
+        className="max-w-full animate-morse-in truncate text-[0.625rem] tracking-kicker text-sage"
+      >
+        {morse}
+      </span>
+    </p>
+  );
+}
