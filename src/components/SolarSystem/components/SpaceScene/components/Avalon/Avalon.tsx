@@ -1,6 +1,6 @@
 import { type ThreeEvent, useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
-import type { Group } from "three";
+import { type Group, Quaternion, Vector3 } from "three";
 
 import { messages } from "#/components/SolarSystem/messages";
 import { PALETTE } from "#/utils/palette";
@@ -13,11 +13,12 @@ import { BLADE, getBladeTurns } from "./utils/avalonBlades";
 // Outside the last orbit, in the bottom left of the home view: on the orbit plane, toward the
 // viewer. Scene units.
 const POSITION: [number, number, number] = [-500, 30, 460];
-// Nose away from the sun, toward Homestead II further out the same way, leaning a little
-// toward the home view.
-const HEADING: [number, number, number] = [0.2, -2.4, 0];
-// The hulls turn round the spine once in about 50 seconds, for gravity.
-const SPIN_SPEED = 0.125;
+// Nose away from the sun, toward Homestead II further out the same way, and tipped up toward
+// the home view, so its hulls are seen wheeling round the spine like the Endurance's ring.
+const NOSE = new Vector3(0.14, 0.79, 0.6).normalize();
+const HEADING = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 0), NOSE);
+// The hulls turn round the spine once in about 40 seconds for gravity, like the Endurance.
+const SPIN_SPEED = 0.16;
 // Drawn far larger than life, or it would be lost among the stars.
 const SHIP_SCALE = 2.4;
 // The spine runs along the ship's length (its x axis), the engine at its tail.
@@ -76,7 +77,7 @@ export function Avalon({ isFaded }: AvalonProps) {
 
   return (
     <group ref={groupRef} position={POSITION}>
-      <group rotation={HEADING} scale={SHIP_SCALE}>
+      <group quaternion={HEADING} scale={SHIP_SCALE}>
         <mesh rotation-z={QUARTER_TURN}>
           <cylinderGeometry args={[SPINE.radius, SPINE.radius, SPINE.length, ROUND / 2]} />
           <meshLambertMaterial color={HULL} />
