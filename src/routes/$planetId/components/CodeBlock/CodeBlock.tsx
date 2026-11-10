@@ -7,7 +7,7 @@ import { CodeLines, CodeTab } from "./CodeBlock.elements";
 import { messages } from "./messages";
 import type { CodeBlockTab } from "./types";
 import { getCodeLength, getPlainLines, getTypingDuration, revealLines } from "./utils/codeLines";
-import { getNextTabIndex } from "./utils/tabKeys";
+import { getNextTabIndex } from "../../utils/tabKeys";
 
 function getCopyStatusCopy(status: CopyStatus) {
   switch (status) {

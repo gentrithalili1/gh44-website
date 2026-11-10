@@ -40,19 +40,17 @@ describe("CodeBlock", () => {
 
   it("switches tabs with the arrow keys", async () => {
     const user = userEvent.setup();
-    await renderAt("/gh44-confirm");
+    await renderAt("/gh44-theme?app=slack");
 
-    await user.click(screen.getByRole("tab", { name: "npm" }));
+    await user.click(screen.getByRole("tab", { name: "gh44 dark" }));
     await user.keyboard("{ArrowRight}");
 
-    expect(screen.getByRole("tab", { name: "provider" })).toHaveFocus();
+    expect(screen.getByRole("tab", { name: "gh44 light" })).toHaveFocus();
+    expect(screen.getByRole("tabpanel", { name: "gh44 light" })).toHaveTextContent("#F2ECE5");
 
-    await user.keyboard("{End}");
+    await user.keyboard("{Home}");
 
-    expect(screen.getByRole("tab", { name: "usage" })).toHaveFocus();
-    expect(screen.getByRole("tabpanel", { name: "usage" })).toHaveTextContent(
-      "await confirmation.confirm()",
-    );
+    expect(screen.getByRole("tab", { name: "gh44 dark" })).toHaveFocus();
   });
 
   it("types the code in the first time it comes on screen", async () => {
