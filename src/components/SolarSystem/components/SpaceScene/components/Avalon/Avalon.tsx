@@ -13,8 +13,9 @@ import { BLADE, getBladeTurns } from "./utils/avalonBlades";
 // Outside the last orbit, in the bottom left of the home view: on the orbit plane, toward the
 // viewer. Scene units.
 const POSITION: [number, number, number] = [-500, 30, 460];
-// Nose toward the top right, leaning a little toward the home view.
-const HEADING: [number, number, number] = [0.25, 0.75, 0.1];
+// Nose away from the sun, toward Homestead II further out the same way, leaning a little
+// toward the home view.
+const HEADING: [number, number, number] = [0.2, -2.4, 0];
 // The hulls turn round the spine once in about 50 seconds, for gravity.
 const SPIN_SPEED = 0.125;
 // Drawn far larger than life, or it would be lost among the stars.
@@ -43,8 +44,8 @@ interface AvalonProps {
   isFaded: boolean;
 }
 
-// A ship from another story, passing outside the planets: three long curved hulls turning
-// round a spine, an engine glowing at its tail. It shows its name when pointed at. Decorative
+// A ship from another story, leaving the solar system behind for Homestead II: three long
+// curved hulls turning round a spine, an engine glowing at its tail. It shows its name when pointed at. Decorative
 // otherwise: nothing to click.
 export function Avalon({ isFaded }: AvalonProps) {
   const [bladeTurns] = useState(getBladeTurns);

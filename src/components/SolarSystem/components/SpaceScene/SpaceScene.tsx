@@ -12,6 +12,7 @@ import { BlackHole } from "./components/BlackHole";
 import { Avalon } from "./components/Avalon";
 import { Endurance } from "./components/Endurance";
 import { FetchBall } from "./components/FetchBall";
+import { Homestead } from "./components/Homestead";
 import { LabelNudges } from "./components/LabelNudges";
 import { MillersPlanet } from "./components/MillersPlanet";
 import { Orbits } from "./components/Orbits";
@@ -101,6 +102,7 @@ export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
           <Endurance isFaded={openPlanetId !== undefined} />
           <MillersPlanet isFaded={openPlanetId !== undefined} />
           <Avalon isFaded={openPlanetId !== undefined} />
+          <Homestead isFaded={openPlanetId !== undefined} />
           <Voyagers isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
           <FetchBall isFaded={openPlanetId !== undefined} sceneStateRef={sceneStateRef} />
           {labelList
