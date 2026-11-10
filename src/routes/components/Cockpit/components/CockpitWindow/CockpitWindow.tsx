@@ -12,7 +12,10 @@ import { COCKPIT_SHIP_Y, GARGANTUA_YEARS } from "#/utils/explorer";
 
 import {
   AstronautIcon,
+  DashboardLip,
+  DashboardPlates,
   PanelIcon,
+  PedestalKeys,
   CockpitWindshield,
   ConsoleLights,
   ConsoleScreen,
@@ -349,8 +352,10 @@ export function CockpitWindow({
         data-panel={isPanelHidden ? "hidden" : "shown"}
         inert={isPanelHidden}
         aria-hidden={isPanelHidden ? true : undefined}
-        className="absolute inset-x-0 bottom-0 max-h-[86%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] transition-transform duration-500 ease-space group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in data-[panel=hidden]:[transform:translateY(calc(100%+1rem))] motion-reduce:transition-none md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12"
+        className="absolute inset-x-0 bottom-0 max-h-[86%] rounded-t-[50%_1.5rem] border-t-8 border-surface bg-bg-subtle bg-[linear-gradient(to_bottom,var(--surface),var(--bg-subtle)_30%)] shadow-[0_-1px_0_var(--rule),0_-18px_40px_-12px_rgb(0_0_0/0.8)] transition-transform duration-500 ease-space group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in data-[panel=hidden]:[transform:translateY(calc(100%+1rem))] motion-reduce:transition-none md:h-(--console-height) md:max-h-none md:rounded-t-[50%_2.5rem] md:border-t-12"
       >
+        <DashboardLip />
+        <DashboardPlates />
         {/* Desktop: Floki on the left, the terminal in the middle, the radar over the radio on
             the right. Phones: Floki beside the radar and the radio, the terminal under them. */}
         <div className="mx-auto grid max-w-[96rem] grid-cols-[8.5rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
@@ -389,6 +394,7 @@ export function CockpitWindow({
           <ConsoleScreen
             label={messages.screens.terminal}
             powerOrder={1}
+            footer={<PedestalKeys />}
             indicator={<ConsoleLights />}
             className="col-span-2 h-[min(20rem,36dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto"
             screenClassName="flex flex-col"
