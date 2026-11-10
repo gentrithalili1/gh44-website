@@ -1,35 +1,37 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getAheadAnchor,
   getEscape,
-  getHoleAnchor,
   getHoleScale,
   getJumpCenter,
   getJumpLift,
   getRestAnchor,
   getSceneWarp,
+  HOLE_SKY_DIRECTION,
 } from "./blackHole";
 
 describe("getRestAnchor", () => {
-  it("rests in the top right, further in with the cockpit open", () => {
-    const home = getRestAnchor({ isCockpit: false, isPhone: false });
-    const cockpit = getRestAnchor({ isCockpit: true, isPhone: false });
+  it("rests in the top right of the screen", () => {
+    for (const isPhone of [true, false]) {
+      const anchor = getRestAnchor(isPhone);
 
-    expect(home.x).toBeGreaterThan(0);
-    expect(home.y).toBeGreaterThan(0);
-    expect(cockpit.x).toBeLessThan(home.x);
-    expect(cockpit.x).toBeGreaterThan(0);
+      expect(anchor.x).toBeGreaterThan(0);
+      expect(anchor.y).toBeGreaterThan(0);
+    }
   });
 });
 
-describe("getHoleAnchor", () => {
-  it("leaves its corner for dead ahead early in the flight, and stays there", () => {
-    const rest = getRestAnchor({ isCockpit: true, isPhone: false });
-    const ahead = { x: 0, y: getJumpLift(false) * 2 };
+describe("getAheadAnchor", () => {
+  it("is straight ahead, up in the windshield", () => {
+    expect(getAheadAnchor(false)).toEqual({ x: 0, y: getJumpLift(false) * 2 });
+    expect(getAheadAnchor(true).y).toBeGreaterThan(getAheadAnchor(false).y);
+  });
+});
 
-    expect(getHoleAnchor({ rest, jump: 0, isPhone: false })).toEqual(rest);
-    expect(getHoleAnchor({ rest, jump: 0.14, isPhone: false })).toEqual(ahead);
-    expect(getHoleAnchor({ rest, jump: 1, isPhone: false })).toEqual(ahead);
+describe("HOLE_SKY_DIRECTION", () => {
+  it("is a direction: one unit long", () => {
+    expect(Math.hypot(...HOLE_SKY_DIRECTION)).toBeCloseTo(1, 2);
   });
 });
 

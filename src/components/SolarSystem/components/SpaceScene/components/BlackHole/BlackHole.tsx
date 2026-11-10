@@ -13,11 +13,13 @@ import { PALETTE } from "#/utils/palette";
 
 import type { SceneState } from "../../types";
 import {
-  getHoleAnchor,
+  getAheadAnchor,
   getHoleScale,
+  getJumpCenter,
   getRestAnchor,
   HOLE_DISTANCE,
   HOLE_RADIUS,
+  HOLE_SKY_DIRECTION,
 } from "../../utils/blackHole";
 import { damp, PHONE_MAX_WIDTH } from "../../utils/sceneMath";
 import { HoverName } from "../HoverName";
@@ -30,11 +32,16 @@ const PLANE_REACH = 5;
 const PLANE_SIZE = HOLE_RADIUS * PLANE_REACH * 2;
 // The flight in takes this long, straight (no ease): the growth itself speeds up.
 const JUMP_SECONDS = 8;
-// Its place on screen eases this fast when the cockpit opens or closes.
-const ANCHOR_LAMBDA = 3;
+// It moves between its corner of the screen and its place in the sky this fast, as the cockpit
+// opens or closes.
+const PLACE_LAMBDA = 3;
 const NAME_POSITION: [number, number, number] = [0, HOLE_RADIUS * 2, 0];
 
-const point = new Vector3();
+// The directions to it: pinned to the screen, where it ends up, and dead ahead.
+const pinned = new Vector3();
+const toward = new Vector3();
+const ahead = new Vector3();
+const SKY = new Vector3(...HOLE_SKY_DIRECTION);
 
 // sRGB as written: the shader outputs it as it is.
 function toShaderColor(hex: string) {
@@ -45,10 +52,12 @@ interface BlackHoleProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// An easter egg: a black hole in the top right of the sky, so far away that it keeps its place
-// on screen whatever the camera does, its disk turning. Once every planet is visited the cockpit
-// can fly into it (`go gargantua`): the solar system drops away, it moves dead ahead and grows
-// until its shadow is all there is. It stays that way until the visitor comes back.
+// An easter egg: a black hole far out, its disk turning. Outside the ship it keeps its place in
+// the top right of the screen; from the cockpit it has its own place in the sky, in the
+// windshield as the site opens, and drifts across as the ship goes round the sun. Once every
+// planet is visited the cockpit can fly into it (`go gargantua`): the solar system drops away,
+// it swings dead ahead and grows until its shadow is all there is. It stays that way until the
+// visitor comes back.
 export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const explorer = useExplorer();
   const exploration = useExploration();
@@ -69,8 +78,8 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const growRef = useRef<Group>(null);
   // 0 to 1 through the flight in; GSAP drives it.
   const jumpRef = useRef({ progress: 0 });
-  // Where it rests on screen now; null until the first frame.
-  const restRef = useRef<{ x: number; y: number } | null>(null);
+  // 0 pinned to its corner of the screen, 1 at its own place in the sky.
+  const skyShareRef = useRef(0);
   const [isHovered, setIsHovered] = useState(false);
 
   const jumpStatus = explorer.jump.status;
@@ -113,17 +122,20 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
     if (!group) return;
 
     const isPhone = size.width < PHONE_MAX_WIDTH;
-    const target = getRestAnchor({ isCockpit, isPhone });
-    const last = restRef.current ?? target;
-    const rest = {
-      x: damp({ current: last.x, target: target.x, delta, lambda: ANCHOR_LAMBDA }),
-      y: damp({ current: last.y, target: target.y, delta, lambda: ANCHOR_LAMBDA }),
-    };
-    restRef.current = rest;
-    const anchor = getHoleAnchor({ rest, jump: progress, isPhone });
-    // From its place on screen to a point that far out, facing the camera.
-    point.set(anchor.x, anchor.y, 0.5).unproject(camera).sub(camera.position).normalize();
-    group.position.copy(camera.position).addScaledVector(point, HOLE_DISTANCE);
+    skyShareRef.current = damp({
+      current: skyShareRef.current,
+      target: isCockpit ? 1 : 0,
+      delta,
+      lambda: PLACE_LAMBDA,
+    });
+    const rest = getRestAnchor(isPhone);
+    const front = getAheadAnchor(isPhone);
+    pinned.set(rest.x, rest.y, 0.5).unproject(camera).sub(camera.position).normalize();
+    ahead.set(front.x, front.y, 0.5).unproject(camera).sub(camera.position).normalize();
+    // From its corner to its place in the sky, then to dead ahead on the flight in.
+    toward.copy(pinned).lerp(SKY, skyShareRef.current).normalize();
+    toward.lerp(ahead, getJumpCenter(progress)).normalize();
+    group.position.copy(camera.position).addScaledVector(toward, HOLE_DISTANCE);
     group.quaternion.copy(camera.quaternion);
   });
 
