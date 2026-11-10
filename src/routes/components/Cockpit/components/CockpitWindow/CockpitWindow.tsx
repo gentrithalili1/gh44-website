@@ -12,6 +12,7 @@ import { COCKPIT_SHIP_Y, GARGANTUA_YEARS } from "#/utils/explorer";
 
 import {
   AstronautIcon,
+  PanelIcon,
   CockpitWindshield,
   ConsoleLights,
   ConsoleScreen,
@@ -103,6 +104,9 @@ export function CockpitWindow({
   earthYearsPassed,
 }: CockpitWindowProps) {
   const titleId = useId();
+  const panelId = useId();
+  // The visitor can slide the console away for the whole view, and back.
+  const [panel, setPanel] = useState<"shown" | "hidden">("shown");
   const dialogRef = useRef<HTMLDivElement>(null);
   // What had focus when the cockpit opened, read on the first render before the input takes it.
   const [returnFocusTo] = useState(() => document.activeElement);
@@ -224,6 +228,14 @@ export function CockpitWindow({
     }
   }
 
+  // Hidden by the visitor, and on every launch and jump: the console slides away first, so the
+  // flight shows through the whole windshield.
+  const isPanelHidden = panel === "hidden" || isLocked;
+
+  function handlePanelToggle() {
+    setPanel((current) => (current === "shown" ? "hidden" : "shown"));
+  }
+
   // The visitor looks around: the windshield shifts a little against the console.
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType !== "mouse") return;
@@ -287,7 +299,7 @@ export function CockpitWindow({
           </>
         ) : null}
       </div>
-      <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-4 md:p-6">
+      <header className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4 md:gap-4 md:p-6">
         <div className="flex flex-col gap-1">
           <h2 id={titleId} className="text-label font-bold tracking-label">
             {messages.title}
@@ -304,21 +316,44 @@ export function CockpitWindow({
           </p>
           <EarthClock yearsPassed={earthYearsPassed} />
         </div>
-        <button
-          type="button"
-          aria-label={messages.spacewalkLabel}
-          disabled={isLocked}
-          onClick={handleClose}
-          className="flex h-10 items-center gap-2 rounded-full border border-rule bg-bg-subtle pr-4 pl-3 text-xs text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40"
-        >
-          <AstronautIcon />
-          {messages.spacewalk}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-expanded={!isPanelHidden}
+            aria-controls={panelId}
+            disabled={isLocked}
+            onClick={handlePanelToggle}
+            className="flex h-10 min-w-10 items-center justify-center gap-1.5 rounded-full border border-rule bg-bg-subtle px-3 text-xs whitespace-nowrap md:pr-4 text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40"
+          >
+            <PanelIcon direction={isPanelHidden ? "up" : "down"} />
+            {/* Phones show the chevron alone: the header has little room. */}
+            <span className="max-md:sr-only">
+              {isPanelHidden ? messages.panelShow : messages.panelHide}
+            </span>
+          </button>
+          <button
+            type="button"
+            aria-label={messages.spacewalkLabel}
+            disabled={isLocked}
+            onClick={handleClose}
+            className="flex h-10 min-w-10 items-center justify-center gap-2 rounded-full border border-rule bg-bg-subtle px-3 text-xs whitespace-nowrap md:pr-4 text-muted transition-colors hover:border-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40"
+          >
+            <AstronautIcon />
+            <span className="max-md:sr-only">{messages.spacewalk}</span>
+          </button>
+        </div>
       </header>
-      <div className="absolute inset-x-0 bottom-0 max-h-[72%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12">
+      {/* Slides out of the way (its own `transform`, apart from the boarding's `translate`). */}
+      <div
+        id={panelId}
+        data-panel={isPanelHidden ? "hidden" : "shown"}
+        inert={isPanelHidden}
+        aria-hidden={isPanelHidden ? true : undefined}
+        className="absolute inset-x-0 bottom-0 max-h-[86%] rounded-t-[50%_2.5rem] border-t-8 border-surface bg-bg-subtle shadow-[0_-1px_0_var(--rule)] transition-transform duration-500 ease-space group-data-[power=off]/cockpit:animate-console-out group-data-[reveal=flight]/cockpit:animate-console-in data-[panel=hidden]:[transform:translateY(calc(100%+1rem))] motion-reduce:transition-none md:h-(--console-height) md:max-h-none md:rounded-t-[50%_4rem] md:border-t-12"
+      >
         {/* Desktop: Floki on the left, the terminal in the middle, the radar over the radio on
             the right. Phones: Floki beside the radar and the radio, the terminal under them. */}
-        <div className="mx-auto grid max-w-[96rem] grid-cols-[7rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
+        <div className="mx-auto grid max-w-[96rem] grid-cols-[8.5rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
           <ConsoleScreen
             label={messages.screens.floki}
             powerOrder={0}
@@ -355,7 +390,7 @@ export function CockpitWindow({
             label={messages.screens.terminal}
             powerOrder={1}
             indicator={<ConsoleLights />}
-            className="col-span-2 h-[min(14rem,27dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto"
+            className="col-span-2 h-[min(20rem,36dvh)] md:col-span-1 md:col-start-2 md:row-span-2 md:row-start-1 md:h-auto"
             screenClassName="flex flex-col"
           >
             <CockpitTerminal

@@ -5,10 +5,10 @@ import { type Group, MathUtils } from "three";
 import { PALETTE } from "#/utils/palette";
 
 import type { FlokiStatus } from "../../../../hooks/useFloki";
+import { FlokiDog } from "../../../FlokiDog";
 
 import { CommitShelf } from "./components/CommitShelf";
 import { getShelfSize } from "./components/CommitShelf/utils/shelfBooks";
-import { FlokiDog } from "./components/FlokiDog";
 import { Lattice } from "./components/Lattice";
 import type { Sightline } from "./components/Lattice/utils/latticeBeams";
 

@@ -64,7 +64,31 @@ describe("CockpitWindow", () => {
 
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "go on a spacewalk" })).toBeDisabled();
-    expect(screen.getByRole("textbox", { name: "command" })).toHaveAttribute("readonly");
+    // The panel slides away so the flight shows: the terminal is out of reach, and read-only.
+    expect(screen.getByRole("button", { name: "show panel" })).toBeDisabled();
+    expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "command", hidden: true })).toHaveAttribute(
+      "readonly",
+    );
+  });
+
+  it("hides the whole panel for the view, and brings it back", async () => {
+    const user = userEvent.setup();
+    await renderCockpitWindow({ isLocked: false, onClose: vi.fn() });
+    const hide = screen.getByRole("button", { name: "hide panel" });
+    expect(hide).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(hide);
+
+    expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "radar" })).not.toBeInTheDocument();
+    const show = screen.getByRole("button", { name: "show panel" });
+    expect(show).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(show);
+
+    expect(screen.getByRole("textbox", { name: "command" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "radar" })).toBeInTheDocument();
   });
 
   it("shows the ship's name and its systems", async () => {

@@ -4,6 +4,27 @@ const VISOR_PATH =
   "M5.4 5h5.2a1 1 0 0 1 1 1v1a2.6 2.6 0 0 1-2.6 2.6H7a2.6 2.6 0 0 1-2.6-2.6V6a1 1 0 0 1 1-1z";
 const SHOULDERS_PATH = "M2.5 15.25c.7-1.9 2.9-2.9 5.5-2.9s4.8 1 5.5 2.9";
 
+interface PanelIconProps {
+  // Which way the chevron points: down to hide the panel, up to bring it back.
+  direction: "down" | "up";
+}
+
+export function PanelIcon({ direction }: PanelIconProps) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      data-direction={direction}
+      className="size-4 transition-transform duration-300 data-[direction=up]:rotate-180"
+    >
+      <path
+        d="M3.5 6l4.5 4.5L12.5 6"
+        className="fill-none stroke-current stroke-[1.5] [stroke-linecap:round] [stroke-linejoin:round]"
+      />
+    </svg>
+  );
+}
+
 // The windshield in a 100 x 100 box stretched over the top of the screen: an arched window cut
 // out of the hull, and two struts that rise from the console and meet at its top.
 const WINDOW_PATH = "M2.5 100 C1.5 52 15 9 50 5 C85 9 98.5 52 97.5 100 Z";

@@ -1,7 +1,16 @@
+import { lazy, Suspense } from "react";
+
+import { useSpaceMode } from "#/hooks/useSpaceMode";
+
 import type { FlokiStatus } from "../../hooks/useFloki";
 import { FlokiHead, MicIcon } from "./CockpitFloki.elements";
 import { FlokiSignal } from "./components/FlokiSignal";
 import { messages } from "./messages";
+
+// Loaded only with the 3D scene: three.js stays out of the static page.
+const FlokiPortrait = lazy(() =>
+  import("./components/FlokiPortrait").then((module) => ({ default: module.FlokiPortrait })),
+);
 
 interface CockpitFlokiProps {
   status: FlokiStatus;
@@ -17,8 +26,9 @@ interface CockpitFlokiProps {
   onTalk: () => void;
 }
 
-// Floki's own screen: the ship's robotic German shepherd, his signal lighting the grille in his
-// muzzle, what he is doing, and the button to talk to him. The mic only opens on that button.
+// Floki's own screen: the black German shepherd himself, head and shoulders in 3D (the same dog
+// as in the tesseract), what he is doing, and the button to talk to him. Without the 3D scene
+// (reduced motion, no WebGL) it shows his drawn head, its signal lighting the grille. The mic only opens on that button.
 // On desktop his head fills the screen above the status; on phones it shrinks to his head and
 // the button.
 export function CockpitFloki({
@@ -31,6 +41,14 @@ export function CockpitFloki({
   onTalk,
 }: CockpitFlokiProps) {
   const isActive = isConversing || status === "listening" || status === "speaking";
+  const spaceMode = useSpaceMode();
+  const drawnHead = (
+    <FlokiHead
+      status={status}
+      praiseCount={praiseCount}
+      grille={<FlokiSignal status={status} getLevel={getLevel} />}
+    />
+  );
 
   return (
     <section
@@ -38,11 +56,15 @@ export function CockpitFloki({
       className="flex min-h-0 flex-1 flex-col justify-between gap-2 md:justify-start md:gap-3"
     >
       <div aria-hidden="true" className="shrink-0 md:flex md:min-h-0 md:flex-1 md:justify-center">
-        <FlokiHead
-          status={status}
-          praiseCount={praiseCount}
-          grille={<FlokiSignal status={status} getLevel={getLevel} />}
-        />
+        {spaceMode === "scene" ? (
+          <span data-status={status} className="relative block aspect-square h-full max-w-full">
+            <Suspense fallback={drawnHead}>
+              <FlokiPortrait status={status} getLevel={getLevel} praiseCount={praiseCount} />
+            </Suspense>
+          </span>
+        ) : (
+          drawnHead
+        )}
       </div>
       <div className="flex min-w-0 flex-col md:flex-row md:items-end md:gap-3">
         <div className="min-w-0 md:flex-1">

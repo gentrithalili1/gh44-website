@@ -21,7 +21,7 @@ export function EarthClock({ yearsPassed }: EarthClockProps) {
   const time = earthFormat.format(getEarthDate({ now, yearsPassed })).toLowerCase();
 
   return (
-    <p className="flex gap-2 text-xs text-faint tabular-nums">
+    <p className="flex gap-2 text-xs whitespace-nowrap text-faint tabular-nums">
       <span aria-hidden="true">{messages.label}</span>
       <time
         // Screen readers get the time when they ask, not every second.

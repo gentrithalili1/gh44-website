@@ -108,11 +108,11 @@ describe("Cockpit", () => {
     const cockpit = await openCockpit(user);
 
     const input = within(cockpit).getByRole("textbox", COMMAND);
-    const close = within(cockpit).getByRole("button", { name: "go on a spacewalk" });
+    const panel = within(cockpit).getByRole("button", { name: "hide panel" });
 
-    // The command line is last: Tab wraps to the close button, Shift+Tab back.
+    // The command line is last: Tab wraps to the first button in the header, Shift+Tab back.
     await user.tab();
-    expect(close).toHaveFocus();
+    expect(panel).toHaveFocus();
     await user.tab({ shift: true });
     expect(input).toHaveFocus();
   });

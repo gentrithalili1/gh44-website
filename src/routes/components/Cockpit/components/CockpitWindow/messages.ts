@@ -8,6 +8,9 @@ export const messages = {
   // Leaving the cockpit is stepping out of the ship.
   spacewalk: "spacewalk",
   spacewalkLabel: "go on a spacewalk",
+  // The console slides away for a full view through the windshield, and back.
+  panelHide: "hide panel",
+  panelShow: "show panel",
   // Engraved on each screen's bezel.
   screens: { floki: "floki", radar: "radar", radio: "radio", terminal: "terminal" },
   // Floki says it out loud when the cockpit opens by itself on a first visit.
