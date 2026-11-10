@@ -2,17 +2,18 @@ import type { Point } from "#/components/SolarSystem/types";
 
 import type { SceneState } from "../types";
 
-// The black hole has one place in space, like a planet: this far from the sun (just inside the
-// stars' shell), in the top right of the home view. The camera looks down on the system, so
+// The black hole has one place in space, like a planet: this far from the sun (twice as far as
+// the stars' shell), in the top right of the home view. The camera looks down on the system, so
 // that is below the orbit plane, behind it. A phone's tall screen sees less to the side, so
 // there it sits closer to the middle. The cockpit only sees it when the ship faces that way.
-const HOLE_DISTANCE = 7000;
+const HOLE_DISTANCE = 16000;
 const HOLE_DIRECTIONS = {
   phone: [0.109, -0.523, -0.846],
   desktop: [0.427, -0.493, -0.758],
 } as const;
-// Its shadow's radius out there: about 20 pixels across.
-export const HOLE_RADIUS = 60;
+// Its shadow's radius out there: about 20 pixels across from home, and smaller as the camera
+// pulls back, since it is so much further out than the planets.
+export const HOLE_RADIUS = 137;
 // It fills the whole view by the end of the flight in: this many times its size.
 const HOLE_GROWTH = 170;
 const GROWTH_POWER = 3.2;

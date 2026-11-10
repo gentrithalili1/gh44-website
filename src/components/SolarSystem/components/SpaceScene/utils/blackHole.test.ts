@@ -22,7 +22,7 @@ describe("getHolePosition", () => {
     for (const isPhone of [true, false]) {
       const [x, y, z] = getHolePosition(isPhone);
 
-      expect(Math.hypot(x, y, z)).toBeGreaterThan(5000);
+      expect(Math.hypot(x, y, z)).toBeGreaterThan(10000);
       // The home view looks down on the system: its top right is under the plane, behind it.
       expect(x).toBeGreaterThan(0);
       expect(y).toBeLessThan(0);
