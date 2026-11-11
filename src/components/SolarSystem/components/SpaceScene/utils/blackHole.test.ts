@@ -19,15 +19,13 @@ describe("getAheadAnchor", () => {
 
 describe("getHolePosition", () => {
   it("is far past every orbit, below the orbit plane and behind the system", () => {
-    for (const isPhone of [true, false]) {
-      const [x, y, z] = getHolePosition(isPhone);
+    const [x, y, z] = getHolePosition();
 
-      expect(Math.hypot(x, y, z)).toBeGreaterThan(10000);
-      // The home view looks down on the system: its top right is under the plane, behind it.
-      expect(x).toBeGreaterThan(0);
-      expect(y).toBeLessThan(0);
-      expect(z).toBeLessThan(0);
-    }
+    expect(Math.hypot(x, y, z)).toBeGreaterThan(10000);
+    // The home view looks down on the system: its top right is under the plane, behind it.
+    expect(x).toBeGreaterThan(0);
+    expect(y).toBeLessThan(0);
+    expect(z).toBeLessThan(0);
   });
 });
 

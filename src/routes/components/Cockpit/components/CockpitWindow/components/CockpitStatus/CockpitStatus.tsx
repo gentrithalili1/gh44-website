@@ -36,18 +36,15 @@ export function CockpitStatus({
   onSpacewalk,
 }: CockpitStatusProps) {
   return (
-    // Docked on a phone it sits at the bottom of the screen: its buttons stay clear of the site's
-    // music button in the corner.
-    <div
-      data-docked={isDocked ? "" : undefined}
-      className="flex min-w-0 items-stretch gap-2 transition-[margin] duration-500 ease-space max-md:data-docked:mr-16"
-    >
+    // Docked on a phone it sits at the bottom of the screen, high enough that the site's music
+    // button in the corner stays under it: the strip keeps the whole width.
+    <div data-docked={isDocked ? "" : undefined} className="flex min-w-0 items-stretch gap-2">
       <h2 id={titleId} className="sr-only">
         {messages.title}
       </h2>
       <div
         data-signal={hasSignal ? "" : undefined}
-        className={`${CARD} min-w-0 flex-1 gap-2 px-3 py-1.5`}
+        className={`${CARD} min-w-0 flex-1 gap-2 overflow-hidden px-3 py-1.5`}
       >
         {hasSignal ? (
           <p className="flex items-center gap-2 text-xs whitespace-nowrap text-ochre">
@@ -68,7 +65,7 @@ export function CockpitStatus({
           aria-controls={panelId}
           disabled={isLocked}
           onClick={onPanelToggle}
-          className={`${CARD} shrink-0 justify-center px-3 text-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40`}
+          className={`${CARD} w-14 shrink-0 justify-center text-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-40`}
         >
           <PanelIcon direction={isDocked ? "up" : "down"} />
         </button>
