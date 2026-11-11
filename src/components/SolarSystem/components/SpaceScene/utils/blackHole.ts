@@ -4,13 +4,10 @@ import type { SceneState } from "../types";
 
 // The black hole has one place in space, like a planet: this far from the sun (well past the
 // stars' shell), in the top right of the home view. The camera looks down on the system, so
-// that is below the orbit plane, behind it. A phone's tall screen sees less to the side, so
-// there it sits closer to the middle. The cockpit only sees it when the ship faces that way.
+// that is below the orbit plane, behind it. The same on every screen: the Endurance and Miller's
+// planet sit on the line out to it. The cockpit only sees it when the ship faces that way.
 const HOLE_DISTANCE = 20000;
-const HOLE_DIRECTIONS = {
-  phone: [0.109, -0.523, -0.846],
-  desktop: [0.427, -0.493, -0.758],
-} as const;
+const HOLE_DIRECTION = [0.427, -0.493, -0.758] as const;
 // Its shadow's radius out there: about 16 pixels across from home, and smaller as the camera
 // pulls back, since it is so much further out than the planets.
 export const HOLE_RADIUS = 137;
@@ -33,8 +30,8 @@ function smooth(share: number) {
 }
 
 // Where the black hole is, in scene units.
-export function getHolePosition(isPhone: boolean): [number, number, number] {
-  const [x, y, z] = isPhone ? HOLE_DIRECTIONS.phone : HOLE_DIRECTIONS.desktop;
+export function getHolePosition(): [number, number, number] {
+  const [x, y, z] = HOLE_DIRECTION;
 
   return [x * HOLE_DISTANCE, y * HOLE_DISTANCE, z * HOLE_DISTANCE];
 }

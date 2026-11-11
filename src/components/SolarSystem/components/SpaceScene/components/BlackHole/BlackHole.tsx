@@ -157,7 +157,7 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
     ahead.set(front.x, front.y, 0.5).unproject(camera).sub(camera.position).normalize();
     // Where it is, seen from the camera; on the flight in the ship swings to face it, drawn
     // as it swinging dead ahead.
-    toward.set(...getHolePosition(isPhone)).sub(camera.position);
+    toward.set(...getHolePosition()).sub(camera.position);
     const distance = toward.length();
     toward.normalize().lerp(ahead, getJumpCenter(progress)).normalize();
     group.position.copy(camera.position).addScaledVector(toward, distance);
