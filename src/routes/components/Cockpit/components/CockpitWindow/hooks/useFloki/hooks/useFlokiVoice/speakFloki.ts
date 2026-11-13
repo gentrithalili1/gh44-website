@@ -18,8 +18,6 @@ function validateText(input: unknown) {
   return text;
 }
 
-// Turns one of Floki's lines into speech with Piper (floki-voice), on the server, which reaches
-// the voice service over the private network.
 export const speakFloki = createServerFn({ method: "POST" })
   .validator(validateText)
   .handler(async ({ data: text }): Promise<SpeakFlokiOutcome> => {

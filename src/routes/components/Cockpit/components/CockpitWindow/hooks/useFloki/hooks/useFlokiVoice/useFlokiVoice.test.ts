@@ -6,9 +6,6 @@ import { stubFloki } from "#/test/floki";
 import { useFlokiSignal } from "../useFlokiSignal";
 import { useFlokiVoice } from "./useFlokiVoice";
 
-// iOS Safari's rules, as far as Floki's voice meets them: audio starts only inside a tap, or on
-// an element a tap already started; the audio graph starts only inside a tap, and the mic can
-// knock it to "interrupted".
 function stubIosAudio() {
   let isInTap = false;
   const contexts: IosAudioContext[] = [];
@@ -151,8 +148,6 @@ describe("useFlokiVoice", () => {
     const ios = stubIosAudio();
     const { result } = renderHook(() => useVoiceWithSignal());
 
-    // The visitor taps ask floki: the graph starts and the voice unlocks. Listening then
-    // interrupts the graph.
     await act(async () =>
       ios.tap(() => {
         result.current.signal.prepare();

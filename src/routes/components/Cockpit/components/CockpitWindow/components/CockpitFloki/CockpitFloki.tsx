@@ -26,11 +26,6 @@ interface CockpitFlokiProps {
   onTalk: () => void;
 }
 
-// Floki's own screen: the black German shepherd himself, head and shoulders in 3D (the same dog
-// as in the tesseract), what he is doing, and the button to talk to him. Without the 3D scene
-// (reduced motion, no WebGL) it shows his drawn head, its signal lighting the grille. The mic only opens on that button.
-// On desktop his head fills the screen above the status; on phones it shrinks to his head and
-// the button.
 export function CockpitFloki({
   status,
   getLevel,

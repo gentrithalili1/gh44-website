@@ -38,8 +38,6 @@ const FLIGHT_OUT_SECONDS = 1.2;
 // To the ship and back is quicker: the cockpit opens out of it within about a second.
 const SHIP_FLIGHT_IN_SECONDS = 0.7;
 const SHIP_FLIGHT_OUT_SECONDS = 0.9;
-// Flights curve: the camera swings this far round its point at mid-flight (radians), one way
-// going in and back the other way going out.
 const PLANET_SWING = 0.32;
 const SHIP_SWING = 0.2;
 // The view widens a little at a flight's fastest (degrees), and a lot through a launch's jump.
@@ -96,8 +94,6 @@ function getFocusPosition({ focus, sceneState }: { focus: CameraFocus; sceneStat
   }
 }
 
-// The angle the camera turns to for a focus: a planet keeps the one the visitor had at take-off,
-// home turns back to the home angle, and the cockpit looks from behind the ship toward the sun.
 function getFocusAngle({ flight, sceneState }: { flight: Flight; sceneState: SceneState }) {
   switch (flight.focus.kind) {
     case "home":
@@ -122,11 +118,6 @@ type UseCameraFlightParams = {
   controlsRef: RefObject<ComponentRef<typeof OrbitControls> | null>;
 };
 
-// Looks down on the system at an angle. Opening a planet flies in and frames it beside the panel
-// (or above the sheet), then follows it; the open cockpit flies in behind the ship, looking in
-// toward the sun, and follows it; closing flies home and turns back to the home angle. Between flights the visitor orbits
-// and zooms around what the camera follows. The first frame is already in place, so a deep link
-// starts framed.
 export function useCameraFlight({
   openPlanetId,
   sceneStateRef,
@@ -155,8 +146,6 @@ export function useCameraFlight({
   const angleRef = useRef<CameraAngle>(HOME_ANGLE);
   const zoomScaleRef = useRef(1);
 
-  // Starts a flight when the focus changes, even while the frame loop is paused; GSAP kills a
-  // running flight on unmount.
   useGSAP(
     () => {
       const flight = flightRef.current;
@@ -238,8 +227,6 @@ export function useCameraFlight({
         WARP_FOV_PUSH;
     camera.position.set(...placement.position);
     camera.lookAt(...placement.target);
-    // Flying into the black hole, the view lifts: straight ahead moves from the ship, behind
-    // the console, up into the middle of the windshield.
     const jumpCenter = getJumpCenter(sceneState.jump);
     const jumpLift = size.height * getJumpLift(size.width < PHONE_MAX_WIDTH);
     camera.setViewOffset(

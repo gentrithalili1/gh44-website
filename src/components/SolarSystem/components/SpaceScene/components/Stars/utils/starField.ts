@@ -7,8 +7,6 @@ const STAR_DEPTHS = [0.2, 0.5, 1] as const;
 
 type CreateStarFieldParams = { random?: () => number };
 
-// Stars at random spots all over a sphere around the system, each with a depth, size, twinkle
-// and hue.
 export function createStarField({ random = Math.random }: CreateStarFieldParams = {}) {
   const positions = new Float32Array(STAR_COUNT * 3);
   const depths = new Float32Array(STAR_COUNT);

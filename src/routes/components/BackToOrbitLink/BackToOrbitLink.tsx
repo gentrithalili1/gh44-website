@@ -23,8 +23,6 @@ function getLabel(destination: BackDestination) {
   }
 }
 
-// The way home, fixed in the top left corner. After a launch from the cockpit it leads back into
-// the cockpit.
 export function BackToOrbitLink({ destination = "orbit", onClick }: BackToOrbitLinkProps) {
   return (
     <Link

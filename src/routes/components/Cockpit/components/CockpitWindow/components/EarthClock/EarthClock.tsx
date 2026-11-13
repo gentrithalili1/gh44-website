@@ -13,8 +13,6 @@ interface EarthClockProps {
   yearsPassed: number;
 }
 
-// The date and time on Earth, ticking in the cockpit's header. Back from the black hole it
-// runs years ahead, and shows it.
 export function EarthClock({ yearsPassed }: EarthClockProps) {
   const now = useNow();
   if (now === null) return null;

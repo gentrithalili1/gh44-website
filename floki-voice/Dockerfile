@@ -1,5 +1,3 @@
-# Floki's voice: Piper text to speech over HTTP, for the site's speakFloki server function only.
-# Keep it on the private network: no public domain.
 FROM python:3.12-slim
 
 ARG PIPER_VERSION=1.8.0

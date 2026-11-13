@@ -4,8 +4,6 @@ import type { CodeLang } from "../types";
 
 type CodeSnippet = { planetId: PlanetId; lang: CodeLang; code: string };
 
-// Every code block's code, highlighted on the server by the planet route's loader. `planetId`
-// is the one place that says whose panel a snippet belongs to.
 export const CODE_SNIPPETS = {
   brainInstall: {
     planetId: "gh44-brain",

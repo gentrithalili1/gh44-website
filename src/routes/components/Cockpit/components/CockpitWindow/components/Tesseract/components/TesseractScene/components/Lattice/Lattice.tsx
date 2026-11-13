@@ -31,8 +31,6 @@ interface LatticeProps {
   sightline: Sightline;
 }
 
-// The tesseract's lattice: beams of streaked light crossing in three directions on the slant,
-// fading into the dark. Decorative: no events.
 export function Lattice({ sightline }: LatticeProps) {
   const [beams] = useState(() => getLatticeBeams(sightline));
   const [material] = useState(() => ({

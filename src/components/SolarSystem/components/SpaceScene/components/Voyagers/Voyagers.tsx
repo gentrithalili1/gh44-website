@@ -12,8 +12,6 @@ interface VoyagersProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// Voyager 1 and Voyager 2, past the last orbit and on their way out of the solar system, one
-// above the planets' plane and one below. Each shows its name when pointed at; nothing more.
 export function Voyagers({ isFaded, sceneStateRef }: VoyagersProps) {
   return VOYAGER_COURSES.map((course) => (
     <VoyagerProbe

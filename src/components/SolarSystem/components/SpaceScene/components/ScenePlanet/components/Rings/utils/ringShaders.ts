@@ -1,6 +1,3 @@
-// A ring band in its app's exact color, grainy along its radius like ice and dust, and dark
-// where the planet stands between it and the sun at the scene's origin. Colors are sRGB as
-// given; no conversion.
 export const RING_VERTEX_SHADER = /* glsl */ `
   varying vec3 vWorld;
   varying vec3 vCenter;

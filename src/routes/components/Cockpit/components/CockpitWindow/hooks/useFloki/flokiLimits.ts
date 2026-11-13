@@ -7,16 +7,12 @@ export const FLOKI_TIMEOUT_MS = 15_000;
 // Past this many tracked visitors, the ones with no recent requests are forgotten.
 const MAX_TRACKED_VISITORS = 1_000;
 
-// The visitor's IP. Coolify's proxy appends the address it saw to X-Forwarded-For, so the last
-// entry is the real one; earlier entries come from the visitor and can be made up.
 function getVisitorIp() {
   const forwarded = getRequestHeader("x-forwarded-for")?.split(",").at(-1)?.trim();
 
   return forwarded || "unknown";
 }
 
-// One rate limit for a kind of request (questions, spoken lines), per visitor IP. In memory: it
-// resets when the server restarts.
 export function createRateLimit() {
   const requestTimes = new Map<string, readonly number[]>();
 

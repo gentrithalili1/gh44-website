@@ -24,8 +24,6 @@ interface CommitShelfProps {
   onSelect: (index: number) => void;
 }
 
-// The shelf in the tesseract: one book per commit. The book under the pointer (or tapped) is
-// the one in view.
 export function CommitShelf({ count, selectedIndex, onSelect }: CommitShelfProps) {
   const [positions] = useState(() => getBookPositions({ count }));
   const [size] = useState(() => getShelfSize({ count }));

@@ -1,5 +1,3 @@
-// GLSL shared by the scene's shaders: 3D simplex noise (Ian McEwan and Stefan Gustavson, MIT)
-// from -1 to 1, and `fbm`, four octaves of it, for clouds, rock and plasma.
 export const NOISE_GLSL = /* glsl */ `
   vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
   vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }

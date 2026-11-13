@@ -3,8 +3,6 @@ import { ROLES } from "./roles";
 import { THEME_TOOLS } from "./themeTools";
 
 export type PlanetFeatures = {
-  // Drawn on the body: Mercury's craters, Venus' clouds, Earth's landmasses, Mars' dust,
-  // Jupiter's bands and red spot, Neptune's haze.
   surface?: "craters" | "clouds" | "continents" | "dust" | "storms" | "haze";
   // Earth's moon, Jupiter's company moons, Mars' Phobos and Deimos, Neptune's agent rocks.
   orbiters?: "moon" | "companies" | "probes" | "agents";
@@ -52,8 +50,6 @@ export type DecorativePlanet = PlanetBody & { kind: "decorative" };
 
 export type SolarPlanet = Planet | DecorativePlanet;
 
-// The site's planets: Earth, Mars, Jupiter, Saturn and Neptune, in real order outward from the
-// sun. Not to scale: the gaps grow outward and the whole system fits the screen.
 export const PLANETS = [
   {
     kind: "site",
@@ -147,8 +143,6 @@ export const PLANETS = [
   },
 ] as const satisfies readonly Planet[];
 
-// The planets with no page yet, between the site's own. Move one into PLANETS, with its copy, to
-// attach a project to it.
 export const DECORATIVE_PLANETS = [
   {
     kind: "decorative",

@@ -1,8 +1,5 @@
 import type { Point } from "#/components/SolarSystem/types";
 
-// The ship's body in its own units, nose toward -z: the same length and wingspan as its outline
-// in `ship.ts`.
-
 // The fuselage's radius along its length, nose to tail: spun round its axis.
 export const FUSELAGE_PROFILE = [
   { x: 0, y: -7 },

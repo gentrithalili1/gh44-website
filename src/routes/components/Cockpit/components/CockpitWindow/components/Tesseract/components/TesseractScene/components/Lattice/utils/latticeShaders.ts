@@ -1,6 +1,3 @@
-// A beam is made of streaks running its whole length: thin bands of warm light and dark, like
-// stretched time. Each beam gets its own bands from where it sits. Light travels slowly along
-// it, and it fades into the dark with distance. Colors are sRGB as given; no conversion.
 export const BEAM_VERTEX_SHADER = /* glsl */ `
   varying vec3 vLocal;
   varying vec3 vNormalLocal;

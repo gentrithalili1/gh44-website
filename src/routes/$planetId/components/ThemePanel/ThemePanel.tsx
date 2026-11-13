@@ -34,8 +34,6 @@ interface ThemePanelProps {
   code: HighlightedCode;
 }
 
-// gh44-theme: its palette, and a tab per app with that app's install steps. The URL holds the
-// open app (`?app=`), so Saturn's ring bands can open one.
 export function ThemePanel({ code }: ThemePanelProps) {
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();

@@ -49,8 +49,6 @@ const ROCK_CRATERS = [
   { x: 0.35, y: 0.05, radius: 0.22 },
   { x: -0.1, y: 0.45, radius: 0.18 },
 ] as const;
-// Mars' two small, lumpy moons: Phobos, bigger, hugging the planet and fast (one lap in under 8
-// hours); Deimos, smaller, farther out and slow (30 hours). gh44-confirm's resolve and reject.
 const MARS_MOONS = [
   {
     id: "phobos",

@@ -10,12 +10,8 @@ import { PHONE_MAX_WIDTH, toPlanePosition } from "../../../utils/sceneMath";
 
 type Viewport = { width: number; height: number };
 
-// Where the camera looks (system units, `y` down), how many pixels one unit spans there, and
-// where that point sits on screen (pixels from the center, `y` down).
 export type CameraPose = { x: number; y: number; zoom: number; offset: Point };
 
-// Which way the camera looks at its point: `polar` radians off straight down, `azimuth` radians
-// around it (0 looks from the bottom of the screen).
 export type CameraAngle = { polar: number; azimuth: number };
 
 // The camera's vertical field of view, in degrees.
@@ -30,9 +26,6 @@ export type CameraFocus =
   | { kind: "planet"; planetId: string }
   | { kind: "ship" };
 
-// With the cockpit open, pixels per system unit on any screen, and how far off straight down the
-// camera looks: from just behind the ship, in toward the sun, so a planet or two is usually in
-// view through the windshield.
 const SHIP_ZOOM = 3;
 const SHIP_POLAR = 1.05;
 
@@ -150,8 +143,6 @@ function mix({ from, to, progress }: { from: number; to: number; progress: numbe
   return from + (to - from) * progress;
 }
 
-// From a step on the orbit plane to the pixels it spans on screen, per unit of zoom, seen from an
-// angle: across turns with the azimuth, and toward the viewer foreshortens with the polar angle.
 function toScreen({ step, angle }: { step: Point; angle: CameraAngle }): Point {
   const sin = Math.sin(angle.azimuth);
   const cos = Math.cos(angle.azimuth);
@@ -180,9 +171,6 @@ function getAnchorOnScreen({ pose, anchor, angle }: GetAnchorOnScreenParams): Po
   return { x: step.x * pose.zoom + pose.offset.x, y: step.y * pose.zoom + pose.offset.y };
 }
 
-// A point of the flight between two poses. Zoom blends on a log scale, so every zoom step feels
-// the same; the anchor (the planet flown to or from) moves along a straight line on screen
-// instead of drifting, from any angle and while the camera turns.
 export function mixPoses({
   from,
   to,
@@ -217,8 +205,6 @@ type MixAnglesParams = {
   from: CameraAngle;
   to: CameraAngle;
   progress: number;
-  // Radians the camera swings round its point at mid-flight, on top of the turn: the flight
-  // curves instead of sliding straight. None at either end.
   swing?: number;
 };
 
@@ -238,8 +224,6 @@ export function getCameraDistance({ viewport, zoom }: { viewport: Viewport; zoom
   return viewport.height / (2 * Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180) * zoom);
 }
 
-// The visitor zooms out at most this many times past home, far enough to see the system from
-// deep space, and in this many times past the closest a planet is framed.
 const ZOOM_OUT_LIMIT = 3.5;
 const ZOOM_IN_LIMIT = 1.5;
 
@@ -255,8 +239,6 @@ export function getDistanceLimits(viewport: Viewport) {
 
 type Offset = { x: number; y: number; z: number };
 
-// The angle a camera looks from, given where it sits relative to its point: the inverse of
-// `getCameraPlacement`.
 export function getCameraAngle(offset: Offset): CameraAngle {
   return {
     polar: Math.acos(offset.y / Math.hypot(offset.x, offset.y, offset.z)),
@@ -266,8 +248,6 @@ export function getCameraAngle(offset: Offset): CameraAngle {
 
 type GetCameraPlacementParams = { pose: CameraPose; angle: CameraAngle; viewport: Viewport };
 
-// Where the perspective camera goes for a pose seen from an angle, and the view offset that
-// moves its point to the pose's spot on screen.
 export function getCameraPlacement({ pose, angle, viewport }: GetCameraPlacementParams) {
   const distance = getCameraDistance({ viewport, zoom: pose.zoom });
   const target = toPlanePosition(pose);
@@ -287,8 +267,6 @@ export function getCameraPlacement({ pose, angle, viewport }: GetCameraPlacement
 
 type GetShipCameraPoseParams = { viewport: Viewport; shipPosition: Point };
 
-// Close in on the ship, low on the screen and centered: the cockpit's console covers it, and the
-// windshield above looks out on the space around it.
 export function getShipCameraPose({ viewport, shipPosition }: GetShipCameraPoseParams): CameraPose {
   return {
     x: shipPosition.x,
@@ -310,8 +288,6 @@ type GetCameraFocusParams = {
   flightPlanetId: string | undefined;
 };
 
-// The open cockpit holds the camera on the ship. Once it closes on a launch, the camera heads for
-// the destination ahead of the page, whose own flight then carries on.
 export function getCameraFocus({
   openPlanetId,
   isCockpitOpen,

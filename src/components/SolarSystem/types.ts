@@ -9,6 +9,4 @@ export type Shade = "soft" | "vivid";
 // A point in system units: `x` right, `y` down.
 export type Point = { x: number; y: number };
 
-// What a surface feature or a moon's crater is painted with: a palette color, or the page's
-// background (`shadow`), laid thin over the body to darken it.
 export type SurfaceColor = PaletteColor | "shadow";

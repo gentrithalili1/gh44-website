@@ -80,8 +80,6 @@ async function requestCompletion({
   return response;
 }
 
-// Asks Floki, on the server so the API key never reaches the browser. Every visitor IP gets a
-// limited number of questions per hour.
 export const askFloki = createServerFn({ method: "POST" })
   .validator(validateInput)
   .handler(async ({ data }): Promise<AskFlokiOutcome> => {

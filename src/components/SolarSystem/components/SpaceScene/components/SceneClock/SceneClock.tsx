@@ -10,8 +10,6 @@ interface SceneClockProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// Advances the scene's one clock once per frame. Planets, moons, satellites and the rocket read
-// its step.
 export function SceneClock({ sceneStateRef }: SceneClockProps) {
   useFrame((_, delta) => {
     sceneStateRef.current.frameStep = Math.min(delta, MAX_FRAME_STEP);

@@ -6,8 +6,6 @@ export type FlokiTurn = { role: "visitor" | "floki"; text: string };
 // Where Floki and the visitor are: aboard the ship, or inside the black hole.
 export type FlokiPlace = "cockpit" | "tesseract";
 
-// What Floki answers: words to say, a planet to fly to when the visitor asked to go, whether to
-// fly into the black hole, and whether to leave the tesseract when they asked to go back.
 export type FlokiReply = {
   say: string;
   go: PlanetId | undefined;

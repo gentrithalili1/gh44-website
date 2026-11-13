@@ -14,8 +14,6 @@ const MAX_PASSES = 50;
 
 type LabelPair = { label: LabelBox; other: LabelBox };
 
-// The way from `other` to `label` before any nudge: steady frame to frame, so the nudges change
-// smoothly as the planets move.
 function getPushDirection({ label, other }: LabelPair) {
   const x = label.x - other.x;
   const y = label.y - other.y;
@@ -32,8 +30,6 @@ type GetPushParams = {
   direction: LabelNudge;
 };
 
-// How much further apart, along `direction`, two labels must move to clear each other on either
-// axis.
 function getPush({ offset, clearance, direction }: GetPushParams) {
   const pushes = (["x", "y"] as const)
     .filter((axis) => direction[axis] !== 0)
@@ -45,9 +41,6 @@ function getPush({ offset, clearance, direction }: GetPushParams) {
   return Math.max(0, Math.min(...pushes));
 }
 
-// How far each label moves so no two come closer than `gap`: two labels that would touch move
-// apart along the line between them, each taking half. No label moves more than its own height,
-// so it always stays by its planet; a crowd too tight for that may still touch.
 export function getLabelNudges({ labels, gap }: GetLabelNudgesParams) {
   const nudges = new Map<string, LabelNudge>(labels.map((label) => [label.id, { x: 0, y: 0 }]));
 

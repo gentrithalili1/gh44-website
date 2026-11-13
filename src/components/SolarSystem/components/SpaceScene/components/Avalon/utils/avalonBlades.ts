@@ -1,12 +1,6 @@
 import { Shape } from "three";
 
-// The Avalon in its own units, nose toward +x: a long spine of twin rods from a domed engine at
-// the tail to a reactor ring at the nose, a hub midway, and three crescent hulls round it,
-// swept back from the nose like blades. Each hull turns with the others round the spine.
 export const BLADE_COUNT = 3;
-// A crescent hull from the side: its tips at `front` and `back` along the spine, held off it
-// (`lift` at the front tip, more at the back, so it sweeps out), bowing a further `reach` at its
-// widest, `thickness` thick in the middle and narrowing to points.
 export const BLADE = {
   front: 10,
   back: -6,
@@ -30,8 +24,6 @@ export function getBladeTurns() {
 
 type Point = { x: number; y: number };
 
-// A point on the crescent's outer edge, `share` (0 to 1) of the way from its front tip to its
-// back: clear of the spine, sweeping out toward the back and bowing out in the middle.
 export function getBladePoint(share: number): Point {
   const x = BLADE.front + (BLADE.back - BLADE.front) * share;
   const bow = Math.sin(Math.PI * share ** 0.85);

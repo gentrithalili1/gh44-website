@@ -1,8 +1,5 @@
 import { TUNNEL_DEPTH } from "./warpField";
 
-// Streaks are placed in the camera's own space, so they always rush straight at the visitor:
-// each runs along the view axis, from its head (corner tail 0) to a tail that grows with the
-// jump. They fade in out of the distance and out before they reach the camera.
 export const WARP_VERTEX_SHADER = /* glsl */ `
   attribute vec4 aSeed;
   attribute vec2 aCorner;

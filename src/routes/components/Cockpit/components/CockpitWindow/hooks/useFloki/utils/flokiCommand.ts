@@ -4,8 +4,6 @@ import type { PlanetId } from "#/utils/planets";
 
 import type { FlokiPlace } from "../types";
 
-// Words a visitor may use for each destination, besides its name: the real planet, and what it
-// holds.
 const DESTINATION_ALIASES = {
   me: ["earth", "contact", "home planet"],
   "gh44-confirm": ["mars", "confirm", "dialog", "dialogs"],
@@ -31,8 +29,6 @@ const PREVIOUS_PATTERN =
   /^(?:please |floki )*(?:play |go to )?(?:the )?(?:previous(?: song| track| one)?|(?:last|go back a|back a) (?:song|track))(?: please)?$/;
 const TRACK_PATTERN = /^(?:please |floki )*(?:play|put on)(?: me| us)? (.+?)(?: on the radio)?$/;
 
-// Aboard the ship: "go to gargantua", "take me into the black hole", ... (no planet is called
-// that, so it never clashes with a destination).
 const GARGANTUA_PATTERN = /\b(?:gargantua|black ?hole)\b/;
 
 // Inside the tesseract: "let's go back", "take me home", "get us out of here", ...
@@ -100,9 +96,6 @@ function getTrackIndex({ text, tracks }: Pick<GetFlokiCommandParams, "text" | "t
   return matches.length === 1 ? matches[0] : undefined;
 }
 
-// A plain order Floki carries out without thinking: fly to one clear destination, change his
-// humor setting, or work the radio; inside the tesseract, leave it or say what it is. Anything
-// else is a question for the model.
 export function getFlokiCommand({
   text,
   tracks,

@@ -1,5 +1,3 @@
-// The parts of the Web Speech API's SpeechRecognition that Floki uses. TypeScript's DOM types
-// have its events but not the class, which Chrome and Safari still prefix.
 export type SpeechRecognitionLike = EventTarget & {
   lang: string;
   continuous: boolean;

@@ -5,8 +5,6 @@ import { useSpaceMode } from "#/hooks/useSpaceMode";
 // Set once the boot has played in this tab: later loads get the short version.
 const BOOTED_KEY = "gh44-booted";
 
-// pending: server and hydration, before the browser is known. skip: no 3D scene to wait for.
-// quick: the boot already played this session. full: the whole boot log.
 type BootModeStatus = "pending" | "skip" | "quick" | "full";
 
 function subscribeToNothing() {

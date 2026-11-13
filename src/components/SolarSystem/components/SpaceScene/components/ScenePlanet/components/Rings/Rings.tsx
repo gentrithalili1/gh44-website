@@ -14,8 +14,6 @@ interface RingsProps {
   onHoverChange: (change: HoverChange) => void;
 }
 
-// Saturn's rings around its tipped equator. Each band names its app on hover and holds the
-// planet still.
 export function Rings({ bands, planetSize, onHoverChange }: RingsProps) {
   const [hoveredBandId, setHoveredBandId] = useState<string | null>(null);
 

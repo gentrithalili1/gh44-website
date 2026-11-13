@@ -1,9 +1,5 @@
 import { NOISE_GLSL } from "#/components/SolarSystem/components/SpaceScene/utils/noiseShader";
 
-// Black fur: strands of slightly lighter and darker hair running down each part, lit warm from
-// the front, with a cool light catching the edge of his shape so it reads against the dark, and
-// a faint sheen along the strands. The lights are fixed to the view, so he is lit the same in
-// the tesseract and in the cockpit. Colors are sRGB as given; no conversion.
 export const FUR_VERTEX_SHADER = /* glsl */ `
   varying vec3 vLocal;
   varying vec3 vNormal;

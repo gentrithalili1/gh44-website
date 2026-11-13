@@ -28,8 +28,6 @@ export function getReplayDuration(script: readonly ReplayLine[]) {
   return script.reduce((duration, line) => duration + getLineDuration(line), 0);
 }
 
-// How much of a line shows `elapsedMs` into it: prompts type in after a pause, replies appear
-// whole once theirs is over.
 function getShownLength({ line, elapsedMs }: { line: ReplayLine; elapsedMs: number }) {
   if (elapsedMs >= getLineDuration(line)) return line.text.length;
 

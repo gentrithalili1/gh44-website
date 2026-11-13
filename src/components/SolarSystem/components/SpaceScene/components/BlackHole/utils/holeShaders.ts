@@ -1,9 +1,5 @@
 import { NOISE_GLSL } from "#/components/SolarSystem/components/SpaceScene/utils/noiseShader";
 
-// The black hole on a flat plane facing the camera: a black shadow, a thin ring of light at its
-// edge, the far side of its disk bent into a halo over and under it, and the near side of the
-// disk as a flat band across the front. The gas turns round it, and the side turning toward the
-// viewer is brighter. Colors are sRGB as given; no conversion.
 export const HOLE_VERTEX_SHADER = /* glsl */ `
   varying vec2 vUv;
 

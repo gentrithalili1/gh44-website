@@ -1,14 +1,9 @@
-// Both probes left the planets behind long ago: each flies straight out from the sun, from well
-// past the last orbit (478) until it is out of sight, then is found again where it started. Scene
-// units and seconds.
 const COURSE = { from: 720, to: 1040, speed: 1.1 } as const;
 // A probe fades in over this share of its course, and out over the same share at the end.
 const FADE_SHARE = 0.08;
 
 export type VoyagerCourse = {
   id: "voyager1" | "voyager2";
-  // The way out from the sun, one unit long: left and up on the home view for Voyager 1 (it
-  // left above the planets' plane), right and down for Voyager 2 (below it).
   heading: readonly [number, number, number];
   // How far along its course it starts: the two are never level.
   lead: number;

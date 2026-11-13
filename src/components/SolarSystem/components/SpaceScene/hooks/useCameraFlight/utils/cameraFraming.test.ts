@@ -28,8 +28,6 @@ import {
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
 
-// Where a system point lands on screen, in pixels from the top left, through a real perspective
-// camera placed for the pose.
 function project({
   pose,
   point,
@@ -336,8 +334,6 @@ describe("mixPoses", () => {
   });
 
   it("zooms on a log scale and moves the anchor straight across the screen", () => {
-    // Halfway: zoom 2 (between 1 and 4 on a log scale); the anchor sits halfway between 100px
-    // right of center and 360px left of it: 130px left.
     const pose = mixPoses({ from, to, anchor, progress: 0.5, ...angles });
 
     expect(pose.zoom).toBeCloseTo(2);

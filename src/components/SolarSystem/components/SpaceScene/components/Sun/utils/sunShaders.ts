@@ -1,7 +1,5 @@
 import { NOISE_GLSL } from "#/components/SolarSystem/components/SpaceScene/utils/noiseShader";
 
-// The sun's surface: slow boiling cells between a cooler and a hotter color, darker toward the
-// edge. Colors are sRGB as given; no conversion.
 export const SUN_VERTEX_SHADER = /* glsl */ `
   varying vec3 vLocal;
   varying vec3 vWorld;
@@ -46,8 +44,6 @@ export const SUN_FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-// The corona: a flat glow facing the camera, fading from the sun's edge outward, with slow
-// streamers reaching further in some directions than others.
 export const CORONA_VERTEX_SHADER = /* glsl */ `
   varying vec2 vUv;
 

@@ -10,8 +10,6 @@ type PlaybackSnapshot = { status: PlaybackStatus; progress: number };
 const WAITING: PlaybackSnapshot = { status: "waiting", progress: 0 };
 const DONE: PlaybackSnapshot = { status: "done", progress: 1 };
 
-// A small store, so the observer and the animation frames live outside render and the element's
-// ref callback stays the same function for the element's whole life.
 function createPlayback(durationMs: number) {
   let snapshot = WAITING;
   let stopPlaying: (() => void) | undefined;
@@ -78,8 +76,6 @@ function getServerSnapshot() {
   return WAITING;
 }
 
-// Plays once, over `durationMs`, the first time the element comes on screen, and again on
-// `replay`. With reduced motion it ends at once.
 export function usePlayOnScreen(durationMs: number) {
   const [playback] = useState(() => createPlayback(durationMs));
   const snapshot = useSyncExternalStore(

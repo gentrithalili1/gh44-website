@@ -30,8 +30,6 @@ const HIT_AREA_SCALE = 2.5;
 const FACING = new Vector3(0, 0, 1);
 const EARTH_MOON_ID = "moon";
 
-// A crater drawn on the rock's disc, moved onto its sphere on the side facing the home view and
-// turned to lie flat on it.
 function getCraterPlacement({ crater, radius }: { crater: OrbiterCrater; radius: number }) {
   const normal = new Vector3(
     crater.x,
@@ -52,8 +50,6 @@ interface OrbiterProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// One moon or rock on its orbit; it names itself on hover, holds its planet still,
-// and opens the planet on click.
 export function Orbiter({ orbiter, onHoverChange, onPlanetClick, sceneStateRef }: OrbiterProps) {
   const meshRef = useRef<Mesh>(null);
   const angleRef = useRef(orbiter.phase);

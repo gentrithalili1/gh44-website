@@ -2,9 +2,6 @@ import { DoubleSide } from "three";
 
 import { PALETTE } from "#/utils/palette";
 
-// The probe in its own units, its dish opening toward +z: the big white dish with its feed, the
-// ten-sided bus behind it, the long magnetometer boom to one side, the power source on a short
-// boom to the other, the instrument boom, and two whip antennas.
 const QUARTER_TURN = Math.PI / 2;
 const DISH = { radius: 3.7, depth: 1.2 } as const;
 const BUS = { radius: 1.5, length: 1, sides: 10, z: -1 } as const;

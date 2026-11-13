@@ -38,8 +38,6 @@ function renderLaunchDialog(dialog: Omit<PromiseConfirmationData, "customCompone
   );
 }
 
-// The package's live demo: `await confirm()` resolves on launch and rejects on abort. The rocket
-// stands on Mars while the dialog asks, and flies into orbit around it on launch.
 export function LaunchDemo() {
   const confirmation = usePromiseConfirmation();
   const rocketLaunch = useRocketLaunch();

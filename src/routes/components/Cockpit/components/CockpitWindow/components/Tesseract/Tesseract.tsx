@@ -36,10 +36,6 @@ interface TesseractProps {
   onReturn: () => void;
 }
 
-// Inside the black hole: a lattice of light with Floki floating in the middle, and a shelf with
-// one book for every commit of this site. Floki is there to talk to, typed or out loud: he says
-// what the place is, and leads the way back when asked. Pointing at a book (or moving the
-// slider) shows its commit.
 export function Tesseract({
   flokiStatus,
   canListen,

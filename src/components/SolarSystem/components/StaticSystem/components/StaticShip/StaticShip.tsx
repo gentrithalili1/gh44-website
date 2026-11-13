@@ -11,8 +11,6 @@ interface StaticShipProps {
   isPlanetOpen: boolean;
 }
 
-// The gh44 explorer, still, between Mars and Jupiter: it opens the cockpit, from any page. It
-// steps back with everything else while a planet is open, and comes forward when pointed at.
 export function StaticShip({ isPlanetOpen }: StaticShipProps) {
   const explorer = useExplorer();
 

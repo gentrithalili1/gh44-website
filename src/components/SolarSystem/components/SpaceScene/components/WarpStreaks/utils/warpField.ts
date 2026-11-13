@@ -1,5 +1,3 @@
-// Streaks fill a tunnel ahead of the camera, in the camera's own space: each has an angle round
-// the view axis, a distance from it, a starting depth and a speed.
 export const STREAK_COUNT = 150;
 export const TUNNEL_DEPTH = 1600;
 const TUNNEL_RADIUS = { min: 45, max: 420 } as const;

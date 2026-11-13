@@ -22,8 +22,6 @@ interface CockpitStatusProps {
   onSpacewalk: () => void;
 }
 
-// The strip on top of the dashboard, in cards: Earth's date and time, the exit out on a
-// spacewalk and, on a phone, the one that folds the panel down to this strip and back.
 export function CockpitStatus({
   titleId,
   hasSignal,
@@ -36,8 +34,6 @@ export function CockpitStatus({
   onSpacewalk,
 }: CockpitStatusProps) {
   return (
-    // Docked on a phone it sits at the bottom of the screen, high enough that the site's music
-    // button in the corner stays under it: the strip keeps the whole width.
     <div data-docked={isDocked ? "" : undefined} className="flex min-w-0 items-stretch gap-2">
       <h2 id={titleId} className="sr-only">
         {messages.title}

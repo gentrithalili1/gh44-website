@@ -9,9 +9,6 @@ import { setAudioSessionType } from "./utils/audioSession";
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
 
-// What happened to a line: it played to the end, a new line, stop or closing the cockpit cut it
-// off, the browser blocked sound before the visitor's first click or key, or it could not be
-// voiced.
 export type FlokiSpeech = "spoken" | "interrupted" | "blocked" | "silent";
 
 async function requestSpeech(text: string): Promise<SpeakFlokiOutcome> {
@@ -23,8 +20,6 @@ async function requestSpeech(text: string): Promise<SpeakFlokiOutcome> {
   }
 }
 
-// An audio element: the fallback when the audio graph can't play the line. iOS lets it play
-// after the network round trip only if a tap already started it (see prepare).
 function playElement({ audio, audioUrl }: { audio: HTMLAudioElement; audioUrl: string }): Playback {
   audio.src = audioUrl;
   let finish: (result: "ended" | "blocked") => void = () => {};
@@ -52,21 +47,15 @@ function playElement({ audio, audioUrl }: { audio: HTMLAudioElement; audioUrl: s
 }
 
 type UseFlokiVoiceParams = {
-  // Plays a line through the audio graph, which a tap or key press already started, so Safari
-  // lets it play after the network round trip.
   playVoice?: PlayVoice;
 };
 
-// Floki's voice: speaks one line at a time. A new line, stop, or closing the cockpit cuts off
-// the one playing, including one still on its way from the server.
 export function useFlokiVoice({ playVoice }: UseFlokiVoiceParams = {}) {
   // Preparing while the line is on its way from the server, speaking once it plays.
   const [status, setStatus] = useState<"quiet" | "preparing" | "speaking">("quiet");
   const playbackRef = useRef<Playback | undefined>(undefined);
   // The audio element a tap unlocked, reused for every line.
   const elementRef = useRef<HTMLAudioElement | undefined>(undefined);
-  // Bumped by every new line, every stop and closing the cockpit, so a line that is cut off
-  // never plays.
   const lineIdRef = useRef(0);
   const isMountedRef = useRef(false);
 
@@ -79,15 +68,11 @@ export function useFlokiVoice({ playVoice }: UseFlokiVoiceParams = {}) {
     };
   }, []);
 
-  // Unlocks the voice's audio element. Call it straight from a click or key press: iOS only
-  // lets an element play later if a tap started it once.
   function prepare() {
     if (elementRef.current || typeof Audio === "undefined") return;
     const audio = new Audio(SILENT_WAV);
     elementRef.current = audio;
     audio.play().catch(() => {
-      // Refused (no gesture yet): the next gesture tries again. Meanwhile lines fall back to the
-      // audio graph, or stay on screen.
       if (elementRef.current === audio) elementRef.current = undefined;
     });
   }

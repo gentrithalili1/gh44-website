@@ -7,8 +7,6 @@ interface SpacewalkDoorProps {
   onSpacewalk: () => void;
 }
 
-// The way out on a spacewalk: a rose card with the cockpit's hatch, its name beside it on a wide
-// screen.
 export function SpacewalkDoor({ isLocked, onSpacewalk }: SpacewalkDoorProps) {
   return (
     // The whole card is the exit, in rose like a hatch's warning light.

@@ -38,8 +38,6 @@ interface CodeBlockProps {
   onSelectTab?: (tabId: string) => void;
 }
 
-// Docs-style code: tabs, server-highlighted code typed in the first time it shows, and a copy
-// button.
 export function CodeBlock({ label, tabs, selectedTabId, onSelectTab }: CodeBlockProps) {
   const id = useId();
   const [ownSelectedTabId, setOwnSelectedTabId] = useState(tabs[0]?.id);

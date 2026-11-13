@@ -28,8 +28,6 @@ interface OrbitersProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// A planet's moons and satellites, each on its orbit around the planet's equator, passing behind
-// and in front of it.
 export function Orbiters({ orbiters, onHoverChange, onPlanetClick, sceneStateRef }: OrbitersProps) {
   const [orbits] = useState(() =>
     orbiters.map((orbiter) => ({

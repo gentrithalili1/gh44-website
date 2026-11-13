@@ -1,13 +1,9 @@
 import { DESTINATIONS, type Destination } from "#/utils/destinations";
 
-// A run of a printed line: plain text, or a destination's name, which links to it.
-// A name's `start` (its index in the line) keys it.
 export type LineSegment =
   | { kind: "text"; text: string }
   | { kind: "destination"; destination: Destination; start: number };
 
-// A whole name between spaces, commas or the line's ends: never part of a word or a route.
-// Longest first, so a name never matches the start of a longer one.
 const NAME_PATTERN = new RegExp(
   `(?<=^|[\\s,])(${DESTINATIONS.map((destination) => destination.name)
     .sort((a, b) => b.length - a.length)

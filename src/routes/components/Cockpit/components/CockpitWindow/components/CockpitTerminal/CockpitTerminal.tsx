@@ -29,8 +29,6 @@ interface CockpitTerminalProps {
   onJump: () => void;
 }
 
-// The terminal on the center screen, the ship's command line. Every destination it prints is a
-// link: clicking one runs `go` for it.
 export function CockpitTerminal({
   terminal,
   isLocked,
@@ -197,8 +195,6 @@ export function CockpitTerminal({
 
   return (
     <section aria-label={messages.title} className="flex min-h-0 w-full flex-1 flex-col">
-      {/* Reversed, so the newest line stays in view as lines arrive. A click anywhere in the
-          window types at the prompt, like a terminal. */}
       <div
         onClick={handleScreenClick}
         className="flex min-h-0 flex-1 cursor-text flex-col-reverse overflow-y-auto p-3 text-xs/[1.6] text-foreground md:text-[0.8125rem]/[1.65] selection:bg-clay/30 [scrollbar-color:var(--rule)_transparent] [scrollbar-width:thin] md:p-4"
@@ -234,8 +230,6 @@ export function CockpitTerminal({
                   autoCapitalize="off"
                   spellCheck={false}
                   enterKeyHint="go"
-                  // iOS zooms into inputs under 16px: on phones the input is 16px scaled to 75%,
-                  // the terminal's 12px, laid over the drawn text.
                   className="absolute top-0 left-0 h-[133.334%] w-[133.334%] min-w-0 origin-top-left scale-75 bg-transparent text-base text-transparent caret-transparent outline-none selection:bg-clay/30 md:h-full md:w-full md:scale-100 md:[font-size:inherit]"
                 />
                 {/* What was typed, drawn again with a block cursor at the caret. */}

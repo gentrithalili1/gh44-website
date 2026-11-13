@@ -4,8 +4,6 @@ import type { PlanetBody } from "#/utils/planets";
 
 type PaintStyle = { color: SurfaceColor; shade: Shade; opacity: number };
 
-// What to paint on a planet's map, in its share (0 to 1) of the map's width (`u`, west to east)
-// and height (`v`, north to south): a band all the way round, or a round feature.
 export type SurfacePaint =
   | (PaintStyle & { kind: "stripe"; top: number; bottom: number })
   | (PaintStyle & { kind: "spot"; u: number; v: number; radiusU: number; radiusV: number });
@@ -24,8 +22,6 @@ function getStyle({ color, shade, opacity }: SurfaceShape): PaintStyle {
   return { color, shade, opacity };
 }
 
-// One surface shape, drawn flat on the disc, painted where it lies on the globe: bands keep their
-// latitudes, features their spot on the side facing the camera.
 function getShapePaint({ shape, radius }: { shape: SurfaceShape; radius: number }): SurfacePaint[] {
   switch (shape.kind) {
     case "polygon": {

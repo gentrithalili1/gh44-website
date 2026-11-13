@@ -1,5 +1,3 @@
-// A single shooting star every 5 seconds, a meteor shower every 10. A single due inside a
-// shower's window is skipped.
 export const SINGLE_INTERVAL = 5;
 export const SHOWER_INTERVAL = 10;
 const SHOWER_CLEARANCE = 2.5;
@@ -11,8 +9,6 @@ export const METEOR_SLOTS = 1 + MAX_SHOWER_METEORS;
 export const METEOR_OUTLINE_SIZE = 12;
 
 const MIN_SHOWER_METEORS = 5;
-// The radiant sits off screen in any direction, this share of the screen's diagonal from its
-// middle; meteors start between these shares of the diagonal out of it.
 const RADIANT_DISTANCE = 0.6;
 const MIN_SHOWER_DISTANCE = 0.2;
 const SHOWER_DISTANCE_RANGE = 0.55;
@@ -84,9 +80,6 @@ export function launchSingle({ meteor, viewport, random }: LaunchSingleParams) {
 
 type LaunchShowerParams = { meteors: Meteor[]; viewport: Viewport; random: Random };
 
-// 5 to 8 meteors flying out of one radiant off any side or corner of the screen, toward its
-// middle, one after another, each a little faster or slower and longer or shorter. Fills the
-// shower slots, after the single's.
 export function launchShower({ meteors, viewport, random }: LaunchShowerParams) {
   const count =
     MIN_SHOWER_METEORS + Math.floor(random() * (MAX_SHOWER_METEORS - MIN_SHOWER_METEORS + 1));
@@ -132,8 +125,6 @@ export function stepMeteor({ meteor, delta }: StepMeteorParams) {
 
 type WriteMeteorOutlineParams = { meteor: Meteor; positions: Float32Array; slot: number };
 
-// Writes a meteor's streak into its slot of `positions`: the head's two edges, then the tail's
-// point twice. No allocation, so it can run every frame.
 export function writeMeteorOutline({ meteor, positions, slot }: WriteMeteorOutlineParams) {
   const speed = Math.hypot(meteor.vx, meteor.vy) || 1;
   const acrossX = (-meteor.vy / speed) * (HEAD_WIDTH / 2);

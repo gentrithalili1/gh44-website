@@ -24,8 +24,6 @@ interface FetchBallProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// An easter egg: the ball `fetch` threw from the cockpit, in orbit round the sun from where the
-// ship was. Nobody has gone to get it.
 export function FetchBall({ isFaded, sceneStateRef }: FetchBallProps) {
   const secrets = useSecrets();
   const groupRef = useRef<Group>(null);

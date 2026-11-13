@@ -82,9 +82,6 @@ function getHearingLine(hearing: FlokiHearing) {
   }
 }
 
-// Talking with Floki in the cockpit: typed questions, and conversations started from his
-// screen. His lines print in the terminal, he says them out loud, and he flies once he has said
-// where.
 export function useFlokiTalk({ floki, terminal, onGo, onBack, onJump }: UseFlokiTalkParams) {
   // A conversation goes on, turn after turn, until it ends; a newer one replaces it.
   const [conversation, setConversation] = useState<"off" | "on">("off");
@@ -102,8 +99,6 @@ export function useFlokiTalk({ floki, terminal, onGo, onBack, onJump }: UseFloki
     setConversation("off");
   }
 
-  // Floki answers on screen and out loud, and flies once he has said it. Returns whether the
-  // conversation can go on.
   async function ask(question: string) {
     const outcome = await floki.ask(question);
     const line = getFlokiLine(outcome);
@@ -137,8 +132,6 @@ export function useFlokiTalk({ floki, terminal, onGo, onBack, onJump }: UseFloki
     return false;
   }
 
-  // Talk is one question: Floki listens, answers, and closes the mic. A tap while he listens or
-  // speaks stops him. He never listens while he speaks, so he can't hear himself.
   async function talk() {
     if (conversation === "on" || floki.status === "listening" || floki.status === "speaking") {
       endConversation();
@@ -168,8 +161,6 @@ export function useFlokiTalk({ floki, terminal, onGo, onBack, onJump }: UseFloki
     if (isCurrent()) endConversation();
   }
 
-  // The visitor takes the controls (a typed go, a destination click): Floki stops, and his
-  // pending answer can't fly anywhere else.
   function takeControls() {
     endConversation();
     floki.stop();

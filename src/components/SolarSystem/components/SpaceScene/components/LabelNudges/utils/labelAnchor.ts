@@ -15,9 +15,6 @@ type GetLabelAnchorParams = {
   viewport: { width: number; height: number };
 };
 
-// Where a planet's label hangs on screen, in pixels from the top left: under the planet as the
-// camera sees it, one radius below its center along the screen's up, as the label's own
-// camera-facing anchor puts it.
 export function getLabelAnchor({ position, size, camera, viewport }: GetLabelAnchorParams) {
   screenUp.set(0, 1, 0).applyQuaternion(camera.quaternion);
   anchor

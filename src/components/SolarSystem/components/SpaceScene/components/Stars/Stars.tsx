@@ -16,8 +16,6 @@ import { getStarTint, stepStarTint } from "./utils/starTint";
 // Zoomed in past this many times, stars draw a little larger.
 const ZOOMED_IN = 1.5;
 const ZOOMED_IN_SIZE = 1.2;
-// While the ship cruises with the cockpit open, the sky turns at this many radians a second:
-// space slides by the windshield instead of standing still.
 const CRUISE_SPEED = 0.05;
 const CRUISE_LAMBDA = 2;
 
@@ -27,13 +25,8 @@ interface StarsProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// Twinkling stars and a faint band of dust all around the system, far behind it. They take the
-// open planet's color,
-// easing there and back, and the sky turns past the cockpit while the ship cruises.
 export function Stars({ openPlanetId, isCruising, sceneStateRef }: StarsProps) {
   const [field] = useState(() => createStarField());
-  // Passed through the constructor, so the material keeps this uniforms object: the `uniforms`
-  // prop copies each uniform, and reassigned values would never reach it.
   const [material] = useState(() => ({
     vertexShader: STAR_VERTEX_SHADER,
     fragmentShader: STAR_FRAGMENT_SHADER,

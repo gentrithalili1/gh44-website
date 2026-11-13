@@ -35,8 +35,6 @@ const PULSE_SPEED = 1.2;
 const SPHERE_SEGMENTS = 64;
 // The sun turns once in this many seconds.
 const SPIN_PERIOD = 240;
-// The sun lights every planet from its center, as strongly near as far. Lambert surfaces reflect
-// a 1/pi share of it: with the ambient light, the side facing the sun shows its palette color.
 const LIGHT_INTENSITY = Math.PI * 0.85;
 // A flare swells the glow by this share and brightens it, up to full.
 const FLARE_GROWTH = 0.45;
@@ -51,9 +49,6 @@ interface SunProps {
   isPlanetOpen: boolean;
 }
 
-// gh44: everything revolves around it, and it lights the planets. Its surface boils and its
-// corona reaches out in slow streamers. Decorative, with no label; poked, it flares, and Floki
-// objects out loud (an easter egg).
 export function Sun({ isPlanetOpen }: SunProps) {
   // Passed through the constructor, so each material keeps its uniforms object.
   const [surface] = useState(() => ({

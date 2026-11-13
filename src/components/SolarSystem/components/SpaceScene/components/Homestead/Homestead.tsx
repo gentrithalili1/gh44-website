@@ -22,9 +22,6 @@ interface HomesteadProps {
   isFaded: boolean;
 }
 
-// A planet from another story, the Avalon's destination: green, with a band of cloud. It is
-// outside the home view, found by turning the camera. It shows its name when pointed at.
-// Decorative otherwise: nothing to click.
 export function Homestead({ isFaded }: HomesteadProps) {
   const groupRef = useRef<Group>(null);
   const cloudsRef = useRef<Group>(null);

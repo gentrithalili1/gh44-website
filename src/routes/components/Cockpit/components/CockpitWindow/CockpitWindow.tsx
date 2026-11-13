@@ -33,8 +33,6 @@ import { messages } from "./messages";
 
 const FOCUSABLE_SELECTOR = "button:not(:disabled), input, a[href]:not([aria-disabled='true'])";
 
-// The iris opens around the ship, which the camera holds this far down the screen. The screens
-// power on once the cockpit is in view: after the flight in, or right away.
 const SHIP_Y = `${COCKPIT_SHIP_Y * 100}%`;
 const COCKPIT_STYLES = {
   flight: { "--ship-y": SHIP_Y, "--power-delay": "1000ms" },
@@ -62,8 +60,6 @@ function getAnimation({ reveal, isClosing, isLocked }: GetAnimationParams) {
 
 interface CockpitWindowProps {
   reveal: CockpitReveal;
-  // Opened by itself to greet the visitor: not modal, and focus stays on the page, until they
-  // step in.
   isGreeting: boolean;
   onBoard: () => void;
   // Fading out while the camera pulls back: no longer a dialog.
@@ -74,8 +70,6 @@ interface CockpitWindowProps {
   // The closing cockpit has faded out.
   onClosed: () => void;
   onGo: (destination: Destination) => void;
-  // The trip into the black hole: flying in, the cockpit goes dark; inside there is only black
-  // and the way back.
   jumpStatus: "idle" | "jumping" | "inside" | "returning";
   // Starts that flight; `onArrive` runs once the visitor is back.
   onJump: (onArrive: () => void) => void;
@@ -88,9 +82,6 @@ interface CockpitWindowProps {
 // What plays on the way into the black hole, if the radio is on.
 const JUMP_TRACK_TITLE = "s.t.a.y.";
 
-// Inside the gh44 explorer, full screen: an arched windshield with two struts looks out on the
-// live system, over a graphite console of bezeled screens: the terminal in the middle, Floki on
-// the left, the radar and the radio on the right.
 export function CockpitWindow({
   reveal,
   isGreeting,
@@ -177,8 +168,6 @@ export function CockpitWindow({
     onGo(destination);
   }
 
-  // Into the black hole (an easter egg): Floki stops, the radio finds the right track, and on
-  // the other side the terminal says what it cost.
   function handleJump() {
     flokiTalk.takeControls();
     setHasReturned(false);
@@ -238,8 +227,6 @@ export function CockpitWindow({
     }
   }
 
-  // A wide screen keeps the panel up, launches included. On a phone the visitor can dock it down
-  // to its status strip, and every launch and jump docks it so the flight shows.
   const isDocked = !isWideScreen && (panel === "hidden" || isLocked);
 
   function handlePanelToggle() {
@@ -281,8 +268,6 @@ export function CockpitWindow({
       className={`group/cockpit fixed inset-0 z-50 overflow-clip text-foreground outline-none md:[--console-height:47%] ${getAnimation({ reveal, isClosing, isLocked })}`}
     >
       <CockpitWindshield />
-      {/* The black hole's shadow takes the whole cockpit at the end of the flight in (a little
-          past its edges: the cockpit is still shaking), and lifts once the ship is back. */}
       <div className="pointer-events-none absolute -inset-1 z-20 flex flex-col items-center justify-center gap-5 bg-black opacity-0 group-data-[jump=back]/cockpit:animate-jump-back group-data-[jump=inside]/cockpit:pointer-events-auto group-data-[jump=inside]/cockpit:opacity-100 group-data-[jump=on]/cockpit:animate-jump-black">
         {jumpStatus === "inside" && spaceMode === "scene" ? (
           <Tesseract
@@ -309,8 +294,6 @@ export function CockpitWindow({
           </>
         ) : null}
       </div>
-      {/* On a phone it folds down to its status strip (its own `transform`, apart from the
-          boarding's `translate`). */}
       <div
         id={panelId}
         data-panel={isDocked ? "docked" : "shown"}
@@ -318,9 +301,6 @@ export function CockpitWindow({
       >
         <DashboardLip />
         <DashboardPlates />
-        {/* Desktop: Floki on the left, the terminal in the middle, the radar over the radio on
-            the right, the status strip over the terminal. Phones: the status strip on top (the
-            dock), then Floki beside the radar and the radio, the terminal under them. */}
         <div className="mx-auto grid max-w-[96rem] grid-cols-[8.5rem_minmax(0,1fr)] gap-2.5 px-3 pt-5 pb-4 md:h-full md:grid-cols-[minmax(0,1fr)_minmax(0,40rem)_minmax(0,1fr)] md:grid-rows-[auto_auto_minmax(0,1fr)] md:gap-x-6 md:gap-y-3 md:px-8 md:pt-9 md:pb-6">
           <div className="col-span-2 md:col-span-1 md:col-start-2 md:row-start-1">
             <CockpitStatus

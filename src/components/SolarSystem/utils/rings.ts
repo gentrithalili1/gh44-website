@@ -45,15 +45,11 @@ export function getRingBands(planet: PlanetBody): RingBand[] {
   }
 }
 
-// Uranus' ring, in planet radii: a thin band seen almost edge on, so it shows as a tall, narrow
-// ellipse, leaning slightly off vertical.
 const UPRIGHT_RING_START = 1.5;
 const UPRIGHT_RING_WIDTH = 0.12;
 const UPRIGHT_RING_SQUASH = 0.32;
 const UPRIGHT_RING_LEAN = 0.26;
 
-// A thin ring standing almost upright: a circle of these radii squashed to `squash` of its width,
-// then turned `lean` radians off vertical.
 export type UprightRing = {
   color: PaletteColor;
   innerRadius: number;

@@ -25,8 +25,6 @@ interface FlokiHeadProps {
   grille: ReactNode;
 }
 
-// Plates in the console's graphite, seams in its rule color, and lavender light where he is
-// alive: ears, eyes and the grille. The eyes dim while he stands by and pulse while he thinks.
 export function FlokiHead({ status, praiseCount, grille }: FlokiHeadProps) {
   return (
     <span
