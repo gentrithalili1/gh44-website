@@ -19,8 +19,6 @@ interface FlokiSignalProps {
   getLevel: () => number;
 }
 
-// Floki's signal bars: they follow the visitor's voice while he listens and his own while he
-// speaks, drawn every frame through `--floki-level` without re-rendering.
 export function FlokiSignal({ status, getLevel }: FlokiSignalProps) {
   const slabsRef = useRef<HTMLSpanElement>(null);
   const isLive = status === "listening" || status === "speaking";

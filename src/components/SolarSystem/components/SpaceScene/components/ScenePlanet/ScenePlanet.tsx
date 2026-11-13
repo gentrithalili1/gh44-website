@@ -57,9 +57,6 @@ interface ScenePlanetProps {
   labelList: HTMLUListElement;
 }
 
-// One planet on its orbit, carrying what says what it holds: surface, moons, satellites, rings
-// or the rocket. It moves every frame. A site planet holds still while hovered or open, and opens
-// its page on click; a decorative one only passes by, with no label.
 export function ScenePlanet({
   planet,
   openPlanetId,

@@ -48,8 +48,6 @@ const TILT_RADIANS = 0.07;
 const TILT_SPEED = 0.7;
 // How fast the bob settles when the ship stops, and picks up again.
 const BOB_LAMBDA = 3;
-// The engine glows softly, flickers a little, and flares while hovered, while the cockpit is
-// open and in flight.
 const GLOW_IDLE = 0.45;
 const GLOW_FLARED = 1;
 const GLOW_FLICKER = 0.08;
@@ -71,17 +69,12 @@ const LABEL_DROP = 4;
 // Over the labels, like the names of hovered moons.
 const LABEL_Z_INDEX_RANGE = [2, 0];
 
-// After `go` the cockpit shows its confirmation this long, then closes and the ship flies:
-// it turns toward the planet, then flies at it, under a second in all.
 const CONFIRM_SECONDS = 0.6;
 const TURN_SECONDS = 0.3;
 const TRAVEL_SECONDS = 0.6;
 const TRAVEL_STARTS_INTO_TURN = 0.6;
 const TURN_EASE = "power2.inOut";
 const TRAVEL_EASE = "power2.in";
-// The jump: the stars start to stretch while the confirmation still shows, seen through the
-// windshield, and the engine opens up as the ship leaves. On arrival the jump ends with a
-// brake that dips just past rest.
 const WARP_STARTS_AT = 0.15;
 const WARP_IN_SECONDS = 0.55;
 const WARP_IN_EASE = "power2.in";
@@ -111,8 +104,6 @@ function drawEngineGlow() {
   return canvas;
 }
 
-// Where the ship is headed from where, how far through the turn and the trip, how far into the
-// jump the stars are and how hard the engine pushes (GSAP drives them all).
 type ShipFlight = {
   planetId: string | null;
   home: ShipPose;
@@ -144,11 +135,6 @@ interface ExplorerShipProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// The gh44 explorer orbits the sun between Mars and Jupiter on the scene clock, nose first,
-// bobbing, its engine burning and now and then puffing a trail. It holds still while hovered.
-// Clicking it opens the cockpit: the camera flies in and follows it, its engine flared. On
-// `go` the stars stretch, it banks toward the planet and flies there, then the page opens. It steps back while a
-// planet is open, and still opens the cockpit from there, coming forward while hovered.
 export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps) {
   const explorer = useExplorer();
   const navigate = useNavigate();
@@ -190,8 +176,6 @@ export function ExplorerShip({ openPlanetId, sceneStateRef }: ExplorerShipProps)
   // Named like a planet while it orbits; behind an open planet only while pointed at.
   const isLabelShown = !isFlying && !isCockpitOpen && (!isFaded || isActive);
 
-  // `go`: a beat for the confirmation, the cockpit closes, the ship turns and flies, and the page
-  // opens on arrival; the camera's own flight takes over from there.
   useGSAP(
     () => {
       if (explorer.flight.status !== "flying") return;

@@ -6,8 +6,6 @@ type LaunchDialogProps = Pick<
   "text" | "description" | "confirmButtonLabel" | "cancelButtonLabel" | "onConfirm" | "onCancel"
 >;
 
-// The package's dialog in gh44 colors: it renders this inside its own overlay and resolves or
-// rejects the `confirm()` promise from the two buttons. Esc and the overlay's focus stay here.
 export function LaunchDialog({
   text,
   description,

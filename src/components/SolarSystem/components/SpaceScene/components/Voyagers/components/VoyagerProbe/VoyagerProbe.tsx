@@ -25,8 +25,6 @@ interface VoyagerProbeProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// One Voyager probe flying straight out from the sun, its dish turned back toward home. It
-// shows its name when pointed at. Decorative otherwise: nothing to click.
 export function VoyagerProbe({ course, name, isFaded, sceneStateRef }: VoyagerProbeProps) {
   const groupRef = useRef<Group>(null);
   const timeRef = useRef(0);

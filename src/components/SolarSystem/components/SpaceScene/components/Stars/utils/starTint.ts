@@ -8,8 +8,6 @@ import { FADE_LAMBDA } from "../../../utils/sceneMath";
 // Closer than this per channel, the tint snaps to its target.
 const SETTLED_DISTANCE = 0.001;
 
-// The stars take the open planet's color, and the foreground's at home. The channels stay
-// sRGB as written (no conversion to linear), because the star shaders output them as they are.
 export function getStarTint(openPlanetId: string | undefined) {
   const planet = findPlanet(openPlanetId);
 

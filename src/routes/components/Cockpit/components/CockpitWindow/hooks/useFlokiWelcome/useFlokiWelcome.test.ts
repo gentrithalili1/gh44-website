@@ -64,8 +64,6 @@ describe("useFlokiWelcome", () => {
     const prepareAudio = vi.fn(() => {
       if (hasActivation) isAudioUnlocked = true;
     });
-    // The voice comes back from the server later: it plays only if a gesture unlocked the audio
-    // by then.
     let hasGreeted = false;
     const lines: Promise<"spoken" | "blocked">[] = [];
     const greet = vi.fn(async () => {

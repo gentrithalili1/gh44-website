@@ -9,8 +9,6 @@ import { PALETTE, SPACE_COLORS } from "#/utils/palette";
 
 import { getRocketOrbit, getRocketPosition } from "./utils/rocketOrbit";
 
-// From the tail up: a nozzle, a round body with a porthole, and a pointed nose; three fins
-// flare out round the tail. In system units, ROCKET_HEIGHT tall in all.
 const ROCKET_SEGMENTS = 16;
 const BODY_RADIUS = 0.75;
 const NOZZLE = { bottomRadius: 0.55, topRadius: 0.4, height: 0.35 };
@@ -39,8 +37,6 @@ interface RocketProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// gh44-confirm's rockets: one stands on top of Mars while the panel's dialog asks, and every
-// launched one climbs into its own orbit around the planet and stays there.
 export function Rocket({ planetSize, sceneStateRef }: RocketProps) {
   const rocketLaunch = useRocketLaunch();
 

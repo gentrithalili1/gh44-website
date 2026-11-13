@@ -27,8 +27,6 @@ function getRingBandPath({ innerRadius, outerRadius }: RingBand) {
   return `${ellipse(outerRadius)} ${ellipse(innerRadius)}`;
 }
 
-// Uranus' upright ring: an ellipse squashed sideways, leaning off vertical. `half` keeps only its
-// right half, the near one.
 function getUprightRingPath({ ring, half }: { ring: UprightRing; half: "full" | "near" }) {
   const ellipse = (radius: number) => {
     const rx = radius * ring.squash;
@@ -48,8 +46,6 @@ interface SolarSystemPlanetProps {
   state: PlanetState;
 }
 
-// A still frame of one planet: what passes behind it, its body and surface, then what passes in
-// front (the near half of tilted orbits and rings).
 export function SolarSystemPlanet({ planet, x, y, state }: SolarSystemPlanetProps) {
   const rocketLaunch = useRocketLaunch();
   const orbiters = getOrbiters(planet).map((orbiter) => ({

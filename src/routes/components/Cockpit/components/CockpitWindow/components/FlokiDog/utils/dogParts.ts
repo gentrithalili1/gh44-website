@@ -1,6 +1,3 @@
-// Floki, sitting, facing +z, in his own units (about 2.3 tall), the ground under him at y 0.
-// His body is built from stretched balls, rounded rods and tapered rods; his head hangs off a
-// pivot at the top of his neck so it can turn, and his lower jaw off another so it can open.
 export type Triple = readonly [number, number, number];
 
 type Ball = { id: string; shape: "ball"; position: Triple; scale: Triple; rotation?: Triple };
@@ -31,8 +28,6 @@ const SIDES = [
   { id: "right", sign: 1 },
 ] as const;
 
-// Everything covered in fur below the neck: haunches, back, a deep chest, shoulders, the ruff
-// of longer fur down his neck, and his legs, the hind ones folded under him.
 export const BODY_PARTS: readonly DogPart[] = [
   { id: "haunch", shape: "ball", position: [0, 0.42, -0.34], scale: [0.4, 0.4, 0.5] },
   {
@@ -117,8 +112,6 @@ export const BODY_PARTS: readonly DogPart[] = [
 // The top of his neck, where his head turns.
 export const HEAD_PIVOT: Triple = [0, 1.6, 0.32];
 
-// His head, from that pivot: skull, cheeks, the flat of his forehead, and a long muzzle that
-// narrows to the nose.
 export const HEAD_PARTS: readonly DogPart[] = [
   { id: "skull", shape: "ball", position: [0, 0.16, 0], scale: [0.235, 0.225, 0.27] },
   { id: "brow", shape: "ball", position: [0, 0.2, 0.18], scale: [0.165, 0.11, 0.15] },
@@ -183,8 +176,6 @@ export const EARS = SIDES.map(({ id, sign }) => ({
   height: 0.44,
 }));
 
-// His tail lies on the ground behind him, curling to one side, bushy and narrowing to its tip;
-// it swings from where it starts.
 export const TAIL = {
   base: [0.1, 0.14, -0.66],
   radius: 0.1,
@@ -193,8 +184,6 @@ export const TAIL = {
   swing: 0.75,
 } as const;
 
-// The harness: a collar, a plate across his chest with his name, straps from the collar down
-// to a girth round his ribs, a plate on his back, and small lights.
 export const HARNESS = {
   collar: { position: [0, 1.31, 0.25], radius: 0.225, tube: 0.045, lean: QUARTER_TURN + 0.28 },
   girth: { position: [0, 0.98, 0.1], radius: 0.385, tube: 0.045, stretch: 1.12 },

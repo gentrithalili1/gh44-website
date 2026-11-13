@@ -3,13 +3,8 @@ import { createContext, use, useRef, useState } from "react";
 import type { Destination } from "#/utils/destinations";
 import { GARGANTUA_YEARS } from "#/utils/explorer";
 
-// How an open cockpit appears: the camera flies to the ship in the scene first and the cockpit
-// opens out of its window, or (no ship: reduced motion, no WebGL) it is there at once.
 export type CockpitReveal = "flight" | "instant";
 
-// A closing cockpit fades out while the camera pulls back; it is no longer a dialog by then. A
-// greeting cockpit opened by itself when the site loads: the page behind stays readable
-// and keeps focus until the visitor steps in.
 type Cockpit =
   | { status: "closed" }
   | { status: "open"; reveal: CockpitReveal; isGreeting: boolean }
@@ -18,16 +13,12 @@ type Cockpit =
 // The ship's trip to a destination, from the cockpit's `go` to the page opening.
 type ExplorerFlight = { status: "idle" } | { status: "flying"; destination: Destination };
 
-// The trip into the black hole (an easter egg): flying in after `go gargantua`, then inside,
-// where there is nothing but the way back; then flying back out to the solar system.
 type ExplorerJump =
   | { status: "idle" }
   | { status: "jumping" }
   | { status: "inside" }
   | { status: "returning" };
 
-// How a launch goes: the ship in the scene flies there first, or (no ship) the visitor arrives
-// at once and the page opens now.
 type LaunchOutcome = { status: "flying" } | { status: "arrived" };
 
 type Explorer = {
@@ -48,8 +39,6 @@ type Explorer = {
   launch: (destination: Destination) => LaunchOutcome;
   endFlight: () => void;
   jump: ExplorerJump;
-  // Flies into the black hole; `onArrive` runs once the visitor is back from it. Without a ship
-  // in the scene there is no flight: the visitor is inside at once.
   startJump: (onArrive: () => void) => void;
   // The flight in is over: nothing but black.
   reachHorizon: () => void;
@@ -77,8 +66,6 @@ interface ExplorerProviderProps {
   children: React.ReactNode;
 }
 
-// The gh44 explorer's state: its cockpit and its flight. The ship in the system and the cockpit
-// share it.
 export function ExplorerProvider({ children }: ExplorerProviderProps) {
   const [cockpit, setCockpit] = useState<Cockpit>(CLOSED);
   const [flight, setFlight] = useState<ExplorerFlight>(IDLE);

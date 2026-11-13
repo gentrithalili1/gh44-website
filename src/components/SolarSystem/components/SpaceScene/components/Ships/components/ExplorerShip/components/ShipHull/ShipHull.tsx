@@ -104,9 +104,6 @@ interface ShipHullProps {
   thrustRef: RefObject<number>;
 }
 
-// The explorer's body: a fuselage with swept wings, a tail fin and a glass canopy, lit by the
-// sun; an exhaust plume that stretches with thrust; and a blinking light on each wingtip.
-// Decorative: the ship's pointer target handles events.
 export function ShipHull({ flareRef, thrustRef }: ShipHullProps) {
   const [geometry] = useState(createGeometry);
   const [materials] = useState(createMaterials);

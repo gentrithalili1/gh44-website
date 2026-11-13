@@ -24,9 +24,6 @@ function getStatusText(status: MusicStatus) {
   }
 }
 
-// The console's radio: what plays, with play or stop, the next and previous tracks, and a
-// playlist to pick from (on phones it opens from its toggle). It is the same player as the music
-// button; without the track it is offline.
 export function CockpitRadio() {
   const music = useMusic();
   const playlistId = useId();

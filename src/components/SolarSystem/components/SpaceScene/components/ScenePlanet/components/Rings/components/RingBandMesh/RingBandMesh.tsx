@@ -15,8 +15,6 @@ interface RingBandMeshProps {
   onHoverChange: (isHovered: boolean) => void;
 }
 
-// One band of Saturn's rings: its app's exact palette color, grainy, with the planet's shadow
-// across it.
 export function RingBandMesh({ band, planetSize, onHoverChange }: RingBandMeshProps) {
   // Passed through the constructor, so the material keeps this uniforms object.
   const [material] = useState(() => ({

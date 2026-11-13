@@ -6,13 +6,9 @@ import type { PlanetState, Point } from "#/components/SolarSystem/types";
 export const PHONE_MAX_WIDTH = 720;
 // How fast fades and color changes settle (higher is faster).
 export const FADE_LAMBDA = 6;
-// A long frame (a background tab coming back) must not jump anything across its orbit, or
-// launch a burst of meteors: no frame moves the scene further than this many seconds.
 export const MAX_FRAME_STEP = 0.05;
 // Opacity of everything that steps back while a planet is open.
 export const FADED_OPACITY = 0.08;
-// Opacity of the planets through the cockpit's windshield: just short of full, so the console's
-// screens stay the brightest thing on board.
 export const WINDSHIELD_OPACITY = 0.85;
 
 // A press that moved further than this many pixels was a drag to orbit the camera, not a click.
@@ -23,14 +19,10 @@ export function isDragRelease(delta: number) {
   return delta > DRAG_TOLERANCE_PX;
 }
 
-// The system lies on the scene's x/z plane: system `y` (down on the home view) is the scene's
-// `z`, toward the viewer.
 export function toPlanePosition({ x, y }: Point): [number, number, number] {
   return [x, 0, y];
 }
 
-// The turn around the scene's up axis that points a model's nose (built along -z) along a
-// heading: radians clockwise from up on the home view, as the 2D drawings measure them.
 export function getPlaneYaw(heading: number) {
   return -heading;
 }

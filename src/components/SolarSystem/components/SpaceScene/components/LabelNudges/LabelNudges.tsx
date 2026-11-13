@@ -12,8 +12,6 @@ import { getLabelNudges, type LabelBox } from "./utils/labelNudges";
 // The least space between two labels, in pixels.
 const LABEL_GAP = 6;
 const NO_NUDGE = { x: 0, y: 0 } as const;
-// How fast a label eases to its new nudge (higher is faster): two labels part smoothly instead
-// of jumping.
 const NUDGE_LAMBDA = 8;
 
 function setNudge(nudge: { x: number; y: number }) {
@@ -29,9 +27,6 @@ interface LabelNudgesProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// On phones the inner planets pass close, and their fixed-size labels would touch: every frame,
-// labels that would ease apart, never further than a label's height from their planet. Desktop
-// has room, and an open planet hides the labels.
 export function LabelNudges({ labelList, openPlanetId, sceneStateRef }: LabelNudgesProps) {
   // Whether the labels may still carry a nudge from an earlier frame.
   const hasNudgesRef = useRef(false);

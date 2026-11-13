@@ -1,5 +1,3 @@
-// Launched rockets climb from Mars' pad into one of three orbits, each in its own plane through
-// the poles, so they spread round the planet instead of stacking.
 const ORBIT_GAP = 8;
 const ORBIT_STEP = 2;
 const ORBIT_LANES = 3;
@@ -32,8 +30,6 @@ type GetRocketPositionParams = {
   angle: number;
 };
 
-// Where a rocket is, in its planet's space (`y` up), and how far through its climb (0 to 1). It
-// starts straight up from the pad and eases out to its orbit.
 export function getRocketPosition({
   orbit,
   planetSize,

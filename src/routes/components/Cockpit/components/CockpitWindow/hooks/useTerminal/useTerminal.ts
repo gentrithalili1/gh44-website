@@ -12,8 +12,6 @@ import {
 
 import { messages } from "../../components/CockpitTerminal/messages";
 
-// A line on the screen: a command echoed at the prompt, what a command printed, what the
-// visitor and Floki said to each other, or an alert that stands out from the rest.
 export type TerminalLine = {
   id: number;
   kind: "command" | "output" | "visitor" | "floki" | "alert";

@@ -1,6 +1,3 @@
-// Stars sit on a far shell around the system and twinkle; they keep their pixel size at any
-// distance. Each leans a little cool or warm of the shared tint, as real stars do. Colors are
-// sRGB as given; no conversion.
 export const STAR_VERTEX_SHADER = /* glsl */ `
   attribute float aDepth;
   attribute float aSize;
@@ -62,8 +59,6 @@ export const NEBULA_FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-// Shooting stars are streaks on the star shell, from their head (aTail 0) fading to their tail
-// (aTail 1); each corner carries its meteor's life, so one draw holds them all.
 export const SHOOTING_STAR_VERTEX_SHADER = /* glsl */ `
   attribute float aTail;
   attribute float aLife;

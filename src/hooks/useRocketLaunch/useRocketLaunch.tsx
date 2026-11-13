@@ -1,7 +1,5 @@
 import { createContext, use, useReducer } from "react";
 
-// How gh44-confirm's demo launch goes: asking puts a rocket on Mars' pad, launched flies it into
-// orbit, aborted takes it down.
 export type LaunchStatus = "idle" | "asking" | "launched" | "aborted";
 
 type RocketLaunch = {

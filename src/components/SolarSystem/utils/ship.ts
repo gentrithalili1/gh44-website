@@ -1,9 +1,6 @@
 import type { Point } from "../types";
 import { getOrbitPosition } from "./space";
 
-// The gh44 explorer orbits the sun in the gap between Mars' orbit (200) and Jupiter's (280). It
-// starts up and to the left of the sun: clear of every planet in the still system, and on screen
-// on any phone.
 export const SHIP_ORBIT = { radius: 242, phase: -2.4 } as const;
 
 // Radians per second: one lap in about 70 seconds, between Mars' pace and Jupiter's.
@@ -17,8 +14,6 @@ export function getShipAngle(time: number) {
   return SHIP_ORBIT.phase + SHIP_ORBIT_SPEED * time;
 }
 
-// The ship at `angle` on its orbit, nose along its direction of travel (clockwise on screen):
-// headings turn clockwise from nose up.
 export function getShipPose(angle: number) {
   return {
     ...getOrbitPosition({ radius: SHIP_ORBIT.radius, phase: angle }),

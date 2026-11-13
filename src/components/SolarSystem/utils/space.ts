@@ -5,8 +5,6 @@ export const SYSTEM_SIZE = 1040;
 export const SUN_RADIUS = 56;
 export const SUN_GLOW_RADIUS = 150;
 
-// Moon, satellite and ring planes lean away from the viewer: a circle shows as an ellipse this
-// many times as tall as it is wide.
 export const ORBIT_TILT = 0.34;
 const ORBIT_DEPTH = Math.sqrt(1 - ORBIT_TILT ** 2);
 
@@ -18,8 +16,6 @@ export function getOrbitPosition({ radius, phase }: Orbit) {
 
 type GetTiltedPointParams = { radius: number; angle: number };
 
-// A point on a tilted orbit. `y` grows downward on screen; `depth` grows toward the viewer, so the
-// near half (below the planet's center) passes in front of it.
 export function getTiltedPoint({ radius, angle }: GetTiltedPointParams) {
   const sin = Math.sin(angle);
   const depth = sin * radius * ORBIT_DEPTH;
@@ -40,8 +36,6 @@ export function getPlanetState({ planetId, openPlanetId }: GetPlanetStateParams)
 
 // gh44-confirm's rocket stands on top of Mars, nose up; from tail to nose it is this tall.
 export const ROCKET_HEIGHT = 4.8;
-// The rocket's outline, nose up (`y` down), its tail at y = 0: a pointed nose, a straight body
-// and two fins flaring out at the tail.
 export const ROCKET_OUTLINE = [
   { x: 0, y: -ROCKET_HEIGHT },
   { x: 0.55, y: -4.1 },

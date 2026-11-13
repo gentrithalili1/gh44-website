@@ -13,8 +13,6 @@ type Signal = {
   mic: { stream: MediaStream; source: MediaStreamAudioSourceNode } | undefined;
 };
 
-// Floki's signal: how loud the visitor's mic or his own voice is right now, for the strip's
-// bars. Browsers without Web Audio, or a refused mic, give a flat signal.
 export function useFlokiSignal() {
   const signalRef = useRef<Signal | undefined>(undefined);
   // Whether the mic should be open: a mic that opens after the turn ended closes at once.
@@ -49,9 +47,6 @@ export function useFlokiSignal() {
     return signalRef.current;
   }
 
-  // Starts the audio graph. Call it straight from a click or key press: browsers only let audio
-  // start from one. iOS picks the session when the graph starts: in "playback", the silent
-  // switch doesn't mute Floki.
   function prepare() {
     setAudioSessionType("playback");
     getSignal()
@@ -61,9 +56,6 @@ export function useFlokiSignal() {
       });
   }
 
-  // Plays one of Floki's lines through the analyser on its way to the speakers. The graph was
-  // started by a tap or key press, so Safari lets it play after the network round trip. A graph
-  // that never started gives undefined, and the line plays on its own audio element.
   async function playVoice(audioUrl: string): Promise<Playback | undefined> {
     const signal = signalRef.current;
     // The mic can knock the graph to "interrupted" on iOS: try to bring it back first.

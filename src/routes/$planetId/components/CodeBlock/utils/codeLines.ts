@@ -35,8 +35,6 @@ type RevealLinesParams = {
   revealedLength: number;
 };
 
-// Splits the code where the typing has reached: the first `revealedLength` characters show, the
-// rest keeps its place, hidden.
 export function revealLines({ lines, revealedLength }: RevealLinesParams): RevealedLine[] {
   let offset = 0;
 

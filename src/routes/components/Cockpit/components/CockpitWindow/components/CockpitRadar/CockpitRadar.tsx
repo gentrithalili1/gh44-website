@@ -10,8 +10,6 @@ import { getRadarBlips } from "./utils/radarBlips";
 
 const RADAR_BLIPS = getRadarBlips();
 
-// The radar screen: each destination where its planet starts on its orbit, lit once visited, and
-// beside it where the ship is, the nearest destination not visited yet, and how many are done.
 export function CockpitRadar() {
   const location = useLocation();
   const exploration = useExploration();

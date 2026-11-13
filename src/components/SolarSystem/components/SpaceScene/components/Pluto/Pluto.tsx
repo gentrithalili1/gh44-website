@@ -23,8 +23,6 @@ interface PlutoProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// An easter egg: a grey speck past the last orbit, with no label. It names itself when pointed
-// at and holds still. Nothing to click.
 export function Pluto({ isFaded, sceneStateRef }: PlutoProps) {
   const groupRef = useRef<Group>(null);
   const timeRef = useRef(0);

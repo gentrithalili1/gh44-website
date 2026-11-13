@@ -20,8 +20,6 @@ interface TerminalCursorProps {
   children: React.ReactNode;
 }
 
-// A block cursor in the theme's cursor color: solid and blinking while the command line has
-// focus, hollow without it.
 export function TerminalCursor({ children }: TerminalCursorProps) {
   return (
     <span className="outline-1 -outline-offset-1 outline-clay group-focus-within:animate-cursor-blink group-focus-within:bg-clay group-focus-within:text-night group-focus-within:outline-0">

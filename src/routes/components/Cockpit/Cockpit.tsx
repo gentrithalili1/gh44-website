@@ -15,8 +15,6 @@ function isTyping(target: EventTarget | null) {
   return target instanceof Element && target.closest(TYPING_SELECTOR) !== null;
 }
 
-// The gh44 explorer's cockpit: Cmd+K (Ctrl+K) or the ship opens it, from anywhere on the site.
-// From a launch until its page opens, Cmd+K does nothing.
 export function Cockpit() {
   const explorer = useExplorer();
   const navigate = useNavigate();
@@ -40,8 +38,6 @@ export function Cockpit() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // The ship in the scene flies there first and opens the page on arrival; without one (reduced
-  // motion, no WebGL) the page opens at once.
   function handleGo(destination: Destination) {
     const outcome = explorer.launch(destination);
     switch (outcome.status) {

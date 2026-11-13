@@ -17,8 +17,6 @@ import {
   getBladeTurns,
 } from "./utils/avalonBlades";
 
-// Outside the last orbit, in the bottom left of the home view: on the orbit plane, toward the
-// viewer. Scene units.
 const POSITION: [number, number, number] = [-500, 30, 460];
 // Nose straight at Homestead II, further out the same way from the sun.
 const NOSE = new Vector3(...HOMESTEAD_POSITION).sub(new Vector3(...POSITION)).normalize();
@@ -73,10 +71,6 @@ interface AvalonProps {
   isFaded: boolean;
 }
 
-// A ship from another story, leaving the solar system behind for Homestead II: a long spine
-// from a domed engine to a reactor ring, a ringed hub, and three crescent hulls swept back round
-// it, lit along their length and turning round the spine. Its engine pushes blue fire. It shows
-// its name when pointed at. Decorative otherwise: nothing to click.
 export function Avalon({ isFaded }: AvalonProps) {
   const [bladeTurns] = useState(getBladeTurns);
   const [bladeShape] = useState(getBladeShape);

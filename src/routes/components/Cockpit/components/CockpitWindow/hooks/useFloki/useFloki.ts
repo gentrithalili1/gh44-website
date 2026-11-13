@@ -35,8 +35,6 @@ export type FlokiOutcome =
   // A radio order: carried out once he has said it (playRadio, stopRadio).
   | { status: "radioPlaying"; track: Track; trackIndex: number }
   | { status: "radioStopped" }
-  // Inside the tesseract: he leads the way back, or says what the place is.
-  // Aboard the ship: he flies the visitor into the black hole once he has said so.
   | { status: "jumping"; say: string | undefined }
   | { status: "returning"; say: string | undefined }
   | { status: "explainingPlace" }
@@ -61,10 +59,6 @@ async function requestAnswer({
   }
 }
 
-// Floki, the explorer's onboard computer: carries out plain orders at once (flying, his humor,
-// the radio), takes a question, keeps the conversation while the cockpit is open, and returns
-// what he says and where to fly.
-// The component prints, speaks and flies.
 export type Floki = ReturnType<typeof useFloki>;
 
 type UseFlokiParams = {
@@ -189,8 +183,6 @@ export function useFloki({ place = "cockpit" }: UseFlokiParams = {}) {
     return "idle";
   }
 
-  // Opens the mic for one sentence; it cuts Floki off first. Only one turn at a time: the one
-  // that opened the mic closes it.
   async function listen(): Promise<FlokiHearing> {
     if (listening.status === "listening") return { status: "failed" };
     prepareAudio();
@@ -205,8 +197,6 @@ export function useFloki({ place = "cockpit" }: UseFlokiParams = {}) {
     return hearing;
   }
 
-  // Says a line out loud, over a paused radio; from a click it also starts the audio graph in
-  // time.
   async function speak(text: string) {
     prepareAudio();
     music.hold();
@@ -230,8 +220,6 @@ export function useFloki({ place = "cockpit" }: UseFlokiParams = {}) {
     return speech;
   }
 
-  // Cuts Floki off and drops the answer he is thinking about, for when the visitor takes the
-  // controls themselves.
   function stop() {
     questionIdRef.current += 1;
     setRequestStatus("idle");

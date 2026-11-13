@@ -35,8 +35,6 @@ const FILL_LAMBDA = 2;
 // Each planet's noise starts somewhere else, so no two surfaces match.
 const SEED_SCALE = 10;
 
-// A palette color with its sRGB channels as written: the shaders light and output them
-// themselves.
 function getShaderColor(hex: string) {
   return new Color().setStyle(hex, LinearSRGBColorSpace);
 }
@@ -106,8 +104,6 @@ interface PlanetSurfaceProps {
   onClick?: (event: ThreeEvent<MouseEvent>) => void;
 }
 
-// The planet's globe, turning on its own axis at its own pace: its surface painted on, then
-// roughed up, clouded and lit by the sun in a shader, inside a glow of air.
 export function PlanetSurface({
   planet,
   isOpen,
@@ -156,8 +152,6 @@ export function PlanetSurface({
   }));
   const meshRef = useRef<Mesh>(null);
   const materialRef = useRef<ShaderMaterial>(null);
-  // Seconds of spin and weather. They run on the scene clock alone: hovering or opening the
-  // planet stops its orbit, not its turning.
   const spinTimeRef = useRef(0);
 
   useFrame((_, delta) => {

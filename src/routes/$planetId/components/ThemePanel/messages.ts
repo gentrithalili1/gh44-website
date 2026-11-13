@@ -1,5 +1,3 @@
-// Each app's install steps, from its README in gh44-theme. `code` names the step's snippets,
-// one code tab each.
 export const messages = {
   appsLabel: "apps",
   stepsLabel: (app: string) => `install gh44 in ${app}`,

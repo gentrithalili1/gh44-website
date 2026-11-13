@@ -13,8 +13,6 @@ interface SceneCameraProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// The camera's flights, and limited orbit controls between them: drag to orbit, scroll or pinch
-// to zoom, no panning.
 export function SceneCamera({ openPlanetId, sceneStateRef }: SceneCameraProps) {
   const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
   const cameraFlight = useCameraFlight({ openPlanetId, sceneStateRef, controlsRef });

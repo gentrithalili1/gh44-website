@@ -42,8 +42,6 @@ export function playFor(ms: number) {
   act(() => vi.advanceTimersByTime(ms));
 }
 
-// Ends a CSS animation on `element`. jsdom has no AnimationEvent, so React listens for the
-// prefixed event there.
 export function endAnimation(element: Element) {
   fireEvent(element, new Event("webkitAnimationEnd", { bubbles: true }));
 }

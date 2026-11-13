@@ -14,10 +14,6 @@ const HOME_PATH = "/";
 
 type BootStatus = "booting" | "leaving" | "done";
 
-// The pre-flight boot: covers the page while the 3D scene loads, so the planets and the cockpit
-// do not pop in one by one. Each log line lands as its real step finishes; then the cover fades
-// and the cockpit greets the visitor. Without a 3D scene (no WebGL, reduced motion) it steps
-// aside at once.
 export function BootScreen() {
   const boot = useBoot();
   const bootMode = useBootMode();

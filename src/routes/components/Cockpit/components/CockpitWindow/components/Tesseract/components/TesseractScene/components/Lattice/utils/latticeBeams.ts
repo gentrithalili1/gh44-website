@@ -1,7 +1,5 @@
 import { Euler, Vector3 } from "three";
 
-// The tesseract is a lattice of beams crossing in three directions round the open cell Floki
-// floats in. It is seen on the slant, so the beams cross at angles. Scene units.
 export const CELL = 6;
 export const BEAM = { thickness: 1.5, length: 44 } as const;
 // How the whole lattice is turned (radians, x then y then z).
@@ -10,8 +8,6 @@ export const LATTICE_TILT = [0.34, 0.6, 0.12] as const;
 export type BeamAxis = "x" | "y" | "z";
 export type LatticeBeam = { id: string; axis: BeamAxis; position: [number, number, number] };
 
-// Beams sit this many half-cells off the middle on each of the two directions across them: the
-// ring round the open cell, and the ring past it.
 const OFFSETS = [-1.5, -0.5, 0.5, 1.5].map((steps) => steps * CELL);
 const AXIS_DIRECTIONS: Record<BeamAxis, [number, number, number]> = {
   x: [1, 0, 0],
@@ -65,8 +61,6 @@ function getClearance({ beam, sightline }: { beam: LatticeBeam; sightline: Sight
   return closest;
 }
 
-// Every beam of the lattice, leaving out the ones that would cross the camera's view of Floki
-// and the shelf.
 export function getLatticeBeams(sightline: Sightline): LatticeBeam[] {
   const axes: readonly BeamAxis[] = ["x", "y", "z"];
 

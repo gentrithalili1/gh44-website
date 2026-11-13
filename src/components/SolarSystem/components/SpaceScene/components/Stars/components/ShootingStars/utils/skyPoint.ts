@@ -1,7 +1,5 @@
 import { type Camera, Matrix4, Vector3 } from "three";
 
-// How the camera saw the sky when a meteor launched: from screen to world, where the camera was,
-// and from world into the turning sky's own frame.
 export type SkyView = { screenToWorld: Matrix4; origin: Vector3; worldToSky: Matrix4 };
 
 export function createSkyView(): SkyView {
@@ -29,9 +27,6 @@ type ToSkyPointParams = {
   target?: Vector3;
 };
 
-// A point of a meteor drawn in screen pixels at launch, moved out onto the star shell along the
-// camera's line of sight, in the sky's frame: it stays in the sky as the camera turns, and turns
-// with the sky.
 export function toSkyPoint({
   x,
   y,

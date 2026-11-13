@@ -21,8 +21,6 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-// Stands in for the 3D scene and the cockpit: a button marks the scene ready, and the cockpit's
-// state shows whether the visitor got greeted.
 function SceneProbe() {
   const boot = useBoot();
   const explorer = useExplorer();

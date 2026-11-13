@@ -9,13 +9,9 @@ import { setGroupOpacity } from "../../utils/groupOpacity";
 import { damp, FADED_OPACITY, MAX_FRAME_STEP } from "../../utils/sceneMath";
 import { HoverName } from "../HoverName";
 
-// On the way from the Endurance to the black hole, close to it: far out, below the orbit plane
-// and behind the system. Scene units.
 const POSITION: [number, number, number] = [3024, -3488, -5360];
 const RADIUS = 52;
 const SEGMENTS = 32;
-// The wave: a white ridge part of the way round the water, standing this far out of it, as thick
-// as this share of the planet, and rolling round once in about a minute.
 const WAVE = { lift: 1.03, thickness: 0.07, arc: 1.9, speed: 0.1 } as const;
 const WAVE_TILT: [number, number, number] = [1.2, 0.3, 0];
 const NAME_POSITION: [number, number, number] = [0, RADIUS * 1.3, 0];
@@ -25,9 +21,6 @@ interface MillersPlanetProps {
   isFaded: boolean;
 }
 
-// A planet from another story, on the Endurance's route, close to the black hole: all water,
-// with one enormous wave rolling round it. It shows its name when pointed at. Decorative
-// otherwise: nothing to click.
 export function MillersPlanet({ isFaded }: MillersPlanetProps) {
   const groupRef = useRef<Group>(null);
   const waveRef = useRef<Group>(null);

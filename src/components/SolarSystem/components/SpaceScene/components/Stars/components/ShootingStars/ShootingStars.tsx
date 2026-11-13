@@ -22,8 +22,6 @@ import {
 } from "./utils/meteors";
 import { createSkyView, setSkyView, toSkyPoint } from "./utils/skyPoint";
 
-// Each meteor's four corners: the head's two edges (tail 0) and the tail (tail 1), drawn as two
-// triangles.
 const CORNERS = 4;
 const CORNER_TAILS = [0, 0, 1, 1];
 const CORNER_TRIANGLES = [0, 1, 2, 1, 3, 2];
@@ -52,15 +50,9 @@ interface ShootingStarsProps {
   tint: Color;
 }
 
-// A shooting star crosses the sky every 5 seconds, and every 10 a short meteor shower streams out
-// of one radiant. Each launches where the visitor looks, then stays on the star shell: it turns
-// with the sky as the camera orbits or the ship cruises. One mesh draws them all, reusing its
-// buffers every frame.
 export function ShootingStars({ tint }: ShootingStarsProps) {
   const [buffers] = useState(createBuffers);
   const [meteors] = useState(createMeteors);
-  // Passed through the constructor, so the material keeps this uniforms object: the `uniforms`
-  // prop copies each uniform, and reassigned values would never reach it.
   const [material] = useState(() => ({
     vertexShader: SHOOTING_STAR_VERTEX_SHADER,
     fragmentShader: SHOOTING_STAR_FRAGMENT_SHADER,

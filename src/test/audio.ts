@@ -11,8 +11,6 @@ export function removeGestureListeners() {
 
 type AutoplayPolicy = "allowed" | "needs-gesture";
 
-// jsdom plays no audio: a stand-in that finds the track, or not, follows an autoplay policy and
-// records what it is told.
 export function stubAudio({ hasTrack, autoplay }: { hasTrack: boolean; autoplay: AutoplayPolicy }) {
   const players: FakeAudio[] = [];
   let hasGesture = autoplay === "allowed";

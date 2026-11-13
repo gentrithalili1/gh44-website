@@ -5,8 +5,6 @@ import { getTrackIndex, type Track, TRACKS } from "./utils/tracks";
 const VOLUME = 0.7;
 const FADE_IN_MS = 1600;
 const FADE_OUT_MS = 600;
-// How long the music waits after Floki goes quiet before it comes back, so it doesn't pop in
-// between his turns.
 const RELEASE_DELAY_MS = 2500;
 
 // "checking" until the browser has read the track; "unavailable" when it is missing.
@@ -16,8 +14,6 @@ type MusicState = { status: MusicStatus; trackIndex: number };
 
 type FadeParams = { audio: HTMLAudioElement; to: number; durationMs: number; onDone?: () => void };
 
-// What starts playback once a browser that blocks autoplay sees the visitor act. `click` covers
-// touch screens, where a tap only counts as a gesture once it ends.
 const GESTURE_EVENTS = ["pointerdown", "keydown", "click"] as const;
 
 // The cockpit's radio marks its buttons with this attribute.
@@ -27,9 +23,6 @@ function isAutoplayBlocked(error: unknown) {
   return error instanceof DOMException && error.name === "NotAllowedError";
 }
 
-// The audio element lives in this store, outside render; it loads on first subscribe, so only
-// in the browser. It starts by itself once the track is ready, or on the visitor's first
-// gesture when the browser blocks autoplay, until the visitor stops it.
 function createMusicPlayer(tracks: readonly Track[]) {
   let state: MusicState = { status: "checking", trackIndex: 0 };
   let audio: HTMLAudioElement | undefined;
@@ -37,8 +30,6 @@ function createMusicPlayer(tracks: readonly Track[]) {
   let isStarting = false;
   // A visitor who pressed stop keeps the quiet for the rest of the visit.
   let hasStopped = false;
-  // Floki holds the music while he listens, thinks or speaks; it comes back once he lets go, if
-  // it was playing.
   let holdCount = 0;
   let shouldResume = false;
   let releaseTimer: ReturnType<typeof setTimeout> | undefined;
@@ -133,8 +124,6 @@ function createMusicPlayer(tracks: readonly Track[]) {
     audio.volume = VOLUME;
   }
 
-  // Floki starts listening, thinking or speaking: the music fades out and pauses. The radio still
-  // shows it playing, since it comes back.
   function hold() {
     clearTimeout(releaseTimer);
     holdCount += 1;
@@ -157,8 +146,6 @@ function createMusicPlayer(tracks: readonly Track[]) {
         .play()
         .then(() => fade({ audio: player, to: VOLUME, durationMs: FADE_IN_MS }))
         .catch((error: unknown) => {
-          // iOS can refuse to resume outside a tap (after the mic had the audio): the radio
-          // comes back on the visitor's next tap instead.
           if (!isAutoplayBlocked(error)) {
             setStatus("unavailable");
             return;
@@ -187,8 +174,6 @@ function createMusicPlayer(tracks: readonly Track[]) {
     fade({ audio: player, to: 0, durationMs: FADE_OUT_MS, onDone: () => player.pause() });
   }
 
-  // Next or previous: a playing radio plays the new track at once; a quiet one only picks it.
-  // With a single track it starts that one over.
   function skip(step: 1 | -1) {
     if (!audio || state.status === "checking" || state.status === "unavailable") return;
     dropHold();
@@ -201,8 +186,6 @@ function createMusicPlayer(tracks: readonly Track[]) {
     }
   }
 
-  // A track picked from the list: a playing radio switches to it at once, a quiet one starts with
-  // it.
   async function playTrack(trackIndex: number) {
     if (!audio || state.status === "checking" || state.status === "unavailable") return;
     dropHold();
@@ -252,8 +235,6 @@ interface MusicProviderProps {
   children: React.ReactNode;
 }
 
-// One player for the whole site, controlled from the cockpit's radio. It loads (and autoplays)
-// with the page, whether or not the radio is on screen.
 export function MusicProvider({ tracks = TRACKS, children }: MusicProviderProps) {
   const [player] = useState(() => createMusicPlayer(tracks));
   useSyncExternalStore(player.subscribe, player.getSnapshot, getServerSnapshot);
@@ -261,9 +242,6 @@ export function MusicProvider({ tracks = TRACKS, children }: MusicProviderProps)
   return <MusicContext value={{ player, tracks }}>{children}</MusicContext>;
 }
 
-// The radio: its tracks in turn, from crystalline. It plays on load, or on the first gesture when
-// the browser blocks autoplay, and the visitor can stop it any time; a stop holds for the visit.
-// It fades each way.
 export function useMusic() {
   const music = use(MusicContext);
   if (!music) throw new Error("useMusic needs a MusicProvider above it");

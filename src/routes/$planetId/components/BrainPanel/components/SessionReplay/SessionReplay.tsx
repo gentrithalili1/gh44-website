@@ -6,8 +6,6 @@ import { getReplayDuration, getReplayFrame } from "./utils/replayFrames";
 
 const SESSION_DURATION_MS = getReplayDuration(messages.script);
 
-// A scripted Claude Code session, clearly a replay: it plays the first time it comes on screen
-// and again on demand.
 export function SessionReplay() {
   const captionId = useId();
   const playback = usePlayOnScreen(SESSION_DURATION_MS);

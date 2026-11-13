@@ -42,8 +42,6 @@ function getHearingForError(error: string): FlokiHearing {
   return { status: "failed" };
 }
 
-// Floki's ears: the browser's speech recognition, one sentence per turn. Browsers without it
-// (Firefox) are unsupported, and the visitor types instead.
 export function useFlokiListening() {
   const [status, setStatus] = useState<FlokiListeningStatus>(() =>
     getRecognitionClass() ? "idle" : "unsupported",

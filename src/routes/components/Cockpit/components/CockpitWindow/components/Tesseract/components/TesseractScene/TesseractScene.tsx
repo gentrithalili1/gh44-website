@@ -91,8 +91,6 @@ function FloatingScene({ commitCount, selectedIndex, flokiStatus, onSelect }: Fl
 
 interface TesseractSceneProps extends FloatingSceneProps {}
 
-// The inside of the black hole, in 3D: the lattice, Floki floating in its middle, and the shelf
-// of commits under him.
 export function TesseractScene(props: TesseractSceneProps) {
   return (
     <Canvas

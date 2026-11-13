@@ -10,8 +10,6 @@ type PlanetMotion = {
 // How every real planet moves: closer planets orbit faster, and each spins at its own pace.
 const PLANET_MOTION = {
   mercury: { orbitMultiplier: 100, dayHours: 1407.6 },
-  // Its cloud tops, not its ground: they race around backwards in about four days, where the
-  // ground takes 243.
   venus: { orbitMultiplier: 75, dayHours: -96 },
   earth: { orbitMultiplier: 63, dayHours: 24 },
   mars: { orbitMultiplier: 51, dayHours: 24.6 },
@@ -21,8 +19,6 @@ const PLANET_MOTION = {
   neptune: { orbitMultiplier: 11, dayHours: 16.1 },
 } as const satisfies Record<RealPlanet, PlanetMotion>;
 
-// Earth's angular speed (radians per second): one orbit in about 42 seconds. The rest scale
-// from it by their orbit multiplier.
 const EARTH_ORBIT_SPEED = 0.15;
 
 export function getOrbitSpeed(planet: PlanetBody) {
@@ -43,8 +39,6 @@ export function getOrbitAngle({ planet, time }: PlanetTimeParams) {
   return planet.orbit.phase + getOrbitSpeed(planet) * time;
 }
 
-// Seconds Earth takes to turn once on its axis; every other planet scales from
-// it by its day length.
 const EARTH_SPIN_PERIOD = 25;
 
 // Seconds one turn on its own axis takes; negative turns the other way.

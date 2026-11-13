@@ -34,8 +34,6 @@ const GARGANTUA_LINES = [
 
 type GetFlokiPromptParams = { humor: number; place: FlokiPlace };
 
-// Everything Floki knows, and how he answers. Nothing else about Gentrit goes in, so he cannot
-// make it up from here.
 export function getFlokiPrompt({ humor, place }: GetFlokiPromptParams) {
   const destinationIds = DESTINATIONS.map(({ name }) => name);
   const commands = Object.values(messages.commands).map(

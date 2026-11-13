@@ -1,7 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-// The easter eggs a visitor has set off: floki's ball is out there, and they have been through
-// the black hole and back.
 const SECRETS = ["ball", "horizon"] as const;
 export type Secret = (typeof SECRETS)[number];
 

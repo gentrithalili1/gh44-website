@@ -34,8 +34,6 @@ import { PHONE_MAX_WIDTH } from "./utils/sceneMath";
 // Phones get a lower pixel ratio, which keeps the scene smooth.
 const PHONE_MAX_DPR = 1.5;
 const DESKTOP_MAX_DPR = 2;
-// Past the black hole, the farthest thing out, seen from the farthest the visitor can zoom out
-// on a phone.
 const CAMERA_FAR = 40000;
 // The planets' night sides stay visible: a little light from everywhere.
 const AMBIENT_INTENSITY = 0.45;
@@ -44,9 +42,6 @@ interface SpaceSceneProps {
   openPlanetId: string | undefined;
 }
 
-// The living system: a WebGL canvas in 3D, lit by the sun and seen at an angle, with each site
-// planet's label as a real link in the "planets" list on top of it. Decorative planets have no
-// label. Clicking empty space while a planet is open goes back home.
 export function SpaceScene({ openPlanetId }: SpaceSceneProps) {
   const isPageVisible = usePageVisible();
   // The labels render into this list once it exists.

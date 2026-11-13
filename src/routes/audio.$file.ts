@@ -6,8 +6,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { getByteRange } from "./utils/byteRange";
 
-// The radio's tracks are not in git, so the build has none. On the server they live in a folder
-// mounted at AUDIO_DIR; locally Vite serves public/audio before this route is reached.
 const DEFAULT_AUDIO_DIR = "public/audio";
 // Plain names only, so a request cannot climb out of the folder.
 const TRACK_FILE = /^[a-z0-9-]+\.mp3$/;

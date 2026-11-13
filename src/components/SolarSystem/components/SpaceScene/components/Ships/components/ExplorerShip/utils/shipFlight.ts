@@ -15,8 +15,6 @@ type GetFlightPoseParams = {
   travel: number;
 };
 
-// The ship on its way from home to a planet: it turns its nose toward the planet (the short way
-// round), flies straight at it and fades as it arrives. Headings are clockwise from nose up.
 export function getFlightPose({
   home,
   homeHeading,

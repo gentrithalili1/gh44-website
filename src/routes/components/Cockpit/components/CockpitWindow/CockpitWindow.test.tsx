@@ -63,8 +63,6 @@ describe("CockpitWindow", () => {
     await user.keyboard("{Escape}");
 
     expect(onClose).not.toHaveBeenCalled();
-    // On a phone the panel docks so the flight shows: the strip stays, its exit shut, and the
-    // rest is out of reach.
     expect(screen.getByRole("button", { name: "go on a spacewalk" })).toBeDisabled();
     expect(screen.queryByRole("textbox", { name: "command" })).not.toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "command", hidden: true })).toHaveAttribute(
@@ -128,8 +126,6 @@ describe("CockpitWindow", () => {
 
 type TestJump = { status: "idle" | "inside"; onArrive: (() => void) | null; years: number };
 
-// The whole cockpit, opened by the visitor, for Floki's conversations. Without a scene, as with
-// reduced motion: a trip into the black hole puts the visitor inside at once.
 function FlokiCockpit({ onGo, isGreeting = false }: { onGo: () => void; isGreeting?: boolean }) {
   const [jump, setJump] = useState<TestJump>({ status: "idle", onArrive: null, years: 0 });
 

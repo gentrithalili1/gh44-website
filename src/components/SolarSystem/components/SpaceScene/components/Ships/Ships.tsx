@@ -8,8 +8,6 @@ interface ShipsProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// The ships in the space: the gh44 explorer, for now. Room for more (an Interstellar-like ship, a
-// Passengers-like ship, a Starship-like rocket).
 export function Ships({ openPlanetId, sceneStateRef }: ShipsProps) {
   return (
     <group name="ships">

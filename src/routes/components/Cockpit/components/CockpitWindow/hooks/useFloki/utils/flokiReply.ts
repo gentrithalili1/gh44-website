@@ -16,8 +16,6 @@ function parseJson(text: string): unknown {
   }
 }
 
-// The model's JSON answer, checked: words to say, a destination only if it is a real one, and
-// whether to leave the tesseract.
 export function parseFlokiReply(text: string): FlokiReply | undefined {
   const value = parseJson(text);
   if (!isRecord(value) || typeof value.say !== "string") return undefined;

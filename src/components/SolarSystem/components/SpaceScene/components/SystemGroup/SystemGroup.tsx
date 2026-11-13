@@ -10,9 +10,6 @@ interface SystemGroupProps {
   children: React.ReactNode;
 }
 
-// Everything that belongs to the solar system: the sun, the planets, the ships. On the flight
-// into the black hole it all drops away behind the ship, shrinking into the sun; on the flight
-// home it grows back ahead of it.
 export function SystemGroup({ sceneStateRef, children }: SystemGroupProps) {
   const groupRef = useRef<Group>(null);
 

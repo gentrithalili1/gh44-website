@@ -15,8 +15,6 @@ interface ConfirmPanelProps {
   code: HighlightedCode;
 }
 
-// react-promise-confirmation-dialog: a live demo of the package, then how to use it, step by
-// step.
 export function ConfirmPanel({ code }: ConfirmPanelProps) {
   const steps = getPlanetSnippetIds("gh44-confirm").map((snippetId) => {
     const step = messages.steps[snippetId];

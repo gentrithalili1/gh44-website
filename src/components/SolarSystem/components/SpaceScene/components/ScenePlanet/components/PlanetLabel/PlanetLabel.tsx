@@ -9,8 +9,6 @@ interface PlanetLabelProps {
   onHoverChange: (isHovered: boolean) => void;
 }
 
-// A fixed-size link under its planet, like the static system's. While a planet is open every
-// label steps back, and comes back when it takes focus.
 export function PlanetLabel({ planet, state, onHoverChange }: PlanetLabelProps) {
   function handleMouseEnter() {
     onHoverChange(true);
@@ -21,8 +19,6 @@ export function PlanetLabel({ planet, state, onHoverChange }: PlanetLabelProps) 
   }
 
   return (
-    // The scene moves a label (`--label-nudge-x`, `--label-nudge-y`) when it would
-    // touch another.
     <div
       data-state={state}
       data-planet-label={planet.id}

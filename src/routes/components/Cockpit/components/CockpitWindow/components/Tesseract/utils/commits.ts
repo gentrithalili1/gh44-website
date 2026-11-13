@@ -1,7 +1,3 @@
-// Every commit of this site, oldest first: the books on the tesseract's shelf. A snapshot, not
-// read at build time (a deploy may not have the history). To refresh it, run in the repo:
-//   git log --no-merges --date=short --pretty=format:'%ad%x09%s'
-// and write each line as { date, subject }, oldest first.
 export type TesseractCommit = { date: string; subject: string };
 
 export const COMMITS: readonly TesseractCommit[] = [

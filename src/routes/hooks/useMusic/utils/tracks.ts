@@ -1,7 +1,5 @@
 export type Track = { id: string; title: string; artist: string; path: string };
 
-// What the radio plays, in order, round and round. Served from public/audio/, which git ignores:
-// the files are not in the repository.
 export const TRACKS = [
   {
     id: "crystalline",

@@ -40,8 +40,6 @@ const JUMP_SECONDS = 8;
 // The flight home, a little quicker than the way in.
 const RETURN_SECONDS = 6;
 const NAME_POSITION: [number, number, number] = [0, HOLE_RADIUS * 2, 0];
-// While it calls (every planet visited, not been there yet) a ring goes out from it every few
-// seconds: from just outside the shadow to this many times its radius, fading on the way.
 const SIGNAL = { seconds: 2.6, from: 1.6, to: 7, width: 0.05, opacity: 0.8 } as const;
 
 // From the camera: the way to it, and dead ahead.
@@ -57,12 +55,6 @@ interface BlackHoleProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// An easter egg: a black hole far out, its disk turning. It has one place in space, like a
-// planet, in the top right of the home view: it moves on screen only as the camera does, and
-// the cockpit sees it only when the ship faces that way. Once every planet is visited the
-// cockpit can fly into it (`go gargantua`): the solar system drops away, the ship swings to
-// face it and it grows until its shadow is all there is. It stays that way until the visitor
-// comes back.
 export function BlackHole({ sceneStateRef }: BlackHoleProps) {
   const explorer = useExplorer();
   const exploration = useExploration();
@@ -110,8 +102,6 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
           jump.progress = 1;
           return;
         case "returning":
-          // Out of the hole and facing home: it is behind the ship, and the flight runs toward
-          // the solar system, which grows back ahead.
           jump.progress = 0;
           gsap
             .timeline()
@@ -155,8 +145,6 @@ export function BlackHole({ sceneStateRef }: BlackHoleProps) {
     const isPhone = size.width < PHONE_MAX_WIDTH;
     const front = getAheadAnchor(isPhone);
     ahead.set(front.x, front.y, 0.5).unproject(camera).sub(camera.position).normalize();
-    // Where it is, seen from the camera; on the flight in the ship swings to face it, drawn
-    // as it swinging dead ahead.
     toward.set(...getHolePosition()).sub(camera.position);
     const distance = toward.length();
     toward.normalize().lerp(ahead, getJumpCenter(progress)).normalize();

@@ -1,5 +1,3 @@
-// The flag waves from its pole: still at the pole, swinging more toward its free end. Scene
-// units and seconds.
 const WAVE = { length: 0.9, speed: 3.2, depth: 0.15 } as const;
 
 type GetFlagWaveParams = {

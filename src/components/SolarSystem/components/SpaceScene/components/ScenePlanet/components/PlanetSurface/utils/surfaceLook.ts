@@ -1,7 +1,5 @@
 import type { RealPlanet } from "#/utils/planets";
 
-// What the surface shader adds on top of a planet's painted map. Amounts run from 0 (none) to
-// about 1 (strong).
 export type SurfaceLook = {
   // How far noise pushes the painted features around, in planet radii: ragged coasts, wavy bands.
   warp: number;

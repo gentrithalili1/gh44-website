@@ -41,8 +41,6 @@ interface NebulaProps {
   tint: Color;
 }
 
-// A faint band of far-off stars and dust across the sky, in the palette's cool hues. It takes
-// the stars' tint. Painted once: it costs nothing per frame.
 export function Nebula({ tint }: NebulaProps) {
   // Passed through the constructor, so the material keeps this uniforms object.
   const [material] = useState(() => ({

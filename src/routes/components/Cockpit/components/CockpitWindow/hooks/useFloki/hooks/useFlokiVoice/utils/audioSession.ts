@@ -1,5 +1,3 @@
-// Safari's Audio Session API (iOS 16.4+): "playback" plays through the silent switch, as music
-// does; "auto" hands the choice back, so the mic can take the session to listen.
 type AudioSessionType = "playback" | "auto";
 
 export function setAudioSessionType(type: AudioSessionType) {

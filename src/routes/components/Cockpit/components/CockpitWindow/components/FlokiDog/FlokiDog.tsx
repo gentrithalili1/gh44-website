@@ -28,8 +28,6 @@ const QUARTER_TURN = Math.PI / 2;
 const FUR_LIFT = 0.18;
 const NAME = "FLOKI";
 const PLATE_PIXELS = { width: 360, height: 110 } as const;
-// He breathes, pants and now and then flicks an ear; his head follows the pointer this far
-// (radians) and this fast. At rest his chin is tucked a little, so he looks at the visitor.
 const BREATH = { amount: 0.018, speed: 1.6 } as const;
 const PANT = { amount: 0.14, speed: 7 } as const;
 const HEAD_TURN = { across: 0.45, up: 0.22, tuck: 0.2, lambda: 4 } as const;
@@ -128,10 +126,6 @@ interface FlokiDogProps {
   praiseCount?: number;
 }
 
-// Floki himself: a black German shepherd sitting upright, ears up, amber eyes, tongue out, in
-// his harness with its lights and his name on the chest. He breathes and pants, his head
-// follows the pointer, his jaw moves with his voice, and his tail wags while he listens and
-// speaks. Decorative: no events.
 export function FlokiDog({ status, getLevel, praiseCount = 0 }: FlokiDogProps) {
   const [fur] = useState(createFur);
   const [plate] = useState(drawNamePlate);

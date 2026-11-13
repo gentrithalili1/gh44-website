@@ -20,9 +20,6 @@ export const SURFACE_VERTEX_SHADER = /* glsl */ `
   }
 `;
 
-// The globe: its painted map pushed around by noise, weather on top, then lit by the sun at the
-// scene's origin. The map's colors are sRGB as painted; the light is added in linear and the
-// result written back as sRGB.
 export const SURFACE_FRAGMENT_SHADER = /* glsl */ `
   uniform sampler2D uMap;
   uniform float uTime;
@@ -104,14 +101,10 @@ export const SURFACE_FRAGMENT_SHADER = /* glsl */ `
 
     vec3 normal = normalize(vNormal);
     vec3 toEye = normalize(cameraPosition - vWorld);
-    // An open planet turns its lit side part of the way toward the visitor, like a portrait's
-    // fill light: the terminator stays, the surface shows.
     vec3 toSun = normalize(mix(normalize(-vWorld), toEye, uFill));
     float facing = dot(normal, toSun);
     float day = smoothstep(-0.12, 0.6, facing);
     if (uRelief > 0.0) {
-      // Ground that rises toward the sun faces away from it, and is darker; ice and clouds
-      // lie smooth over it.
       float ahead = fbm(normalize(point + normalize(vLocalSun) * 0.05) * uGrain * DETAIL_SCALE + uSeed);
       float slope = clamp((detail - ahead) * 1.8, -1.0, 1.0);
       day *= 1.0 + RELIEF_SHADE * uRelief * slope * (1.0 - cover) * (1.0 - cap);
@@ -144,8 +137,6 @@ export const SURFACE_FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-// The air: a shell around the globe that glows where a line of sight passes just over the edge,
-// brightest right at it and on the sunlit side.
 export const AIR_FRAGMENT_SHADER = /* glsl */ `
   uniform vec3 uColor;
   uniform float uRadius;

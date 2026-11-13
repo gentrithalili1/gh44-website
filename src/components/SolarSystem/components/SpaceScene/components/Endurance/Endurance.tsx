@@ -10,8 +10,6 @@ import { damp, FADED_OPACITY, MAX_FRAME_STEP } from "../../utils/sceneMath";
 import { HoverName } from "../HoverName";
 import { getRingModules, RING_RADIUS } from "./utils/enduranceRing";
 
-// Far out past the last orbit on the way to the black hole: below the orbit plane and behind the
-// system, in the top right of the home view. Scene units.
 const POSITION: [number, number, number] = [1914, -2208, -3395];
 // The wheel leans toward the home view, and turns once in about 26 seconds for gravity.
 const LEAN: [number, number, number] = [-0.5, -0.45, 0];
@@ -36,9 +34,6 @@ interface EnduranceProps {
   isFaded: boolean;
 }
 
-// A ship from another story, parked out past the planets on the way to the black hole: a wheel
-// of twelve modules round a hub, turning slowly. It shows its name when pointed at. Decorative
-// otherwise: nothing to click.
 export function Endurance({ isFaded }: EnduranceProps) {
   const [modules] = useState(getRingModules);
   const groupRef = useRef<Group>(null);

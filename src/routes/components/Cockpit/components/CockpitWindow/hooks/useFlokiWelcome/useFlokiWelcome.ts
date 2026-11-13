@@ -2,8 +2,6 @@ import { useEffect, useEffectEvent, useState } from "react";
 
 import type { Floki } from "../useFloki";
 
-// The visitor's first click, tap or key press: browsers let sound start from one. `click` covers
-// touch screens, where a tap only counts as a gesture once it ends.
 const GESTURE_EVENTS = ["pointerdown", "keydown", "click"] as const;
 // Talk greets and listens on its own: a tap there is not a cue for the welcome.
 const TALK_SELECTOR = "[data-floki-talk]";
@@ -15,8 +13,6 @@ type UseFlokiWelcomeParams = {
   text: string;
 };
 
-// Floki welcomes the visitor out loud when the cockpit opens by itself as the site loads.
-// Browsers block sound before the first click or key press; then he speaks on that one.
 export function useFlokiWelcome({ floki, isGreeting, text }: UseFlokiWelcomeParams) {
   const [shouldWelcome] = useState(isGreeting);
 

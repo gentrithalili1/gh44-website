@@ -1,5 +1,3 @@
-// The hatch in a 20 x 28 box: a door with rounded corners in a frame of hazard stripes, a
-// porthole near the top, two latches on its edge and a vent below the window.
 const STRIPES_DASH = "2.4 2.4";
 
 export function DoorIcon() {

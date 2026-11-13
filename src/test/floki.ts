@@ -17,9 +17,6 @@ const VOICE_URL = "http://floki-voice.test";
 // A few bytes stand in for a WAV file.
 const FAKE_WAV = new Uint8Array([82, 73, 70, 70]);
 
-// Stands in for Floki's services: Groq answers each question with the next reply (JSON in a chat
-// completion, or an error status), Piper turns lines into audio, and the audio element plays it.
-// Returns the fetch stub and the audio players to read what happened.
 export function stubFloki({
   replies,
   hasVoice = true,
@@ -67,8 +64,6 @@ export function stubFloki({
       return this.#src;
     }
 
-    // Only Floki's lines: other players on the page (the radio) are not his. One element can
-    // play many lines; it counts once.
     set src(src: string) {
       this.#src = src;
       if (src.startsWith("data:audio") && !players.includes(this)) players.push(this);
@@ -99,8 +94,6 @@ export function getModelRequests(fetchStub: ReturnType<typeof stubFloki>["fetchS
 // A stuck turn never ends, not even on stop or abort, as iOS's recognizer sometimes does.
 type Hearing = { text: string } | { error: string } | { stuck: true };
 
-// Stands in for the browser's speech recognition: each turn at the mic hears the next entry,
-// words or an error, then ends. Returns the recognizers it made.
 export function stubSpeechRecognition(hearings: readonly Hearing[]) {
   let hearingIndex = 0;
   const recognizers: FakeRecognition[] = [];

@@ -1,6 +1,3 @@
-// The hull is lit by the sun at the scene's origin, like the planets: a lit side, a dim side
-// that never goes black, and a thin light along its edge. Colors are sRGB as given; the light
-// is worked out in linear.
 export const HULL_VERTEX_SHADER = /* glsl */ `
   varying vec3 vWorld;
   varying vec3 vNormal;
@@ -36,8 +33,6 @@ export const HULL_FRAGMENT_SHADER = /* glsl */ `
   }
 `;
 
-// The exhaust: a cone from the engine (vAlong 0) to its tip (1), hot at the engine, thinning to
-// nothing, soft at its sides and flickering along its length.
 export const PLUME_VERTEX_SHADER = /* glsl */ `
   varying float vAlong;
   varying float vEdge;

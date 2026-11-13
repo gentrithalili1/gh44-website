@@ -1,5 +1,3 @@
-// gh44 dark's hues (palette/tokens.json in gh44-theme). styles.css holds the same values as CSS
-// variables; three.js reads the hex values below.
 export type PaletteColor =
   | "clay"
   | "ochre"
@@ -13,8 +11,6 @@ export type PaletteColor =
 
 type PaletteShades = { soft: string; vivid: string };
 
-// gh44 has one value per hue, so both shades are that value. Only neutral keeps two: the
-// foreground for past roles and the moon, the muted gray for rocks and man-made things.
 export const PALETTE = {
   clay: { soft: "#c59172", vivid: "#c59172" },
   ochre: { soft: "#d4b25e", vivid: "#d4b25e" },
@@ -27,8 +23,6 @@ export const PALETTE = {
   neutral: { soft: "#dfe1e5", vivid: "#a8abb2" },
 } as const satisfies Record<PaletteColor, PaletteShades>;
 
-// The page's own colors (styles.css `--background`, `--foreground`, `--muted`, `--faint`,
-// `--rule`), and code's foreground.
 export const SPACE_COLORS = {
   background: "#191a1c",
   foreground: "#dfe1e5",

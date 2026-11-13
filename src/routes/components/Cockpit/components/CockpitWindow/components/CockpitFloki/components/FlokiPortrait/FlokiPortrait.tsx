@@ -16,8 +16,6 @@ interface FlokiPortraitProps {
   praiseCount: number;
 }
 
-// Floki on his own screen: the same dog as in the tesseract, framed head and shoulders. His jaw
-// moves with his voice, and his harness lights follow what he is doing. Decorative.
 export function FlokiPortrait({ status, getLevel, praiseCount }: FlokiPortraitProps) {
   return (
     <Canvas

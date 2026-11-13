@@ -18,8 +18,6 @@ import { MusicProvider } from "./hooks/useMusic";
 import { messages } from "./messages";
 import { getPlanetStyle } from "./utils/planetStyle";
 
-// Without JavaScript nothing types in or plays, so code and the session replay show whole, and
-// the boot screen never lifts, so it never shows.
 const NO_SCRIPT_STYLE =
   "[data-hidden] { visibility: visible !important; } [data-boot-screen] { display: none !important; }";
 

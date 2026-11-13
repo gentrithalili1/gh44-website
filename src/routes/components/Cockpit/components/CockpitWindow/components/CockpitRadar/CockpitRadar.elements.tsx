@@ -63,8 +63,6 @@ interface RadarSignalProps {
   isReached: boolean;
 }
 
-// The black hole, once every planet is visited: a blip at the edge of the scope, past every
-// orbit, sending out rings until the visitor has been there.
 export function RadarSignal({ isReached }: RadarSignalProps) {
   return (
     <g>

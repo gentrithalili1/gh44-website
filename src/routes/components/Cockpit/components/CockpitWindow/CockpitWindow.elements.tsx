@@ -19,9 +19,6 @@ export function PanelIcon({ direction }: PanelIconProps) {
   );
 }
 
-// The windshield in a 100 x 100 box stretched over the top of the screen, cut out of the hull
-// like a ship's canopy: a central arch, two overhead panes split by a spine, and a pane down
-// each side. Mirrored left to right.
 const CENTER_PANE = "M24 100 V58 C24 33 36 17.5 50 17.5 C64 17.5 76 33 76 58 V100 Z";
 const OVERHEAD_PANES = [
   "M2 1.5 H46 V8.5 C38 9.5 31 13 26.5 18 C23.5 21.5 21 25 19.5 28.5 L2 22 Z",
@@ -59,10 +56,6 @@ const GLARE_ID = "cockpit-glass-glare";
 const HULL_SHADE_ID = "cockpit-hull-shade";
 const SHEEN_ID = "cockpit-glass-sheen";
 
-// The space outside shows through the panes: it is the live scene behind the cockpit. The
-// frame is lit by strips of light, and the glass carries a warm glare and a faint slanted sheen. Drawn a little
-// oversized, it shifts against the console as the visitor looks around (--look-x, --look-y), and
-// closes in round the window on boarding.
 export function CockpitWindshield() {
   return (
     <svg
@@ -218,9 +211,6 @@ interface ConsoleScreenProps {
   children: React.ReactNode;
 }
 
-// A screen set into the console: a raised bezel with its label plate and screws, and the glass
-// sunk into it. A dark cover over the picture flickers away when the console powers on, and
-// comes back as it powers off.
 export function ConsoleScreen({
   label,
   indicator = <PowerLamp />,
@@ -279,8 +269,6 @@ const PEDESTAL_KEYS = [
   { id: "k10", lit: "bg-sky/70 shadow-[0_0_6px_var(--sky)]" },
 ] as const;
 
-// The dashboard's front edge: a bevelled lip with a strip of light along its middle, like the
-// edge of the console under the windshield.
 export function DashboardLip() {
   return (
     <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-4 md:h-5">

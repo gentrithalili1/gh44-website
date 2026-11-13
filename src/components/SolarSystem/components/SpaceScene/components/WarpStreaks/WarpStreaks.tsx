@@ -13,8 +13,6 @@ interface WarpStreaksProps {
   sceneStateRef: RefObject<SceneState>;
 }
 
-// The jump of a launch: stars stretch into streaks that rush past the camera, for as long as
-// the scene's warp lasts. Hidden, and not drawn, the rest of the time.
 export function WarpStreaks({ sceneStateRef }: WarpStreaksProps) {
   const [field] = useState(() => createWarpField(Math.random));
   const [material] = useState(() => ({

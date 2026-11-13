@@ -6,8 +6,6 @@ import { describe, expect, it, vi } from "vitest";
 import { Tesseract } from "./Tesseract";
 import { COMMITS } from "./utils/commits";
 
-// The 3D scene needs WebGL, which the test browser does not have: the talk box, the shelf's
-// slider and the way back are what is tested here.
 vi.mock("./components/TesseractScene", () => ({ TesseractScene: () => null }));
 
 function renderTesseract(props: Partial<ComponentProps<typeof Tesseract>> = {}) {

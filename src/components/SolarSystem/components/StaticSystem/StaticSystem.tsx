@@ -15,9 +15,6 @@ import { StaticShip } from "./components/StaticShip";
 
 const VIEW_BOX = `${-SYSTEM_SIZE / 2} ${-SYSTEM_SIZE / 2} ${SYSTEM_SIZE} ${SYSTEM_SIZE}`;
 
-// A still frame of the system: the SVG draws it, the HTML on top holds the site planets' links at
-// a readable size. Both share one unit, so the labels sit under their planets. Decorative planets
-// have no label. The sun is gh44: everything revolves around it, and it only decorates.
 interface StaticSystemProps {
   openPlanetId: string | undefined;
 }

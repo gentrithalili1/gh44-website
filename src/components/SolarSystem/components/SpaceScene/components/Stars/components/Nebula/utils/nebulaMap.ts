@@ -1,7 +1,5 @@
 import { PALETTE } from "#/utils/palette";
 
-// The sky's faint band of far-off stars and dust, baked once into a map that wraps the star
-// shell: twice as wide as tall, like any globe's.
 export const NEBULA_MAP_WIDTH = 512;
 export const NEBULA_MAP_HEIGHT = 256;
 // The band's thickest spot is this opaque: it stays behind the stars, never a surface.
@@ -111,9 +109,6 @@ export function getNebulaAt(direction: Vector) {
   return { density: band * clumps * (0.45 + 0.55 * wisps) * (0.25 + 0.75 * lanes), lean: wisps };
 }
 
-// The band as RGBA pixels from 0 to 1, row by row from the shell's south pole up, as three's
-// sphere wraps them. Fractions, not bytes: a glow this faint shows its steps in 8 bits. Colors
-// are palette hues, sRGB as written.
 export function createNebulaMap() {
   const pixels = new Float32Array(NEBULA_MAP_WIDTH * NEBULA_MAP_HEIGHT * CHANNELS);
   const colors = BAND_COLORS.map(getChannels);

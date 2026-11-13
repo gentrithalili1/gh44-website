@@ -11,9 +11,6 @@ interface FlokiSlabsProps {
   status: FlokiStatus;
 }
 
-// The voice grille in Floki's muzzle: slabs side by side, each a column of cells that light from
-// the bottom with `--floki-level` (0 to 1). While he stands by, one cell blinks; while he
-// thinks, every cell does.
 export function FlokiSlabs({ ref, status }: FlokiSlabsProps) {
   return (
     <span
